@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package study;
+option go_package = "github.com/studyguides-com/study-guides-api/api/study;study";
+
+import "tag_path.proto";
+
+message SearchRequest {
+  string query = 1;
+  string context = 2; // Optional filter: "DoD", etc.
+}
+
+message SearchResponse {
+  repeated SearchResult results = 1;
+}
+
+message SearchResult {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string type = 4;
+  bool has_questions = 5;
+  string content_rating = 6;
+  repeated string meta_tags = 7;
+  repeated string content_descriptors = 8;
+  repeated TagPath tag_hierarchy = 9;
+}

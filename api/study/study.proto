@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package study;
+option go_package = "github.com/studyguides-com/study-guides-api/api/study;study";
+
+import "search.proto";
+
+service StudyService {
+  rpc Search(SearchRequest) returns (SearchResponse);
+}

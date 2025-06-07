@@ -1,0 +1,37 @@
+# Go build artifacts
+bin/
+*.exe
+*.test
+*.out
+
+# Go module files
+vendor/
+go.sum
+
+# Protobuf generated Go code (you ARE committing these)
+# (no ignore here — intentional)
+
+# Buf build outputs (mobile code generation)
+gen/
+
+# Buf lockfile (only ignore if you don’t use remote proto deps)
+buf.lock
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs / temp
+*.log
+*.tmp
+
+# OS-specific
+Thumbs.db
+ehthumbs.db
+
+# Test coverage / profiling
+coverage.*
+*.prof
