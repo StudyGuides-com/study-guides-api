@@ -4,8 +4,10 @@ import (
 	"context"
 	"log"
 
-	"github.com/studyguides-com/study-guides-api/internal/store"
 	searchpb "github.com/studyguides-com/study-guides-api/api/v1/search"
+	"github.com/studyguides-com/study-guides-api/internal/store"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type SearchService struct {
@@ -19,7 +21,6 @@ func NewSearchService(s store.Store) *SearchService {
 	}
 }
 
-
 func (s *SearchService) Search(ctx context.Context, req *searchpb.SearchRequest) (*searchpb.SearchResponse, error) {
 	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string) (interface{}, error) {
 		if userID != nil {
@@ -29,6 +30,8 @@ func (s *SearchService) Search(ctx context.Context, req *searchpb.SearchRequest)
 		}
 
 		results, err := s.store.SearchStore().SearchTags(ctx, FromProtoContextType(req.Context), req.Query)
+
+		log.Printf("Search results: %v", results)
 		if err != nil {
 			return nil, err
 		}
@@ -36,6 +39,12 @@ func (s *SearchService) Search(ctx context.Context, req *searchpb.SearchRequest)
 			Results: results,
 		}, nil
 	})
-	return resp.(*searchpb.SearchResponse), err
+	if err != nil {
+		return nil, err
+	}
+	if resp == nil {
+		return nil, status.Error(codes.Internal, "search service returned nil response")
+	}
+	return resp.(*searchpb.SearchResponse), nil
 }
 

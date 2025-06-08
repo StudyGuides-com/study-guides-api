@@ -17,5 +17,5 @@ type SearchStore interface {
 
 
 func NewAlgoliaSearchStore() SearchStore {
-	return NewAlgoliaStore(os.Getenv("ALGOLIA_APP_ID"), os.Getenv("ALGOLIA_API_KEY"))
+	return NewAlgoliaStore(os.Getenv("ALGOLIA_APP_ID"), os.Getenv("ALGOLIA_ADMIN_API_KEY"))
 }
