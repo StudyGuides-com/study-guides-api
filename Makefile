@@ -58,7 +58,10 @@ evans-prod:
 	cp .env.prod .env
 	evans --host localhost --port 1973 --header "Authorization=Bearer $$(cat .jwt.prod)" -r
 
-
+generate-tokens:
+	node scripts/generate_jwt.js > .jwt.dev
+	node scripts/generate_jwt.js > .jwt.test
+	node scripts/generate_jwt.js > .jwt.prod
 
 install-tools:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
