@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package tag.v1;
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/tag;tagv1";
+
+import "v1/shared/tag.proto";
+
+message GetTagRequest {
+  string id = 1;
+}
+
+message ListTagsByParentRequest {
+  string parent_id = 1;
+}
+
+message ListTagsByTypeRequest {
+  string type = 1;
+}
+
+message ListRootTagsRequest {} // could also take `type` if needed
+
+message ListTagsResponse {
+  repeated shared.v1.Tag tags = 1;
+}
+
+service TagService {
+    rpc GetTag(GetTagRequest) returns (shared.v1.Tag) {}
+    rpc ListTagsByParent(ListTagsByParentRequest) returns (ListTagsResponse) {}
+    rpc ListTagsByType(ListTagsByTypeRequest) returns (ListTagsResponse) {}
+    rpc ListRootTags(ListRootTagsRequest) returns (ListTagsResponse) {} // optional: top-level tags
+  }
+  

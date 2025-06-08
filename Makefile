@@ -4,15 +4,22 @@ PROTO_DIR=api/study
 BIN_DIR=bin
 CMD_DIR=cmd/server
 
+PROTO_DIR=api
+
 proto:
 	protoc \
 		--proto_path=$(PROTO_DIR) \
 		--go_out=$(PROTO_DIR) --go_opt=paths=source_relative \
 		--go-grpc_out=$(PROTO_DIR) --go-grpc_opt=paths=source_relative \
-		$(PROTO_DIR)/search/tag_path.proto \
-		$(PROTO_DIR)/search/search.proto \
-		$(PROTO_DIR)/health/health.proto \
-		$(PROTO_DIR)/study.proto
+		$(PROTO_DIR)/v1/search/search.proto \
+		$(PROTO_DIR)/v1/health/health.proto \
+		$(PROTO_DIR)/v1/user/user.proto \
+		$(PROTO_DIR)/v1/shared/tag.proto \
+		$(PROTO_DIR)/v1/shared/user.proto \
+		$(PROTO_DIR)/v1/shared/tagsearchresult.proto \
+		$(PROTO_DIR)/v1/shared/contexttype.proto \
+		$(PROTO_DIR)/v1/tag/tag.proto
+
 
 build:
 	go build -o $(BIN_DIR)/study-server ./$(CMD_DIR)
@@ -33,11 +40,12 @@ run-prod: build
 	./$(BIN_DIR)/study-server
 
 clean:
-	rm -f $(PROTO_DIR)/*.pb.go
-	rm -f $(PROTO_DIR)/*/*.pb.go
-	rm -f $(PROTO_DIR)/*_grpc.pb.go
+	@echo "Cleaning generated files..."
+	find $(PROTO_DIR) -type f \( -name '*.pb.go' -o -name '*_grpc.pb.go' \) -delete
 	rm -rf $(BIN_DIR)
 	rm -f .env
+	@echo "Done."
+
 
 fmt:
 	find . -type f -name '*.go' ! -name '*.pb.go' -exec gofmt -s -w {} +

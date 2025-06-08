@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package health.v1;
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/health;healthv1";
+
+enum HealthStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+  }
+
+message CheckRequest {}
+
+message CheckResponse {
+  HealthStatus status = 1;
+}
+
+
+service HealthService {
+  rpc Check(CheckRequest) returns (CheckResponse);
+}
+

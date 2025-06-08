@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package shared.v1;
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+import "google/protobuf/timestamp.proto";
+
+message Tag {
+	string id = 1;
+	optional string batch_id = 2;
+	string hash = 3;
+	string name = 4;
+	optional string description = 5;
+	string type = 6;
+	string context = 7;
+	optional string parent_tag_id = 8;
+	string content_rating = 9;
+	repeated string content_descriptors = 10;
+	repeated string meta_tags = 11;
+	bool public = 12;
+	int32 access_count = 13;
+	map<string, string> metadata = 14;
+	google.protobuf.Timestamp created_at = 15;
+	google.protobuf.Timestamp updated_at = 16;
+	optional string owner_id = 17;
+	bool has_questions = 18;
+	bool has_children = 19;
+}

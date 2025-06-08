@@ -4,15 +4,44 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
 
-	studypb "github.com/studyguides-com/study-guides-api/api/study"
-	"github.com/studyguides-com/study-guides-api/internal/service"
+	healthpb "github.com/studyguides-com/study-guides-api/api/v1/health"
+	searchpb "github.com/studyguides-com/study-guides-api/api/v1/search"
+	tagpb "github.com/studyguides-com/study-guides-api/api/v1/tag"
+	userpb "github.com/studyguides-com/study-guides-api/api/v1/user"
 
 	"github.com/joho/godotenv"
 	"github.com/studyguides-com/study-guides-api/internal/middleware"
+	"github.com/studyguides-com/study-guides-api/internal/services"
+	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
+
+func parseEnvAsInt(key string, fallback int) int {
+	valStr := os.Getenv(key)
+	if valStr == "" {
+		return fallback
+	}
+	val, err := strconv.Atoi(valStr)
+	if err != nil {
+		return fallback
+	}
+	return val
+}
+
+func parseEnvAsRate(key string, fallback rate.Limit) rate.Limit {
+	valStr := os.Getenv(key)
+	if valStr == "" {
+		return fallback
+	}
+	val, err := strconv.ParseFloat(valStr, 64)
+	if err != nil {
+		return fallback
+	}
+	return rate.Limit(val)
+}
 
 func main() {
 
@@ -30,10 +59,19 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(middleware.AuthUnaryInterceptor(os.Getenv("JWT_SECRET"))),
+		grpc.ChainUnaryInterceptor(
+			middleware.AuthUnaryInterceptor(os.Getenv("JWT_SECRET")),
+			middleware.RateLimitUnaryInterceptor(
+				parseEnvAsRate("RATE_LIMIT_USER_PER_SECOND", 1.0),
+				parseEnvAsInt("RATE_LIMIT_USER_BURST", 5),
+			),
+		),
 	)
-	
-	studypb.RegisterStudyServiceServer(grpcServer, service.NewStudyService())
+
+	healthpb.RegisterHealthServiceServer(grpcServer, services.NewHealthService())
+	searchpb.RegisterSearchServiceServer(grpcServer, services.NewSearchService())
+	userpb.RegisterUserServiceServer(grpcServer, services.NewUserService())
+	tagpb.RegisterTagServiceServer(grpcServer, services.NewTagService())
 
 	// Enable gRPC reflection
 	reflection.Register(grpcServer)

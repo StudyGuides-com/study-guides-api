@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package user.v1;
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/user;userv1";
+
+import "v1/shared/user.proto";
+
+message ProfileRequest {
+
+}
+
+message ProfileResponse {
+  shared.v1.User user = 1;
+}
+
+
+service UserService {
+  rpc Profile(ProfileRequest) returns (ProfileResponse);
+}
+

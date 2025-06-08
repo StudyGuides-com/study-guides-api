@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package search.v1;
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/search;searchv1";
+
+import "v1/shared/tagsearchresult.proto";
+import "v1/shared/contexttype.proto";
+
+message SearchRequest {
+    string query = 1;
+    shared.v1.ContextType context = 2;
+  }
+  
+  message SearchResponse {
+    repeated shared.v1.TagSearchResult results = 1;
+  }
+  
+
+service SearchService {
+  rpc Search(SearchRequest) returns (SearchResponse);
+}
+

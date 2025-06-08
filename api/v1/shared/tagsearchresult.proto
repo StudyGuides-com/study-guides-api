@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package shared.v1;
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+
+message TagSearchPath {
+  string id = 1;
+  string name = 2;
+  string type = 3;
+}
+
+message TagSearchResult {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string type = 4;
+    bool has_questions = 5;
+    string content_rating = 6;
+    repeated string meta_tags = 7;
+    repeated string content_descriptors = 8;
+    repeated TagSearchPath tag_hierarchy = 9;
+  }

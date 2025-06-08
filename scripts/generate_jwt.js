@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 
 const token = jwt.sign(
   {
+    sub: "123",
     name: "Bruce Stockwell",
     email: "bruce.stockwell@gmail.com",
     roles: ["user", "admin"],
