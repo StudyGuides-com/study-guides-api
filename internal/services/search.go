@@ -31,7 +31,6 @@ func (s *SearchService) Search(ctx context.Context, req *searchpb.SearchRequest)
 
 		results, err := s.store.SearchStore().SearchTags(ctx, FromProtoContextType(req.Context), req.Query)
 
-		log.Printf("Search results: %v", results)
 		if err != nil {
 			return nil, err
 		}
