@@ -1,3 +1,12 @@
 package tag
 
-type TagStore interface {}
+type tagStore struct {
+}
+
+type TagStore interface {
+}
+
+
+func NewTagStore() TagStore {
+	return &tagStore{}
+}

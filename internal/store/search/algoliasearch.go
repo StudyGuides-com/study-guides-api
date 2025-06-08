@@ -9,27 +9,27 @@ import (
 	"github.com/studyguides-com/study-guides-api/internal/types"
 )
 
-// AlgoliaSearchClient represents an Algolia search client
-type AlgoliaSearchClient struct {
+// AlgoliaStore represents an Algolia search client
+type AlgoliaStore struct {
 	client *search.Client
 }
 
 // NewAlgoliaSearchClient creates a new Algolia search client
-func NewAlgoliaSearchClient(appID, apiKey string) *AlgoliaSearchClient {
+func NewAlgoliaStore(appID, apiKey string) *AlgoliaStore {
 	client := search.NewClient(appID, apiKey)
 	
-	return &AlgoliaSearchClient{
+	return &AlgoliaStore{
 		client: client,
 	}
 }
 
 // GetIndex returns an Algolia index by name
-func (c *AlgoliaSearchClient) GetIndex(indexName string) *search.Index {
+func (c *AlgoliaStore) GetIndex(indexName string) *search.Index {
 	return c.client.InitIndex(indexName)
 }
 
 // SearchTags searches for tags using Algolia
-func (c *AlgoliaSearchClient) SearchTags(ctx context.Context, contextType types.ContextType, query string) ([]*sharedpb.TagSearchResult, error) {
+func (c *AlgoliaStore) SearchTags(ctx context.Context, contextType types.ContextType, query string) ([]*sharedpb.TagSearchResult, error) {
 	index := c.GetIndex("tags")
 	
 	// Create search parameters with context filter

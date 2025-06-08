@@ -10,6 +10,7 @@ import (
 	searchpb "github.com/studyguides-com/study-guides-api/api/v1/search"
 	tagpb "github.com/studyguides-com/study-guides-api/api/v1/tag"
 	userpb "github.com/studyguides-com/study-guides-api/api/v1/user"
+	"github.com/studyguides-com/study-guides-api/internal/store"
 
 	"github.com/joho/godotenv"
 	"github.com/studyguides-com/study-guides-api/internal/middleware"
@@ -69,7 +70,7 @@ func main() {
 	)
 
 	healthpb.RegisterHealthServiceServer(grpcServer, services.NewHealthService())
-	searchpb.RegisterSearchServiceServer(grpcServer, services.NewSearchService())
+	searchpb.RegisterSearchServiceServer(grpcServer, services.NewSearchService(store.NewStore()))
 	userpb.RegisterUserServiceServer(grpcServer, services.NewUserService())
 	tagpb.RegisterTagServiceServer(grpcServer, services.NewTagService())
 

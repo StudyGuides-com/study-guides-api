@@ -13,9 +13,12 @@ type SearchService struct {
 	store store.Store
 }
 
-func NewSearchService() *SearchService {
-	return &SearchService{}
+func NewSearchService(s store.Store) *SearchService {
+	return &SearchService{
+		store: s,
+	}
 }
+
 
 func (s *SearchService) Search(ctx context.Context, req *searchpb.SearchRequest) (*searchpb.SearchResponse, error) {
 	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string) (interface{}, error) {

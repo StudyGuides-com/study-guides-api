@@ -12,3 +12,29 @@ type Store interface {
 	TagStore() tag.TagStore
 	UserStore() user.UserStore
 }
+
+type store struct {
+	searchStore search.SearchStore
+	tagStore    tag.TagStore
+	userStore   user.UserStore
+}
+
+func (s *store) SearchStore() search.SearchStore {
+	return s.searchStore
+}
+
+func (s *store) TagStore() tag.TagStore {
+	return s.tagStore
+}
+
+func (s *store) UserStore() user.UserStore {
+	return s.userStore
+}
+
+func NewStore() Store {
+	return &store{
+		searchStore: search.NewAlgoliaSearchStore(),
+		tagStore:    tag.NewTagStore(),
+		userStore:   user.NewUserStore(),
+	}
+}
