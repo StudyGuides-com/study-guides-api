@@ -32,6 +32,17 @@ buf.lock
 Thumbs.db
 ehthumbs.db
 
+# Scripts
+scripts/node_modules/
+
 # Test coverage / profiling
 coverage.*
 *.prof
+.env
+.env.dev
+.env.test
+.env.prod
+
+.jwt.dev
+.jwt.test
+.jwt.prod

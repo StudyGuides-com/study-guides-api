@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v5.29.3
-// source: search.proto
+// source: search/search.proto
 
-package study
+package search
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -31,7 +31,7 @@ type SearchRequest struct {
 
 func (x *SearchRequest) Reset() {
 	*x = SearchRequest{}
-	mi := &file_search_proto_msgTypes[0]
+	mi := &file_search_search_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -43,7 +43,7 @@ func (x *SearchRequest) String() string {
 func (*SearchRequest) ProtoMessage() {}
 
 func (x *SearchRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_search_proto_msgTypes[0]
+	mi := &file_search_search_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -56,7 +56,7 @@ func (x *SearchRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchRequest.ProtoReflect.Descriptor instead.
 func (*SearchRequest) Descriptor() ([]byte, []int) {
-	return file_search_proto_rawDescGZIP(), []int{0}
+	return file_search_search_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *SearchRequest) GetQuery() string {
@@ -82,7 +82,7 @@ type SearchResponse struct {
 
 func (x *SearchResponse) Reset() {
 	*x = SearchResponse{}
-	mi := &file_search_proto_msgTypes[1]
+	mi := &file_search_search_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -94,7 +94,7 @@ func (x *SearchResponse) String() string {
 func (*SearchResponse) ProtoMessage() {}
 
 func (x *SearchResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_search_proto_msgTypes[1]
+	mi := &file_search_search_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -107,7 +107,7 @@ func (x *SearchResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchResponse.ProtoReflect.Descriptor instead.
 func (*SearchResponse) Descriptor() ([]byte, []int) {
-	return file_search_proto_rawDescGZIP(), []int{1}
+	return file_search_search_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *SearchResponse) GetResults() []*SearchResult {
@@ -134,7 +134,7 @@ type SearchResult struct {
 
 func (x *SearchResult) Reset() {
 	*x = SearchResult{}
-	mi := &file_search_proto_msgTypes[2]
+	mi := &file_search_search_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -146,7 +146,7 @@ func (x *SearchResult) String() string {
 func (*SearchResult) ProtoMessage() {}
 
 func (x *SearchResult) ProtoReflect() protoreflect.Message {
-	mi := &file_search_proto_msgTypes[2]
+	mi := &file_search_search_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -159,7 +159,7 @@ func (x *SearchResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchResult.ProtoReflect.Descriptor instead.
 func (*SearchResult) Descriptor() ([]byte, []int) {
-	return file_search_proto_rawDescGZIP(), []int{2}
+	return file_search_search_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *SearchResult) GetId() string {
@@ -225,16 +225,16 @@ func (x *SearchResult) GetTagHierarchy() []*TagPath {
 	return nil
 }
 
-var File_search_proto protoreflect.FileDescriptor
+var File_search_search_proto protoreflect.FileDescriptor
 
-const file_search_proto_rawDesc = "" +
+const file_search_search_proto_rawDesc = "" +
 	"\n" +
-	"\fsearch.proto\x12\x05study\x1a\x0etag_path.proto\"?\n" +
+	"\x13search/search.proto\x12\x06search\x1a\x15search/tag_path.proto\"?\n" +
 	"\rSearchRequest\x12\x14\n" +
 	"\x05query\x18\x01 \x01(\tR\x05query\x12\x18\n" +
-	"\acontext\x18\x02 \x01(\tR\acontext\"?\n" +
-	"\x0eSearchResponse\x12-\n" +
-	"\aresults\x18\x01 \x03(\v2\x13.study.SearchResultR\aresults\"\xb7\x02\n" +
+	"\acontext\x18\x02 \x01(\tR\acontext\"@\n" +
+	"\x0eSearchResponse\x12.\n" +
+	"\aresults\x18\x01 \x03(\v2\x14.search.SearchResultR\aresults\"\xb8\x02\n" +
 	"\fSearchResult\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -243,31 +243,31 @@ const file_search_proto_rawDesc = "" +
 	"\rhas_questions\x18\x05 \x01(\bR\fhasQuestions\x12%\n" +
 	"\x0econtent_rating\x18\x06 \x01(\tR\rcontentRating\x12\x1b\n" +
 	"\tmeta_tags\x18\a \x03(\tR\bmetaTags\x12/\n" +
-	"\x13content_descriptors\x18\b \x03(\tR\x12contentDescriptors\x123\n" +
-	"\rtag_hierarchy\x18\t \x03(\v2\x0e.study.TagPathR\ftagHierarchyB=Z;github.com/studyguides-com/study-guides-api/api/study;studyb\x06proto3"
+	"\x13content_descriptors\x18\b \x03(\tR\x12contentDescriptors\x124\n" +
+	"\rtag_hierarchy\x18\t \x03(\v2\x0f.search.TagPathR\ftagHierarchyBEZCgithub.com/studyguides-com/study-guides-api/api/study/search;searchb\x06proto3"
 
 var (
-	file_search_proto_rawDescOnce sync.Once
-	file_search_proto_rawDescData []byte
+	file_search_search_proto_rawDescOnce sync.Once
+	file_search_search_proto_rawDescData []byte
 )
 
-func file_search_proto_rawDescGZIP() []byte {
-	file_search_proto_rawDescOnce.Do(func() {
-		file_search_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_search_proto_rawDesc), len(file_search_proto_rawDesc)))
+func file_search_search_proto_rawDescGZIP() []byte {
+	file_search_search_proto_rawDescOnce.Do(func() {
+		file_search_search_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_search_search_proto_rawDesc), len(file_search_search_proto_rawDesc)))
 	})
-	return file_search_proto_rawDescData
+	return file_search_search_proto_rawDescData
 }
 
-var file_search_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
-var file_search_proto_goTypes = []any{
-	(*SearchRequest)(nil),  // 0: study.SearchRequest
-	(*SearchResponse)(nil), // 1: study.SearchResponse
-	(*SearchResult)(nil),   // 2: study.SearchResult
-	(*TagPath)(nil),        // 3: study.TagPath
+var file_search_search_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_search_search_proto_goTypes = []any{
+	(*SearchRequest)(nil),  // 0: search.SearchRequest
+	(*SearchResponse)(nil), // 1: search.SearchResponse
+	(*SearchResult)(nil),   // 2: search.SearchResult
+	(*TagPath)(nil),        // 3: search.TagPath
 }
-var file_search_proto_depIdxs = []int32{
-	2, // 0: study.SearchResponse.results:type_name -> study.SearchResult
-	3, // 1: study.SearchResult.tag_hierarchy:type_name -> study.TagPath
+var file_search_search_proto_depIdxs = []int32{
+	2, // 0: search.SearchResponse.results:type_name -> search.SearchResult
+	3, // 1: search.SearchResult.tag_hierarchy:type_name -> search.TagPath
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -275,27 +275,27 @@ var file_search_proto_depIdxs = []int32{
 	0, // [0:2] is the sub-list for field type_name
 }
 
-func init() { file_search_proto_init() }
-func file_search_proto_init() {
-	if File_search_proto != nil {
+func init() { file_search_search_proto_init() }
+func file_search_search_proto_init() {
+	if File_search_search_proto != nil {
 		return
 	}
-	file_tag_path_proto_init()
+	file_search_tag_path_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_search_proto_rawDesc), len(file_search_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_search_search_proto_rawDesc), len(file_search_search_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_search_proto_goTypes,
-		DependencyIndexes: file_search_proto_depIdxs,
-		MessageInfos:      file_search_proto_msgTypes,
+		GoTypes:           file_search_search_proto_goTypes,
+		DependencyIndexes: file_search_search_proto_depIdxs,
+		MessageInfos:      file_search_search_proto_msgTypes,
 	}.Build()
-	File_search_proto = out.File
-	file_search_proto_goTypes = nil
-	file_search_proto_depIdxs = nil
+	File_search_search_proto = out.File
+	file_search_search_proto_goTypes = nil
+	file_search_search_proto_depIdxs = nil
 }

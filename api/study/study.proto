@@ -3,8 +3,11 @@ syntax = "proto3";
 package study;
 option go_package = "github.com/studyguides-com/study-guides-api/api/study;study";
 
-import "search.proto";
+import "search/search.proto";
+import "health/health.proto";
 
 service StudyService {
-  rpc Search(SearchRequest) returns (SearchResponse);
+  rpc Search(search.SearchRequest) returns (search.SearchResponse);
+  rpc HealthCheck(health.HealthCheckRequest) returns (health.HealthCheckResponse);
 }
+

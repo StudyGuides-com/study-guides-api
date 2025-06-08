@@ -7,6 +7,8 @@
 package study
 
 import (
+	health "github.com/studyguides-com/study-guides-api/api/study/health"
+	search "github.com/studyguides-com/study-guides-api/api/study/search"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -24,19 +26,24 @@ var File_study_proto protoreflect.FileDescriptor
 
 const file_study_proto_rawDesc = "" +
 	"\n" +
-	"\vstudy.proto\x12\x05study\x1a\fsearch.proto2E\n" +
-	"\fStudyService\x125\n" +
-	"\x06Search\x12\x14.study.SearchRequest\x1a\x15.study.SearchResponseB=Z;github.com/studyguides-com/study-guides-api/api/study;studyb\x06proto3"
+	"\vstudy.proto\x12\x05study\x1a\x13search/search.proto\x1a\x13health/health.proto2\x8f\x01\n" +
+	"\fStudyService\x127\n" +
+	"\x06Search\x12\x15.search.SearchRequest\x1a\x16.search.SearchResponse\x12F\n" +
+	"\vHealthCheck\x12\x1a.health.HealthCheckRequest\x1a\x1b.health.HealthCheckResponseB=Z;github.com/studyguides-com/study-guides-api/api/study;studyb\x06proto3"
 
 var file_study_proto_goTypes = []any{
-	(*SearchRequest)(nil),  // 0: study.SearchRequest
-	(*SearchResponse)(nil), // 1: study.SearchResponse
+	(*search.SearchRequest)(nil),       // 0: search.SearchRequest
+	(*health.HealthCheckRequest)(nil),  // 1: health.HealthCheckRequest
+	(*search.SearchResponse)(nil),      // 2: search.SearchResponse
+	(*health.HealthCheckResponse)(nil), // 3: health.HealthCheckResponse
 }
 var file_study_proto_depIdxs = []int32{
-	0, // 0: study.StudyService.Search:input_type -> study.SearchRequest
-	1, // 1: study.StudyService.Search:output_type -> study.SearchResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	0, // 0: study.StudyService.Search:input_type -> search.SearchRequest
+	1, // 1: study.StudyService.HealthCheck:input_type -> health.HealthCheckRequest
+	2, // 2: study.StudyService.Search:output_type -> search.SearchResponse
+	3, // 3: study.StudyService.HealthCheck:output_type -> health.HealthCheckResponse
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -47,7 +54,6 @@ func file_study_proto_init() {
 	if File_study_proto != nil {
 		return
 	}
-	file_search_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

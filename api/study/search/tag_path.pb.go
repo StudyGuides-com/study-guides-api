@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v5.29.3
-// source: tag_path.proto
+// source: search/tag_path.proto
 
-package study
+package search
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -32,7 +32,7 @@ type TagPath struct {
 
 func (x *TagPath) Reset() {
 	*x = TagPath{}
-	mi := &file_tag_path_proto_msgTypes[0]
+	mi := &file_search_tag_path_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -44,7 +44,7 @@ func (x *TagPath) String() string {
 func (*TagPath) ProtoMessage() {}
 
 func (x *TagPath) ProtoReflect() protoreflect.Message {
-	mi := &file_tag_path_proto_msgTypes[0]
+	mi := &file_search_tag_path_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -57,7 +57,7 @@ func (x *TagPath) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TagPath.ProtoReflect.Descriptor instead.
 func (*TagPath) Descriptor() ([]byte, []int) {
-	return file_tag_path_proto_rawDescGZIP(), []int{0}
+	return file_search_tag_path_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *TagPath) GetId() string {
@@ -81,33 +81,33 @@ func (x *TagPath) GetType() string {
 	return ""
 }
 
-var File_tag_path_proto protoreflect.FileDescriptor
+var File_search_tag_path_proto protoreflect.FileDescriptor
 
-const file_tag_path_proto_rawDesc = "" +
+const file_search_tag_path_proto_rawDesc = "" +
 	"\n" +
-	"\x0etag_path.proto\x12\x05study\"A\n" +
+	"\x15search/tag_path.proto\x12\x06search\"A\n" +
 	"\aTagPath\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
-	"\x04type\x18\x03 \x01(\tR\x04typeB=Z;github.com/studyguides-com/study-guides-api/api/study;studyb\x06proto3"
+	"\x04type\x18\x03 \x01(\tR\x04typeBEZCgithub.com/studyguides-com/study-guides-api/api/study/search;searchb\x06proto3"
 
 var (
-	file_tag_path_proto_rawDescOnce sync.Once
-	file_tag_path_proto_rawDescData []byte
+	file_search_tag_path_proto_rawDescOnce sync.Once
+	file_search_tag_path_proto_rawDescData []byte
 )
 
-func file_tag_path_proto_rawDescGZIP() []byte {
-	file_tag_path_proto_rawDescOnce.Do(func() {
-		file_tag_path_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_tag_path_proto_rawDesc), len(file_tag_path_proto_rawDesc)))
+func file_search_tag_path_proto_rawDescGZIP() []byte {
+	file_search_tag_path_proto_rawDescOnce.Do(func() {
+		file_search_tag_path_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_search_tag_path_proto_rawDesc), len(file_search_tag_path_proto_rawDesc)))
 	})
-	return file_tag_path_proto_rawDescData
+	return file_search_tag_path_proto_rawDescData
 }
 
-var file_tag_path_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
-var file_tag_path_proto_goTypes = []any{
-	(*TagPath)(nil), // 0: study.TagPath
+var file_search_tag_path_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_search_tag_path_proto_goTypes = []any{
+	(*TagPath)(nil), // 0: search.TagPath
 }
-var file_tag_path_proto_depIdxs = []int32{
+var file_search_tag_path_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
 	0, // [0:0] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -115,26 +115,26 @@ var file_tag_path_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_tag_path_proto_init() }
-func file_tag_path_proto_init() {
-	if File_tag_path_proto != nil {
+func init() { file_search_tag_path_proto_init() }
+func file_search_tag_path_proto_init() {
+	if File_search_tag_path_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_tag_path_proto_rawDesc), len(file_tag_path_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_search_tag_path_proto_rawDesc), len(file_search_tag_path_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   1,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_tag_path_proto_goTypes,
-		DependencyIndexes: file_tag_path_proto_depIdxs,
-		MessageInfos:      file_tag_path_proto_msgTypes,
+		GoTypes:           file_search_tag_path_proto_goTypes,
+		DependencyIndexes: file_search_tag_path_proto_depIdxs,
+		MessageInfos:      file_search_tag_path_proto_msgTypes,
 	}.Build()
-	File_tag_path_proto = out.File
-	file_tag_path_proto_goTypes = nil
-	file_tag_path_proto_depIdxs = nil
+	File_search_tag_path_proto = out.File
+	file_search_tag_path_proto_goTypes = nil
+	file_search_tag_path_proto_depIdxs = nil
 }
