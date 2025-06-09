@@ -69,6 +69,8 @@ func (x *GetTagRequest) GetId() string {
 type ListTagsByParentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ParentId      string                 `protobuf:"bytes,1,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -110,9 +112,25 @@ func (x *ListTagsByParentRequest) GetParentId() string {
 	return ""
 }
 
+func (x *ListTagsByParentRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListTagsByParentRequest) GetPageToken() string {
+	if x != nil {
+		return x.PageToken
+	}
+	return ""
+}
+
 type ListTagsByTypeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Type          string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -154,8 +172,24 @@ func (x *ListTagsByTypeRequest) GetType() string {
 	return ""
 }
 
+func (x *ListTagsByTypeRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListTagsByTypeRequest) GetPageToken() string {
+	if x != nil {
+		return x.PageToken
+	}
+	return ""
+}
+
 type ListRootTagsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -190,9 +224,24 @@ func (*ListRootTagsRequest) Descriptor() ([]byte, []int) {
 	return file_v1_tag_tag_proto_rawDescGZIP(), []int{3}
 }
 
+func (x *ListRootTagsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListRootTagsRequest) GetPageToken() string {
+	if x != nil {
+		return x.PageToken
+	}
+	return ""
+}
+
 type ListTagsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Tags          []*shared.Tag          `protobuf:"bytes,1,rep,name=tags,proto3" json:"tags,omitempty"`
+	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -234,20 +283,37 @@ func (x *ListTagsResponse) GetTags() []*shared.Tag {
 	return nil
 }
 
+func (x *ListTagsResponse) GetNextPageToken() string {
+	if x != nil {
+		return x.NextPageToken
+	}
+	return ""
+}
+
 var File_v1_tag_tag_proto protoreflect.FileDescriptor
 
 const file_v1_tag_tag_proto_rawDesc = "" +
 	"\n" +
 	"\x10v1/tag/tag.proto\x12\x06tag.v1\x1a\x13v1/shared/tag.proto\"\x1f\n" +
 	"\rGetTagRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"6\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"r\n" +
 	"\x17ListTagsByParentRequest\x12\x1b\n" +
-	"\tparent_id\x18\x01 \x01(\tR\bparentId\"+\n" +
+	"\tparent_id\x18\x01 \x01(\tR\bparentId\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\n" +
+	"page_token\x18\x03 \x01(\tR\tpageToken\"g\n" +
 	"\x15ListTagsByTypeRequest\x12\x12\n" +
-	"\x04type\x18\x01 \x01(\tR\x04type\"\x15\n" +
-	"\x13ListRootTagsRequest\"6\n" +
+	"\x04type\x18\x01 \x01(\tR\x04type\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\n" +
+	"page_token\x18\x03 \x01(\tR\tpageToken\"Q\n" +
+	"\x13ListRootTagsRequest\x12\x1b\n" +
+	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\n" +
+	"page_token\x18\x02 \x01(\tR\tpageToken\"^\n" +
 	"\x10ListTagsResponse\x12\"\n" +
-	"\x04tags\x18\x01 \x03(\v2\x0e.shared.v1.TagR\x04tags2\xa6\x02\n" +
+	"\x04tags\x18\x01 \x03(\v2\x0e.shared.v1.TagR\x04tags\x12&\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken2\xa6\x02\n" +
 	"\n" +
 	"TagService\x121\n" +
 	"\x06GetTag\x12\x15.tag.v1.GetTagRequest\x1a\x0e.shared.v1.Tag\"\x00\x12O\n" +
