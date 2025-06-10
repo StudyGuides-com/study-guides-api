@@ -118,19 +118,112 @@ func (x *SearchTagsResponse) GetResults() []*shared.TagSearchResult {
 	return nil
 }
 
+type SearchUsersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Query         string                 `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SearchUsersRequest) Reset() {
+	*x = SearchUsersRequest{}
+	mi := &file_v1_search_search_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SearchUsersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SearchUsersRequest) ProtoMessage() {}
+
+func (x *SearchUsersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_search_search_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SearchUsersRequest.ProtoReflect.Descriptor instead.
+func (*SearchUsersRequest) Descriptor() ([]byte, []int) {
+	return file_v1_search_search_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *SearchUsersRequest) GetQuery() string {
+	if x != nil {
+		return x.Query
+	}
+	return ""
+}
+
+type SearchUsersResponse struct {
+	state         protoimpl.MessageState     `protogen:"open.v1"`
+	Results       []*shared.UserSearchResult `protobuf:"bytes,1,rep,name=results,proto3" json:"results,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SearchUsersResponse) Reset() {
+	*x = SearchUsersResponse{}
+	mi := &file_v1_search_search_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SearchUsersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SearchUsersResponse) ProtoMessage() {}
+
+func (x *SearchUsersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_search_search_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SearchUsersResponse.ProtoReflect.Descriptor instead.
+func (*SearchUsersResponse) Descriptor() ([]byte, []int) {
+	return file_v1_search_search_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *SearchUsersResponse) GetResults() []*shared.UserSearchResult {
+	if x != nil {
+		return x.Results
+	}
+	return nil
+}
+
 var File_v1_search_search_proto protoreflect.FileDescriptor
 
 const file_v1_search_search_proto_rawDesc = "" +
 	"\n" +
-	"\x16v1/search/search.proto\x12\tsearch.v1\x1a\x1fv1/shared/tagsearchresult.proto\x1a\x1bv1/shared/contexttype.proto\"[\n" +
+	"\x16v1/search/search.proto\x12\tsearch.v1\x1a\x1fv1/shared/tagsearchresult.proto\x1a\x1bv1/shared/contexttype.proto\x1a v1/shared/usersearchresult.proto\"[\n" +
 	"\x11SearchTagsRequest\x12\x14\n" +
 	"\x05query\x18\x01 \x01(\tR\x05query\x120\n" +
 	"\acontext\x18\x02 \x01(\x0e2\x16.shared.v1.ContextTypeR\acontext\"J\n" +
 	"\x12SearchTagsResponse\x124\n" +
-	"\aresults\x18\x01 \x03(\v2\x1a.shared.v1.TagSearchResultR\aresults2Z\n" +
+	"\aresults\x18\x01 \x03(\v2\x1a.shared.v1.TagSearchResultR\aresults\"*\n" +
+	"\x12SearchUsersRequest\x12\x14\n" +
+	"\x05query\x18\x01 \x01(\tR\x05query\"L\n" +
+	"\x13SearchUsersResponse\x125\n" +
+	"\aresults\x18\x01 \x03(\v2\x1b.shared.v1.UserSearchResultR\aresults2\xa8\x01\n" +
 	"\rSearchService\x12I\n" +
 	"\n" +
-	"SearchTags\x12\x1c.search.v1.SearchTagsRequest\x1a\x1d.search.v1.SearchTagsResponseBDZBgithub.com/studyguides-com/study-guides-api/api/v1/search;searchv1b\x06proto3"
+	"SearchTags\x12\x1c.search.v1.SearchTagsRequest\x1a\x1d.search.v1.SearchTagsResponse\x12L\n" +
+	"\vSearchUsers\x12\x1d.search.v1.SearchUsersRequest\x1a\x1e.search.v1.SearchUsersResponseBDZBgithub.com/studyguides-com/study-guides-api/api/v1/search;searchv1b\x06proto3"
 
 var (
 	file_v1_search_search_proto_rawDescOnce sync.Once
@@ -144,23 +237,29 @@ func file_v1_search_search_proto_rawDescGZIP() []byte {
 	return file_v1_search_search_proto_rawDescData
 }
 
-var file_v1_search_search_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_v1_search_search_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_v1_search_search_proto_goTypes = []any{
-	(*SearchTagsRequest)(nil),      // 0: search.v1.SearchTagsRequest
-	(*SearchTagsResponse)(nil),     // 1: search.v1.SearchTagsResponse
-	(shared.ContextType)(0),        // 2: shared.v1.ContextType
-	(*shared.TagSearchResult)(nil), // 3: shared.v1.TagSearchResult
+	(*SearchTagsRequest)(nil),       // 0: search.v1.SearchTagsRequest
+	(*SearchTagsResponse)(nil),      // 1: search.v1.SearchTagsResponse
+	(*SearchUsersRequest)(nil),      // 2: search.v1.SearchUsersRequest
+	(*SearchUsersResponse)(nil),     // 3: search.v1.SearchUsersResponse
+	(shared.ContextType)(0),         // 4: shared.v1.ContextType
+	(*shared.TagSearchResult)(nil),  // 5: shared.v1.TagSearchResult
+	(*shared.UserSearchResult)(nil), // 6: shared.v1.UserSearchResult
 }
 var file_v1_search_search_proto_depIdxs = []int32{
-	2, // 0: search.v1.SearchTagsRequest.context:type_name -> shared.v1.ContextType
-	3, // 1: search.v1.SearchTagsResponse.results:type_name -> shared.v1.TagSearchResult
-	0, // 2: search.v1.SearchService.SearchTags:input_type -> search.v1.SearchTagsRequest
-	1, // 3: search.v1.SearchService.SearchTags:output_type -> search.v1.SearchTagsResponse
-	3, // [3:4] is the sub-list for method output_type
-	2, // [2:3] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	4, // 0: search.v1.SearchTagsRequest.context:type_name -> shared.v1.ContextType
+	5, // 1: search.v1.SearchTagsResponse.results:type_name -> shared.v1.TagSearchResult
+	6, // 2: search.v1.SearchUsersResponse.results:type_name -> shared.v1.UserSearchResult
+	0, // 3: search.v1.SearchService.SearchTags:input_type -> search.v1.SearchTagsRequest
+	2, // 4: search.v1.SearchService.SearchUsers:input_type -> search.v1.SearchUsersRequest
+	1, // 5: search.v1.SearchService.SearchTags:output_type -> search.v1.SearchTagsResponse
+	3, // 6: search.v1.SearchService.SearchUsers:output_type -> search.v1.SearchUsersResponse
+	5, // [5:7] is the sub-list for method output_type
+	3, // [3:5] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_v1_search_search_proto_init() }
@@ -174,7 +273,7 @@ func file_v1_search_search_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_search_search_proto_rawDesc), len(file_v1_search_search_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

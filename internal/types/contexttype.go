@@ -8,4 +8,5 @@ const (
 	ContextTypeEntranceExams  = "EntranceExams"
 	ContextTypeAPExams        = "APExams"
 	ContextTypeDoD            = "DoD"
+	ContextTypeAll            = "All"
 )

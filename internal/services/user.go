@@ -21,7 +21,7 @@ func NewUserService() *UserService {
 }
 
 func (s *UserService) Profile(ctx context.Context, req *userpb.ProfileRequest) (*userpb.ProfileResponse, error) {
-	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string) (interface{}, error) {
+	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string, userRoles *[]string) (interface{}, error) {
 		if userID == nil {
 			log.Printf("Profile request from anonymous user")
 			return nil, status.Error(codes.Unauthenticated, "authentication required")

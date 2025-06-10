@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package shared.v1;
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+message UserSearchResult {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+    string gamer_tag = 4;
+    string created_at = 5;
+    string stripe_customer_id = 6;
+    string object_id = 7;
+}

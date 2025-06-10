@@ -17,7 +17,7 @@ func NewTagService() *TagService {
 }
 
 func (s *TagService) GetTag(ctx context.Context, req *tagpb.GetTagRequest) (*sharedpb.Tag, error) {
-	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string) (interface{}, error) {
+	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string, userRoles *[]string) (interface{}, error) {
 		if userID != nil {
 			log.Printf("GetTag request from user %s: id=%s", *userID, req.Id)
 		} else {
@@ -43,7 +43,7 @@ func (s *TagService) GetTag(ctx context.Context, req *tagpb.GetTagRequest) (*sha
 }
 
 func (s *TagService) ListTagsByParent(ctx context.Context, req *tagpb.ListTagsByParentRequest) (*tagpb.ListTagsResponse, error) {
-	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string) (interface{}, error) {
+	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string, userRoles *[]string) (interface{}, error) {
 		if userID != nil {
 			log.Printf("ListTagsByParent request from user %s: parent_id=%s", *userID, req.ParentId)
 		} else {
@@ -63,7 +63,7 @@ func (s *TagService) ListTagsByParent(ctx context.Context, req *tagpb.ListTagsBy
 }
 
 func (s *TagService) ListTagsByType(ctx context.Context, req *tagpb.ListTagsByTypeRequest) (*tagpb.ListTagsResponse, error) {
-	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string) (interface{}, error) {
+	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string, userRoles *[]string) (interface{}, error) {
 		if userID != nil {
 			log.Printf("ListTagsByType request from user %s: type=%s", *userID, req.Type)
 		} else {
@@ -83,7 +83,7 @@ func (s *TagService) ListTagsByType(ctx context.Context, req *tagpb.ListTagsByTy
 }
 
 func (s *TagService) ListRootTags(ctx context.Context, req *tagpb.ListRootTagsRequest) (*tagpb.ListTagsResponse, error) {
-	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string) (interface{}, error) {
+	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string, userRoles *[]string) (interface{}, error) {
 		if userID != nil {
 			log.Printf("ListRootTags request from user %s", *userID)
 		} else {

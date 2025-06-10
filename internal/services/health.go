@@ -16,7 +16,7 @@ func NewHealthService() *HealthService {
 }
 
 func (s *HealthService) Check(ctx context.Context, req *healthpb.CheckRequest) (*healthpb.CheckResponse, error) {
-	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string) (interface{}, error) {
+	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string, userRoles *[]string) (interface{}, error) {
 		if userID != nil {
 			log.Printf("Logged in as %s", *userID)
 		}

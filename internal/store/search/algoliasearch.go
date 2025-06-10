@@ -32,13 +32,27 @@ func (c *AlgoliaStore) GetIndex(indexName string) *search.Index {
 // buildFilters builds the search filters based on the search options
 func (c *AlgoliaStore) buildFilters(opts *SearchOptions) []interface{} {
 	var searchOpts []interface{}
-	if opts.ContextType != "" {
+	if opts.ContextType != "" && opts.ContextType != "All" {
 		filter := "context:" + string(opts.ContextType)
 		searchOpts = []interface{}{
 			opt.Filters(filter),
 		}
 	}
 	return searchOpts
+}
+
+func (c *AlgoliaStore) SearchUsers(ctx context.Context, query string, opts *SearchOptions) ([]*sharedpb.UserSearchResult, error) {
+	log.Printf("Searching for users with query: %s, context: %v, userID: %v", query, opts.ContextType, opts.UserID)
+	index := c.GetIndex("users")
+
+	// Perform the search
+	res, err := index.Search(query)
+	if err != nil {
+		log.Printf("Error searching for users: %v", err)
+		return nil, err
+	}
+
+	return NewUserSearchResults(res.Hits), nil
 }
 
 // SearchTags searches for tags using Algolia
@@ -157,5 +171,37 @@ func NewTagSearchPaths(hit map[string]interface{}) []*sharedpb.TagSearchPath {
 	}
 	return tagHierarchy
 }
+
+func NewUserSearchResult(hit map[string]interface{}) *sharedpb.UserSearchResult {
+	id, _ := hit["id"].(string)
+	name, _ := hit["name"].(string)
+	email, _ := hit["email"].(string)
+	gamerTag, _ := hit["gamerTag"].(string)
+	createdAt, _ := hit["createdAt"].(string)
+	stripeCustomerId, _ := hit["stripeCustomerId"].(string)
+	objectID, _ := hit["objectID"].(string)
+
+	return &sharedpb.UserSearchResult{
+		Id: id,
+		Name: name,
+		Email: email,
+		GamerTag: gamerTag,
+		CreatedAt: createdAt,
+		StripeCustomerId: stripeCustomerId,
+		ObjectId: objectID,
+	}
+}
+
+func NewUserSearchResults(hits []map[string]interface{}) []*sharedpb.UserSearchResult {
+	results := make([]*sharedpb.UserSearchResult, 0, len(hits))
+	log.Printf("Found %d users", len(hits))
+	for _, hit := range hits {
+		user := NewUserSearchResult(hit)
+		results = append(results, user)
+	}
+	return results
+}
+
+
 
 
