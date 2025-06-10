@@ -69,3 +69,18 @@ func (s *SearchService) SearchUsers(ctx context.Context, req *searchpb.SearchUse
 	}
 	return resp.(*searchpb.SearchUsersResponse), nil
 }
+
+func (s *SearchService) ListIndexes(ctx context.Context, req *searchpb.ListIndexesRequest) (*searchpb.ListIndexesResponse, error) {
+	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, session *middleware.SessionDetails) (interface{}, error) {
+		return &searchpb.ListIndexesResponse{
+			Indexes: s.store.SearchStore().ListIndexes(ctx).Indexes,
+		}, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if resp == nil {
+		return nil, status.Error(codes.Internal, "search service returned nil response")
+	}
+	return resp.(*searchpb.ListIndexesResponse), nil
+}

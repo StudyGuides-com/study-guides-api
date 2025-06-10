@@ -29,8 +29,13 @@ import "v1/shared/usersearchresult.proto";
     string query = 1;
   }
 
+  message IndexInfo {
+    string name = 1;
+    int64 entries = 2;
+  }
+
   message ListIndexesResponse {
-    repeated string indexes = 1;
+    repeated IndexInfo indexes = 1;
   }
 
 service SearchService {

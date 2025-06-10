@@ -8,6 +8,7 @@ import (
 
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/opt"
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
+	searchpb "github.com/studyguides-com/study-guides-api/api/v1/search"
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 	"github.com/studyguides-com/study-guides-api/internal/types"
 	"google.golang.org/grpc/codes"
@@ -248,4 +249,38 @@ func NewUserSearchResults(hits []map[string]interface{}) []*sharedpb.UserSearchR
 		results = append(results, user)
 	}
 	return results
+}
+
+func (s *AlgoliaStore) ListIndexes(ctx context.Context) *searchpb.ListIndexesResponse {
+	// Get all indices from Algolia
+	indices, err := s.client.ListIndices()
+	if err != nil {
+		log.Printf("Error listing indices: %v", err)
+		return &searchpb.ListIndexesResponse{
+			Indexes: []*searchpb.IndexInfo{},
+		}
+	}
+
+	results := make([]*searchpb.IndexInfo, 0, len(indices.Items))
+
+	for _, indexRes := range indices.Items {
+		// Get the actual index object
+		index := s.GetIndex(indexRes.Name)
+		
+		// Get the number of entries using a search with empty query
+		searchRes, err := index.Search("")
+		if err != nil {
+			log.Printf("Error getting entries count for index %s: %v", indexRes.Name, err)
+			continue
+		}
+
+		results = append(results, &searchpb.IndexInfo{
+			Name:    indexRes.Name,
+			Entries: int64(searchRes.NbHits),
+		})
+	}
+
+	return &searchpb.ListIndexesResponse{
+		Indexes: results,
+	}
 }

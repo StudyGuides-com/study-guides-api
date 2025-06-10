@@ -250,16 +250,68 @@ func (x *ListIndexesRequest) GetQuery() string {
 	return ""
 }
 
+type IndexInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Entries       int64                  `protobuf:"varint,2,opt,name=entries,proto3" json:"entries,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IndexInfo) Reset() {
+	*x = IndexInfo{}
+	mi := &file_v1_search_search_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IndexInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IndexInfo) ProtoMessage() {}
+
+func (x *IndexInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_search_search_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IndexInfo.ProtoReflect.Descriptor instead.
+func (*IndexInfo) Descriptor() ([]byte, []int) {
+	return file_v1_search_search_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *IndexInfo) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *IndexInfo) GetEntries() int64 {
+	if x != nil {
+		return x.Entries
+	}
+	return 0
+}
+
 type ListIndexesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Indexes       []string               `protobuf:"bytes,1,rep,name=indexes,proto3" json:"indexes,omitempty"`
+	Indexes       []*IndexInfo           `protobuf:"bytes,1,rep,name=indexes,proto3" json:"indexes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListIndexesResponse) Reset() {
 	*x = ListIndexesResponse{}
-	mi := &file_v1_search_search_proto_msgTypes[5]
+	mi := &file_v1_search_search_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -271,7 +323,7 @@ func (x *ListIndexesResponse) String() string {
 func (*ListIndexesResponse) ProtoMessage() {}
 
 func (x *ListIndexesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_search_search_proto_msgTypes[5]
+	mi := &file_v1_search_search_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -284,10 +336,10 @@ func (x *ListIndexesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListIndexesResponse.ProtoReflect.Descriptor instead.
 func (*ListIndexesResponse) Descriptor() ([]byte, []int) {
-	return file_v1_search_search_proto_rawDescGZIP(), []int{5}
+	return file_v1_search_search_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *ListIndexesResponse) GetIndexes() []string {
+func (x *ListIndexesResponse) GetIndexes() []*IndexInfo {
 	if x != nil {
 		return x.Indexes
 	}
@@ -309,9 +361,12 @@ const file_v1_search_search_proto_rawDesc = "" +
 	"\x13SearchUsersResponse\x125\n" +
 	"\aresults\x18\x01 \x03(\v2\x1b.shared.v1.UserSearchResultR\aresults\"*\n" +
 	"\x12ListIndexesRequest\x12\x14\n" +
-	"\x05query\x18\x01 \x01(\tR\x05query\"/\n" +
-	"\x13ListIndexesResponse\x12\x18\n" +
-	"\aindexes\x18\x01 \x03(\tR\aindexes2\xf6\x01\n" +
+	"\x05query\x18\x01 \x01(\tR\x05query\"9\n" +
+	"\tIndexInfo\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
+	"\aentries\x18\x02 \x01(\x03R\aentries\"E\n" +
+	"\x13ListIndexesResponse\x12.\n" +
+	"\aindexes\x18\x01 \x03(\v2\x14.search.v1.IndexInfoR\aindexes2\xf6\x01\n" +
 	"\rSearchService\x12I\n" +
 	"\n" +
 	"SearchTags\x12\x1c.search.v1.SearchTagsRequest\x1a\x1d.search.v1.SearchTagsResponse\x12L\n" +
@@ -330,33 +385,35 @@ func file_v1_search_search_proto_rawDescGZIP() []byte {
 	return file_v1_search_search_proto_rawDescData
 }
 
-var file_v1_search_search_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_v1_search_search_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_v1_search_search_proto_goTypes = []any{
 	(*SearchTagsRequest)(nil),       // 0: search.v1.SearchTagsRequest
 	(*SearchTagsResponse)(nil),      // 1: search.v1.SearchTagsResponse
 	(*SearchUsersRequest)(nil),      // 2: search.v1.SearchUsersRequest
 	(*SearchUsersResponse)(nil),     // 3: search.v1.SearchUsersResponse
 	(*ListIndexesRequest)(nil),      // 4: search.v1.ListIndexesRequest
-	(*ListIndexesResponse)(nil),     // 5: search.v1.ListIndexesResponse
-	(shared.ContextType)(0),         // 6: shared.v1.ContextType
-	(*shared.TagSearchResult)(nil),  // 7: shared.v1.TagSearchResult
-	(*shared.UserSearchResult)(nil), // 8: shared.v1.UserSearchResult
+	(*IndexInfo)(nil),               // 5: search.v1.IndexInfo
+	(*ListIndexesResponse)(nil),     // 6: search.v1.ListIndexesResponse
+	(shared.ContextType)(0),         // 7: shared.v1.ContextType
+	(*shared.TagSearchResult)(nil),  // 8: shared.v1.TagSearchResult
+	(*shared.UserSearchResult)(nil), // 9: shared.v1.UserSearchResult
 }
 var file_v1_search_search_proto_depIdxs = []int32{
-	6, // 0: search.v1.SearchTagsRequest.context:type_name -> shared.v1.ContextType
-	7, // 1: search.v1.SearchTagsResponse.results:type_name -> shared.v1.TagSearchResult
-	8, // 2: search.v1.SearchUsersResponse.results:type_name -> shared.v1.UserSearchResult
-	0, // 3: search.v1.SearchService.SearchTags:input_type -> search.v1.SearchTagsRequest
-	2, // 4: search.v1.SearchService.SearchUsers:input_type -> search.v1.SearchUsersRequest
-	4, // 5: search.v1.SearchService.ListIndexes:input_type -> search.v1.ListIndexesRequest
-	1, // 6: search.v1.SearchService.SearchTags:output_type -> search.v1.SearchTagsResponse
-	3, // 7: search.v1.SearchService.SearchUsers:output_type -> search.v1.SearchUsersResponse
-	5, // 8: search.v1.SearchService.ListIndexes:output_type -> search.v1.ListIndexesResponse
-	6, // [6:9] is the sub-list for method output_type
-	3, // [3:6] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	7, // 0: search.v1.SearchTagsRequest.context:type_name -> shared.v1.ContextType
+	8, // 1: search.v1.SearchTagsResponse.results:type_name -> shared.v1.TagSearchResult
+	9, // 2: search.v1.SearchUsersResponse.results:type_name -> shared.v1.UserSearchResult
+	5, // 3: search.v1.ListIndexesResponse.indexes:type_name -> search.v1.IndexInfo
+	0, // 4: search.v1.SearchService.SearchTags:input_type -> search.v1.SearchTagsRequest
+	2, // 5: search.v1.SearchService.SearchUsers:input_type -> search.v1.SearchUsersRequest
+	4, // 6: search.v1.SearchService.ListIndexes:input_type -> search.v1.ListIndexesRequest
+	1, // 7: search.v1.SearchService.SearchTags:output_type -> search.v1.SearchTagsResponse
+	3, // 8: search.v1.SearchService.SearchUsers:output_type -> search.v1.SearchUsersResponse
+	6, // 9: search.v1.SearchService.ListIndexes:output_type -> search.v1.ListIndexesResponse
+	7, // [7:10] is the sub-list for method output_type
+	4, // [4:7] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_v1_search_search_proto_init() }
@@ -370,7 +427,7 @@ func file_v1_search_search_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_search_search_proto_rawDesc), len(file_v1_search_search_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
