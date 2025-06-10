@@ -23,7 +23,7 @@ func NewSearchService(s store.Store) *SearchService {
 }
 
 func (s *SearchService) SearchTags(ctx context.Context, req *searchpb.SearchTagsRequest) (*searchpb.SearchTagsResponse, error) {
-	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string, userRoles *[]string) (interface{}, error) {
+	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, userID *string, userRoles *[]string) (interface{}, error) {
 		log.Printf("Search request from user %s: query=%s", *userID, req.Query)
 
 		opts := &search.SearchOptions{
@@ -49,7 +49,7 @@ func (s *SearchService) SearchTags(ctx context.Context, req *searchpb.SearchTags
 }
 
 func (s *SearchService) SearchUsers(ctx context.Context, req *searchpb.SearchUsersRequest) (*searchpb.SearchUsersResponse, error) {
-	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string, userRoles *[]string) (interface{}, error) {
+	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, userID *string, userRoles *[]string) (interface{}, error) {
 		log.Printf("Search request from user %s: query=%s", *userID, req.Query)
 
 		opts := &search.SearchOptions{

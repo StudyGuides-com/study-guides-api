@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"log"
 
 	healthpb "github.com/studyguides-com/study-guides-api/api/v1/health"
 )
@@ -16,10 +15,7 @@ func NewHealthService() *HealthService {
 }
 
 func (s *HealthService) Check(ctx context.Context, req *healthpb.CheckRequest) (*healthpb.CheckResponse, error) {
-	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string, userRoles *[]string) (interface{}, error) {
-		if userID != nil {
-			log.Printf("Logged in as %s", *userID)
-		}
+	resp, err := PublicBaseHandler(ctx, func(ctx context.Context) (interface{}, error) {
 		return &healthpb.CheckResponse{Status: healthpb.HealthStatus_SERVING}, nil
 	})
 	return resp.(*healthpb.CheckResponse), err
