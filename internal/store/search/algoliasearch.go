@@ -8,14 +8,12 @@ import (
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/opt"
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
-	"github.com/studyguides-com/study-guides-api/internal/types"
 )
 
 // AlgoliaStore represents an Algolia search client
 type AlgoliaStore struct {
 	client *search.Client
 }
-
 
 // NewAlgoliaSearchClient creates a new Algolia search client
 func NewAlgoliaStore(appID, apiKey string) *AlgoliaStore {
@@ -31,45 +29,33 @@ func (c *AlgoliaStore) GetIndex(indexName string) *search.Index {
 	return c.client.InitIndex(indexName)
 }
 
-// SearchTags searches for tags using Algolia without any filters
-func (c *AlgoliaStore) SearchTags(ctx context.Context, query string) ([]*sharedpb.TagSearchResult, error) {
-	return c.searchTags(ctx, "", query)
-}
-
-// SearchTagsForContext searches for tags using Algolia with a context filter
-func (c *AlgoliaStore) SearchTagsForContext(ctx context.Context, contextType types.ContextType, query string) ([]*sharedpb.TagSearchResult, error) {
-	filter := "context:" + string(contextType)
-	return c.searchTags(ctx, filter, query)
-}
-
-// searchTags is the internal implementation for searching tags
-func (c *AlgoliaStore) searchTags(ctx context.Context, filter string, query string) ([]*sharedpb.TagSearchResult, error) {
-	log.Printf("Searching for tags with query: %s, filter: %s", query, filter)
-	index := c.GetIndex("tags")
-
-	var opts []interface{}
-	if filter != "" {
-		opts = []interface{}{
+// buildFilters builds the search filters based on the search options
+func (c *AlgoliaStore) buildFilters(opts *SearchOptions) []interface{} {
+	var searchOpts []interface{}
+	if opts.ContextType != "" {
+		filter := "context:" + string(opts.ContextType)
+		searchOpts = []interface{}{
 			opt.Filters(filter),
 		}
 	}
+	return searchOpts
+}
+
+// SearchTags searches for tags using Algolia
+func (c *AlgoliaStore) SearchTags(ctx context.Context, query string, opts *SearchOptions) ([]*sharedpb.TagSearchResult, error) {
+	log.Printf("Searching for tags with query: %s, context: %v, userID: %v", query, opts.ContextType, opts.UserID)
+	index := c.GetIndex("tags")
+
+	searchOpts := c.buildFilters(opts)
 
 	// Perform the search
-	res, err := index.Search(query, opts...)
+	res, err := index.Search(query, searchOpts...)
 	if err != nil {
 		log.Printf("Error searching for tags: %v", err)
 		return nil, err
 	}
 
-	// Convert Algolia results to TagSearchResult
-	results := make([]*sharedpb.TagSearchResult, 0, len(res.Hits))
-	log.Printf("Found %d tags", len(res.Hits))
-	for _, hit := range res.Hits {
-		tag := NewTagSearchResult(hit)
-		results = append(results, tag)
-	}
-
-	return results, nil
+	return NewTagSearchResults(res.Hits), nil
 }
 
 // NewTagSearchResult creates a TagSearchResult from a hit
@@ -111,6 +97,17 @@ func NewTagSearchResult(hit map[string]interface{}) *sharedpb.TagSearchResult {
 		MissingContentDescriptors: missingContentDescriptors,
 		ObjectId:                objectID,
 	}
+}
+
+// NewTagSearchResults converts Algolia search results to TagSearchResults
+func NewTagSearchResults(hits []map[string]interface{}) []*sharedpb.TagSearchResult {
+	results := make([]*sharedpb.TagSearchResult, 0, len(hits))
+	log.Printf("Found %d tags", len(hits))
+	for _, hit := range hits {
+		tag := NewTagSearchResult(hit)
+		results = append(results, tag)
+	}
+	return results
 }
 
 // NewTagSearchPath creates a TagSearchPath from a map of tag data
@@ -161,23 +158,4 @@ func NewTagSearchPaths(hit map[string]interface{}) []*sharedpb.TagSearchPath {
 	return tagHierarchy
 }
 
-// convertToStringSlice converts an interface{} to []string
-func convertToStringSlice(v interface{}) []string {
-	if v == nil {
-		return nil
-	}
-	
-	slice, ok := v.([]interface{})
-	if !ok {
-		return nil
-	}
-
-	result := make([]string, 0, len(slice))
-	for _, item := range slice {
-		if str, ok := item.(string); ok {
-			result = append(result, str)
-		}
-	}
-	return result
-}
 
