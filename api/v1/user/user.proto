@@ -13,8 +13,22 @@ message ProfileResponse {
   shared.v1.User user = 1;
 }
 
+message UserByIDRequest {
+  string user_id = 1;
+}
+
+message UserByEmailRequest {
+  string email = 1;
+}
+
+message UserResponse {
+  shared.v1.User user = 1;
+}
 
 service UserService {
   rpc Profile(ProfileRequest) returns (ProfileResponse);
+  rpc UserByID(UserByIDRequest) returns (UserResponse);
+  rpc UserByEmail(UserByEmailRequest) returns (UserResponse);
+
 }
 

@@ -6,14 +6,18 @@ import (
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 	tagpb "github.com/studyguides-com/study-guides-api/api/v1/tag"
 	"github.com/studyguides-com/study-guides-api/internal/middleware"
+	"github.com/studyguides-com/study-guides-api/internal/store"
 )
 
 type TagService struct {
 	tagpb.UnimplementedTagServiceServer
+	store store.Store
 }
 
-func NewTagService() *TagService {
-	return &TagService{}
+func NewTagService(store store.Store) *TagService {
+	return &TagService{
+		store: store,
+	}
 }
 
 func (s *TagService) GetTag(ctx context.Context, req *tagpb.GetTagRequest) (*sharedpb.Tag, error) {

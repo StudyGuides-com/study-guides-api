@@ -69,10 +69,15 @@ func main() {
 		),
 	)
 
+	appStore, err := store.NewStore()
+	if err != nil {
+		log.Fatalf("failed to initialize store: %v", err)
+	}
+
 	healthpb.RegisterHealthServiceServer(grpcServer, services.NewHealthService())
-	searchpb.RegisterSearchServiceServer(grpcServer, services.NewSearchService(store.NewStore()))
+	searchpb.RegisterSearchServiceServer(grpcServer, services.NewSearchService(appStore))
 	userpb.RegisterUserServiceServer(grpcServer, services.NewUserService())
-	tagpb.RegisterTagServiceServer(grpcServer, services.NewTagService())
+	tagpb.RegisterTagServiceServer(grpcServer, services.NewTagService(appStore))
 
 	// Enable gRPC reflection
 	reflection.Register(grpcServer)
