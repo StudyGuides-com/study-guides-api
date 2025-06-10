@@ -57,17 +57,29 @@ lint:
 	golangci-lint run --timeout=2m --skip-dirs-use-default --skip-files='.*\.pb\.go'
 
 
-evans-dev:
+auth-evans-dev:
 	cp .env.dev .env
 	evans --host localhost --port 1973 --header "Authorization=Bearer $$(cat .jwt.dev)" -r
 
-evans-test:
+auth-evans-test:
 	cp .env.test .env
 	evans --host localhost --port 1973 --header "Authorization=Bearer $$(cat .jwt.test)" -r
 
-evans-prod:
+auth-evans-prod:
 	cp .env.prod .env
 	evans --host localhost --port 1973 --header "Authorization=Bearer $$(cat .jwt.prod)" -r
+
+evans-dev:
+	cp .env.dev .env
+	evans --host localhost --port 1973 -r
+
+evans-test:
+	cp .env.test .env
+	evans --host localhost --port 1973 -r
+
+evans-prod:
+	cp .env.prod .env
+	evans --host localhost --port 1973 -r
 
 generate-tokens:
 	node scripts/generate_jwt.js > .jwt.dev

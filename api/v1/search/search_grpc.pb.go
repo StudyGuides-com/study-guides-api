@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	SearchService_SearchTags_FullMethodName  = "/search.v1.SearchService/SearchTags"
 	SearchService_SearchUsers_FullMethodName = "/search.v1.SearchService/SearchUsers"
+	SearchService_ListIndexes_FullMethodName = "/search.v1.SearchService/ListIndexes"
 )
 
 // SearchServiceClient is the client API for SearchService service.
@@ -29,6 +30,7 @@ const (
 type SearchServiceClient interface {
 	SearchTags(ctx context.Context, in *SearchTagsRequest, opts ...grpc.CallOption) (*SearchTagsResponse, error)
 	SearchUsers(ctx context.Context, in *SearchUsersRequest, opts ...grpc.CallOption) (*SearchUsersResponse, error)
+	ListIndexes(ctx context.Context, in *ListIndexesRequest, opts ...grpc.CallOption) (*ListIndexesResponse, error)
 }
 
 type searchServiceClient struct {
@@ -59,12 +61,23 @@ func (c *searchServiceClient) SearchUsers(ctx context.Context, in *SearchUsersRe
 	return out, nil
 }
 
+func (c *searchServiceClient) ListIndexes(ctx context.Context, in *ListIndexesRequest, opts ...grpc.CallOption) (*ListIndexesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListIndexesResponse)
+	err := c.cc.Invoke(ctx, SearchService_ListIndexes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SearchServiceServer is the server API for SearchService service.
 // All implementations must embed UnimplementedSearchServiceServer
 // for forward compatibility.
 type SearchServiceServer interface {
 	SearchTags(context.Context, *SearchTagsRequest) (*SearchTagsResponse, error)
 	SearchUsers(context.Context, *SearchUsersRequest) (*SearchUsersResponse, error)
+	ListIndexes(context.Context, *ListIndexesRequest) (*ListIndexesResponse, error)
 	mustEmbedUnimplementedSearchServiceServer()
 }
 
@@ -80,6 +93,9 @@ func (UnimplementedSearchServiceServer) SearchTags(context.Context, *SearchTagsR
 }
 func (UnimplementedSearchServiceServer) SearchUsers(context.Context, *SearchUsersRequest) (*SearchUsersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchUsers not implemented")
+}
+func (UnimplementedSearchServiceServer) ListIndexes(context.Context, *ListIndexesRequest) (*ListIndexesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListIndexes not implemented")
 }
 func (UnimplementedSearchServiceServer) mustEmbedUnimplementedSearchServiceServer() {}
 func (UnimplementedSearchServiceServer) testEmbeddedByValue()                       {}
@@ -138,6 +154,24 @@ func _SearchService_SearchUsers_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SearchService_ListIndexes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListIndexesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SearchServiceServer).ListIndexes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SearchService_ListIndexes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SearchServiceServer).ListIndexes(ctx, req.(*ListIndexesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SearchService_ServiceDesc is the grpc.ServiceDesc for SearchService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +186,10 @@ var SearchService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SearchUsers",
 			Handler:    _SearchService_SearchUsers_Handler,
+		},
+		{
+			MethodName: "ListIndexes",
+			Handler:    _SearchService_ListIndexes_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

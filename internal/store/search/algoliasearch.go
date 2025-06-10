@@ -8,6 +8,8 @@ import (
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/opt"
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // AlgoliaStore represents an Algolia search client
@@ -42,6 +44,10 @@ func (c *AlgoliaStore) buildFilters(opts *SearchOptions) []interface{} {
 }
 
 func (c *AlgoliaStore) SearchUsers(ctx context.Context, query string, opts *SearchOptions) ([]*sharedpb.UserSearchResult, error) {
+	if !opts.HasRole(sharedpb.UserRole_USER_ROLE_ADMIN) {
+		return nil, status.Error(codes.PermissionDenied, "you must be an administrator to search users")
+	}
+	
 	log.Printf("Searching for users with query: %s, context: %v, userID: %v", query, opts.ContextType, opts.UserID)
 	index := c.GetIndex("users")
 
