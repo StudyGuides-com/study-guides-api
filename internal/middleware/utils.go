@@ -10,6 +10,7 @@ import (
 type SessionDetails struct {
 	UserID    *string
 	UserRoles *[]sharedpb.UserRole
+	IsAuth    bool
 }
 
 func UserIDFromContext(ctx context.Context) (string, bool) {
@@ -25,18 +26,13 @@ func UserRolesFromContext(ctx context.Context) ([]sharedpb.UserRole, bool) {
 // GetSessionDetails extracts session information from the context
 func GetSessionDetails(ctx context.Context) *SessionDetails {
 	userID, ok := UserIDFromContext(ctx)
-	userRoles, rolesOk := UserRolesFromContext(ctx)
+	userRoles, _ := UserRolesFromContext(ctx)
 	
-	if !ok || !rolesOk {
-		return &SessionDetails{
-			UserID:    nil,
-			UserRoles: nil,
-		}
-	}
-	
+	// Always return a valid SessionDetails, even if no JWT
 	return &SessionDetails{
-		UserID:    &userID,
-		UserRoles: &userRoles,
+		UserID:    &userID,  // Will be empty string if not found
+		UserRoles: &userRoles,  // Will be empty slice if not found
+		IsAuth:    ok,  // true if we got a valid userID from context
 	}
 }
 

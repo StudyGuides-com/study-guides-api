@@ -24,12 +24,13 @@ const (
 type ContextType int32
 
 const (
-	ContextType_CONTEXT_TYPE_COLLEGES       ContextType = 0
-	ContextType_CONTEXT_TYPE_CERTIFICATIONS ContextType = 1
-	ContextType_CONTEXT_TYPE_ENTRANCE_EXAMS ContextType = 2
-	ContextType_CONTEXT_TYPE_AP_EXAMS       ContextType = 3
-	ContextType_CONTEXT_TYPE_DOD            ContextType = 4
-	ContextType_CONTEXT_TYPE_ALL            ContextType = 5
+	ContextType_CONTEXT_TYPE_COLLEGES               ContextType = 0
+	ContextType_CONTEXT_TYPE_CERTIFICATIONS         ContextType = 1
+	ContextType_CONTEXT_TYPE_ENTRANCE_EXAMS         ContextType = 2
+	ContextType_CONTEXT_TYPE_AP_EXAMS               ContextType = 3
+	ContextType_CONTEXT_TYPE_DOD                    ContextType = 4
+	ContextType_CONTEXT_TYPE_USER_GENERATED_CONTENT ContextType = 5
+	ContextType_CONTEXT_TYPE_ALL                    ContextType = 6
 )
 
 // Enum value maps for ContextType.
@@ -40,15 +41,17 @@ var (
 		2: "CONTEXT_TYPE_ENTRANCE_EXAMS",
 		3: "CONTEXT_TYPE_AP_EXAMS",
 		4: "CONTEXT_TYPE_DOD",
-		5: "CONTEXT_TYPE_ALL",
+		5: "CONTEXT_TYPE_USER_GENERATED_CONTENT",
+		6: "CONTEXT_TYPE_ALL",
 	}
 	ContextType_value = map[string]int32{
-		"CONTEXT_TYPE_COLLEGES":       0,
-		"CONTEXT_TYPE_CERTIFICATIONS": 1,
-		"CONTEXT_TYPE_ENTRANCE_EXAMS": 2,
-		"CONTEXT_TYPE_AP_EXAMS":       3,
-		"CONTEXT_TYPE_DOD":            4,
-		"CONTEXT_TYPE_ALL":            5,
+		"CONTEXT_TYPE_COLLEGES":               0,
+		"CONTEXT_TYPE_CERTIFICATIONS":         1,
+		"CONTEXT_TYPE_ENTRANCE_EXAMS":         2,
+		"CONTEXT_TYPE_AP_EXAMS":               3,
+		"CONTEXT_TYPE_DOD":                    4,
+		"CONTEXT_TYPE_USER_GENERATED_CONTENT": 5,
+		"CONTEXT_TYPE_ALL":                    6,
 	}
 )
 
@@ -83,14 +86,15 @@ var File_v1_shared_contexttype_proto protoreflect.FileDescriptor
 
 const file_v1_shared_contexttype_proto_rawDesc = "" +
 	"\n" +
-	"\x1bv1/shared/contexttype.proto\x12\tshared.v1*\xb1\x01\n" +
+	"\x1bv1/shared/contexttype.proto\x12\tshared.v1*\xda\x01\n" +
 	"\vContextType\x12\x19\n" +
 	"\x15CONTEXT_TYPE_COLLEGES\x10\x00\x12\x1f\n" +
 	"\x1bCONTEXT_TYPE_CERTIFICATIONS\x10\x01\x12\x1f\n" +
 	"\x1bCONTEXT_TYPE_ENTRANCE_EXAMS\x10\x02\x12\x19\n" +
 	"\x15CONTEXT_TYPE_AP_EXAMS\x10\x03\x12\x14\n" +
-	"\x10CONTEXT_TYPE_DOD\x10\x04\x12\x14\n" +
-	"\x10CONTEXT_TYPE_ALL\x10\x05BDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
+	"\x10CONTEXT_TYPE_DOD\x10\x04\x12'\n" +
+	"#CONTEXT_TYPE_USER_GENERATED_CONTENT\x10\x05\x12\x14\n" +
+	"\x10CONTEXT_TYPE_ALL\x10\x06BDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
 
 var (
 	file_v1_shared_contexttype_proto_rawDescOnce sync.Once

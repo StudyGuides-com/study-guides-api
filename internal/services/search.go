@@ -47,6 +47,9 @@ func (s *SearchService) SearchTags(ctx context.Context, req *searchpb.SearchTags
 
 func (s *SearchService) SearchUsers(ctx context.Context, req *searchpb.SearchUsersRequest) (*searchpb.SearchUsersResponse, error) {
 	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, session *middleware.SessionDetails) (interface{}, error) {
+		if !session.IsAuth {
+			return nil, status.Error(codes.PermissionDenied, "you must logged in to search users")
+		}
 		log.Printf("Search request from user %s: query=%s", *session.UserID, req.Query)
 
 		opts := search.NewSearchOptionsFrom(ctx)

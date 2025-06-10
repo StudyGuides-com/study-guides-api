@@ -18,6 +18,8 @@ func ToProtoContextType(internal types.ContextType) sharedv1.ContextType	 {
 		return sharedv1.ContextType_CONTEXT_TYPE_AP_EXAMS
 	case types.ContextTypeDoD:
 		return sharedv1.ContextType_CONTEXT_TYPE_DOD
+	case types.ContextTypeUserGeneratedContent:
+		return sharedv1.ContextType_CONTEXT_TYPE_USER_GENERATED_CONTENT
 	case types.ContextTypeAll:
 		return sharedv1.ContextType_CONTEXT_TYPE_ALL
 	default:
@@ -37,6 +39,8 @@ func FromProtoContextType(proto sharedv1.ContextType) types.ContextType {
 		return types.ContextTypeAPExams
 	case sharedv1.ContextType_CONTEXT_TYPE_DOD:
 		return types.ContextTypeDoD
+	case sharedv1.ContextType_CONTEXT_TYPE_USER_GENERATED_CONTENT:
+		return types.ContextTypeUserGeneratedContent
 	case sharedv1.ContextType_CONTEXT_TYPE_ALL:
 		return types.ContextTypeAll
 	default:

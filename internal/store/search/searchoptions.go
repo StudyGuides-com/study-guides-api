@@ -17,6 +17,8 @@ type SearchOptions struct {
 	ContextType types.ContextType
 	// UserRoles is the roles of the user performing the search, can be nil for anonymous users
 	UserRoles *[]sharedpb.UserRole
+	// Type is the type of tag to filter by
+	Type sharedpb.TagType
 }
 
 // NewSearchOptions creates a new SearchOptions with optional fields
@@ -46,6 +48,13 @@ func WithContextType(contextType types.ContextType) func(*SearchOptions) {
 func WithUserRoles(userRoles *[]sharedpb.UserRole) func(*SearchOptions) {
 	return func(o *SearchOptions) {
 		o.UserRoles = userRoles
+	}
+}
+
+// WithType sets the Type field
+func WithType(tagType sharedpb.TagType) func(*SearchOptions) {
+	return func(o *SearchOptions) {
+		o.Type = tagType
 	}
 }
 
