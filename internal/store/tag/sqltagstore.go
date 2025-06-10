@@ -18,25 +18,25 @@ type SqlTagStore struct {
 }
 
 type tagRow struct {
-	ID                string            `db:"id"`
-	BatchID           *string           `db:"batchId"`
-	Hash              string            `db:"hash"`
-	Name              string            `db:"name"`
-	Description       *string           `db:"description"`
-	Type              string            `db:"type"`
-	Context           string            `db:"context"`
-	ParentTagID       *string           `db:"parentTagId"`
-	ContentRating     string            `db:"contentRating"`
-	ContentDescriptors []string         `db:"contentDescriptors"`
-	MetaTags          []string          `db:"metaTags"`
-	Public            bool              `db:"public"`
-	AccessCount       int64             `db:"accessCount"`
-	Metadata          map[string]string `db:"metadata"`
-	CreatedAt         time.Time         `db:"createdAt"`
-	UpdatedAt         time.Time         `db:"updatedAt"`
-	OwnerID           *string           `db:"ownerId"`
-	HasQuestions      bool              `db:"hasQuestions"`
-	HasChildren       bool              `db:"hasChildren"`
+	ID                 string            `db:"id"`
+	BatchID            *string           `db:"batchId"`
+	Hash               string            `db:"hash"`
+	Name               string            `db:"name"`
+	Description        *string           `db:"description"`
+	Type               string            `db:"type"`
+	Context            string            `db:"context"`
+	ParentTagID        *string           `db:"parentTagId"`
+	ContentRating      string            `db:"contentRating"`
+	ContentDescriptors []string          `db:"contentDescriptors"`
+	MetaTags           []string          `db:"metaTags"`
+	Public             bool              `db:"public"`
+	AccessCount        int64             `db:"accessCount"`
+	Metadata           map[string]string `db:"metadata"`
+	CreatedAt          time.Time         `db:"createdAt"`
+	UpdatedAt          time.Time         `db:"updatedAt"`
+	OwnerID            *string           `db:"ownerId"`
+	HasQuestions       bool              `db:"hasQuestions"`
+	HasChildren        bool              `db:"hasChildren"`
 }
 
 func (s *SqlTagStore) GetTagByID(ctx context.Context, id string) (*sharedpb.Tag, error) {
@@ -54,25 +54,25 @@ func (s *SqlTagStore) GetTagByID(ctx context.Context, id string) (*sharedpb.Tag,
 	}
 
 	return &sharedpb.Tag{
-		Id:                row.ID,
-		BatchId:           row.BatchID,
-		Hash:              row.Hash,
-		Name:              row.Name,
-		Description:       row.Description,
-		Type:              sharedpb.TagType(sharedpb.TagType_value[row.Type]),
-		Context:           row.Context,
-		ParentTagId:       row.ParentTagID,
-		ContentRating:     sharedpb.ContentRating(sharedpb.ContentRating_value[row.ContentRating]),
+		Id:                 row.ID,
+		BatchId:            row.BatchID,
+		Hash:               row.Hash,
+		Name:               row.Name,
+		Description:        row.Description,
+		Type:               sharedpb.TagType(sharedpb.TagType_value[row.Type]),
+		Context:            row.Context,
+		ParentTagId:        row.ParentTagID,
+		ContentRating:      sharedpb.ContentRating(sharedpb.ContentRating_value[row.ContentRating]),
 		ContentDescriptors: row.ContentDescriptors,
-		MetaTags:          row.MetaTags,
-		Public:            row.Public,
-		AccessCount:       int32(row.AccessCount),
-		Metadata:          row.Metadata,
-		CreatedAt:         timestamppb.New(row.CreatedAt),
-		UpdatedAt:         timestamppb.New(row.UpdatedAt),
-		OwnerId:           row.OwnerID,
-		HasQuestions:      row.HasQuestions,
-		HasChildren:       row.HasChildren,
+		MetaTags:           row.MetaTags,
+		Public:             row.Public,
+		AccessCount:        int32(row.AccessCount),
+		Metadata:           row.Metadata,
+		CreatedAt:          timestamppb.New(row.CreatedAt),
+		UpdatedAt:          timestamppb.New(row.UpdatedAt),
+		OwnerId:            row.OwnerID,
+		HasQuestions:       row.HasQuestions,
+		HasChildren:        row.HasChildren,
 	}, nil
 }
 
@@ -131,25 +131,25 @@ func mapRowsToTags(rows []tagRow) []*sharedpb.Tag {
 	var tags []*sharedpb.Tag
 	for _, row := range rows {
 		tags = append(tags, &sharedpb.Tag{
-			Id:                row.ID,
-			BatchId:           row.BatchID,
-			Hash:              row.Hash,
-			Name:              row.Name,
-			Description:       row.Description,
-			Type:              sharedpb.TagType(sharedpb.TagType_value[row.Type]),
-			Context:           row.Context,
-			ParentTagId:       row.ParentTagID,
-			ContentRating:     sharedpb.ContentRating(sharedpb.ContentRating_value[row.ContentRating]),
+			Id:                 row.ID,
+			BatchId:            row.BatchID,
+			Hash:               row.Hash,
+			Name:               row.Name,
+			Description:        row.Description,
+			Type:               sharedpb.TagType(sharedpb.TagType_value[row.Type]),
+			Context:            row.Context,
+			ParentTagId:        row.ParentTagID,
+			ContentRating:      sharedpb.ContentRating(sharedpb.ContentRating_value[row.ContentRating]),
 			ContentDescriptors: row.ContentDescriptors,
-			MetaTags:          row.MetaTags,
-			Public:            row.Public,
-			AccessCount:       int32(row.AccessCount),
-			Metadata:          row.Metadata,
-			CreatedAt:         timestamppb.New(row.CreatedAt),
-			UpdatedAt:         timestamppb.New(row.UpdatedAt),
-			OwnerId:           row.OwnerID,
-			HasQuestions:      row.HasQuestions,
-			HasChildren:       row.HasChildren,
+			MetaTags:           row.MetaTags,
+			Public:             row.Public,
+			AccessCount:        int32(row.AccessCount),
+			Metadata:           row.Metadata,
+			CreatedAt:          timestamppb.New(row.CreatedAt),
+			UpdatedAt:          timestamppb.New(row.UpdatedAt),
+			OwnerId:            row.OwnerID,
+			HasQuestions:       row.HasQuestions,
+			HasChildren:        row.HasChildren,
 		})
 	}
 	return tags

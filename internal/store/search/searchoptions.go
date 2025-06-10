@@ -100,11 +100,11 @@ func (s *SearchOptions) HasRole(role sharedpb.UserRole) bool {
 	if s.UserRoles == nil {
 		return false
 	}
-	
+
 	for _, userRole := range *s.UserRoles {
 		if userRole == role {
 			return true
 		}
 	}
 	return false
-} 
+}

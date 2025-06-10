@@ -27,12 +27,12 @@ func UserRolesFromContext(ctx context.Context) ([]sharedpb.UserRole, bool) {
 func GetSessionDetails(ctx context.Context) *SessionDetails {
 	userID, ok := UserIDFromContext(ctx)
 	userRoles, _ := UserRolesFromContext(ctx)
-	
+
 	// Always return a valid SessionDetails, even if no JWT
 	return &SessionDetails{
-		UserID:    &userID,  // Will be empty string if not found
-		UserRoles: &userRoles,  // Will be empty slice if not found
-		IsAuth:    ok,  // true if we got a valid userID from context
+		UserID:    &userID,    // Will be empty string if not found
+		UserRoles: &userRoles, // Will be empty slice if not found
+		IsAuth:    ok,         // true if we got a valid userID from context
 	}
 }
 
@@ -41,7 +41,7 @@ func (s *SessionDetails) HasRole(role sharedpb.UserRole) bool {
 	if s.UserRoles == nil {
 		return false
 	}
-	
+
 	for _, userRole := range *s.UserRoles {
 		if userRole == role {
 			return true

@@ -5,7 +5,7 @@ func convertToStringSlice(v interface{}) []string {
 	if v == nil {
 		return nil
 	}
-	
+
 	slice, ok := v.([]interface{})
 	if !ok {
 		return nil

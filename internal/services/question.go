@@ -33,4 +33,4 @@ func (s *QuestionService) ForTag(ctx context.Context, req *questionpb.ForTagRequ
 		return nil, err
 	}
 	return resp.(*questionpb.QuestionsResponse), nil
-} 
+}

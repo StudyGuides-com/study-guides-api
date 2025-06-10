@@ -76,7 +76,7 @@ func (s *SqlInteractionStore) AnswerCorrectly(ctx context.Context, req *interact
 	// Create interaction record
 	interactionId := cuid.New()
 	metadata := map[string]interface{}{
-		"studyMethod": req.StudyMethod,
+		"studyMethod":   req.StudyMethod,
 		"strengthScore": 0.0,
 	}
 	metadataBytes, err := json.Marshal(metadata)
@@ -158,7 +158,7 @@ func (s *SqlInteractionStore) AnswerIncorrectly(ctx context.Context, req *intera
 	// Create interaction record
 	interactionId := cuid.New()
 	metadata := map[string]interface{}{
-		"studyMethod": req.StudyMethod,
+		"studyMethod":   req.StudyMethod,
 		"strengthScore": 0.0,
 	}
 	metadataBytes, err := json.Marshal(metadata)
@@ -213,7 +213,7 @@ func (s *SqlInteractionStore) AnswerEasy(ctx context.Context, req *interactionpb
 	// Create interaction record
 	interactionId := cuid.New()
 	metadata := map[string]interface{}{
-		"studyMethod": req.StudyMethod,
+		"studyMethod":   req.StudyMethod,
 		"strengthScore": 0.0,
 	}
 	metadataBytes, err := json.Marshal(metadata)
@@ -268,7 +268,7 @@ func (s *SqlInteractionStore) AnswerHard(ctx context.Context, req *interactionpb
 	// Create interaction record
 	interactionId := cuid.New()
 	metadata := map[string]interface{}{
-		"studyMethod": req.StudyMethod,
+		"studyMethod":   req.StudyMethod,
 		"strengthScore": 0.0,
 	}
 	metadataBytes, err := json.Marshal(metadata)
@@ -323,7 +323,7 @@ func (s *SqlInteractionStore) Reveal(ctx context.Context, req *interactionpb.Int
 	// Create interaction record
 	interactionId := cuid.New()
 	metadata := map[string]interface{}{
-		"studyMethod": req.StudyMethod,
+		"studyMethod":   req.StudyMethod,
 		"strengthScore": 0.0,
 	}
 	metadataBytes, err := json.Marshal(metadata)
@@ -361,7 +361,7 @@ func (s *SqlInteractionStore) ViewLearnMore(ctx context.Context, req *interactio
 	// Create interaction record
 	interactionId := cuid.New()
 	metadata := map[string]interface{}{
-		"studyMethod": req.StudyMethod,
+		"studyMethod":   req.StudyMethod,
 		"strengthScore": 0.0,
 	}
 	metadataBytes, err := json.Marshal(metadata)
@@ -399,7 +399,7 @@ func (s *SqlInteractionStore) ViewPassage(ctx context.Context, req *interactionp
 	// Create interaction record
 	interactionId := cuid.New()
 	metadata := map[string]interface{}{
-		"studyMethod": req.StudyMethod,
+		"studyMethod":   req.StudyMethod,
 		"strengthScore": 0.0,
 	}
 	metadataBytes, err := json.Marshal(metadata)
@@ -426,10 +426,6 @@ func (s *SqlInteractionStore) ViewPassage(ctx context.Context, req *interactionp
 	return nil
 }
 
-
-
-
-
 /*
 const result = await prisma.userQuestionInteraction.create({
       data: {
@@ -442,7 +438,6 @@ const result = await prisma.userQuestionInteraction.create({
       },
     });
 */
-
 
 /*
 import { prisma } from "@/lib/database";
@@ -493,7 +488,6 @@ export const updateQuestionDifficulty = async (
   }
 };
 */
-
 
 /*
 -- public."UserQuestionInteraction" definition

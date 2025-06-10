@@ -5,8 +5,7 @@ import (
 	"github.com/studyguides-com/study-guides-api/internal/types"
 )
 
-
-func ToProtoContextType(internal types.ContextType) sharedv1.ContextType	 {
+func ToProtoContextType(internal types.ContextType) sharedv1.ContextType {
 	switch internal {
 	case types.ContextTypeColleges:
 		return sharedv1.ContextType_CONTEXT_TYPE_COLLEGES
@@ -47,4 +46,3 @@ func FromProtoContextType(proto sharedv1.ContextType) types.ContextType {
 		return types.ContextTypeAll
 	}
 }
-

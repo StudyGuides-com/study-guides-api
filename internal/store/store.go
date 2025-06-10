@@ -22,10 +22,10 @@ type Store interface {
 }
 
 type store struct {
-	searchStore  search.SearchStore
-	tagStore     tag.TagStore
-	userStore    user.UserStore
-	questionStore question.QuestionStore
+	searchStore      search.SearchStore
+	tagStore         tag.TagStore
+	userStore        user.UserStore
+	questionStore    question.QuestionStore
 	interactionStore interaction.InteractionStore
 }
 
@@ -63,7 +63,7 @@ func NewStore() (Store, error) {
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	
+
 	userStore, err := user.NewSqlUserStore(ctx, dbURL)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -85,10 +85,10 @@ func NewStore() (Store, error) {
 	}
 
 	return &store{
-		searchStore:  searchStore,
-		tagStore:     tagStore,
-		userStore:    userStore,
-		questionStore: questionStore,
+		searchStore:      searchStore,
+		tagStore:         tagStore,
+		userStore:        userStore,
+		questionStore:    questionStore,
 		interactionStore: interactionStore,
 	}, nil
 }

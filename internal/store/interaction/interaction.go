@@ -17,7 +17,7 @@ type InteractionStore interface {
 	AnswerIncorrectly(ctx context.Context, req *interactionpb.InteractRequest) (*sharedpb.Question, error)
 	AnswerEasy(ctx context.Context, req *interactionpb.InteractRequest) (*sharedpb.Question, error)
 	AnswerHard(ctx context.Context, req *interactionpb.InteractRequest) (*sharedpb.Question, error)
-	
+
 	// View-only methods don't return a question
 	Reveal(ctx context.Context, req *interactionpb.InteractRequest) error
 	ViewLearnMore(ctx context.Context, req *interactionpb.InteractRequest) error
@@ -31,4 +31,3 @@ func NewSqlInteractionStore(ctx context.Context, dbURL string) (*SqlInteractionS
 	}
 	return &SqlInteractionStore{db: db}, nil
 }
-

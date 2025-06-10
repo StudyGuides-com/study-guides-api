@@ -14,8 +14,6 @@ type QuestionStore interface {
 	GetQuestionsByTagID(ctx context.Context, tagID string) ([]*sharedpb.Question, error)
 }
 
-
-
 func NewSqlQuestionStore(ctx context.Context, dbURL string) (*SqlQuestionStore, error) {
 	db, err := pgxpool.New(ctx, dbURL)
 	if err != nil {
@@ -23,4 +21,3 @@ func NewSqlQuestionStore(ctx context.Context, dbURL string) (*SqlQuestionStore, 
 	}
 	return &SqlQuestionStore{db: db}, nil
 }
-

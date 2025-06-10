@@ -29,7 +29,7 @@ func NewAlgoliaStore(appID, apiKey string) (*AlgoliaStore, error) {
 	if client == nil {
 		return nil, status.Error(codes.Internal, "failed to create Algolia client")
 	}
-	
+
 	return &AlgoliaStore{
 		client: client,
 	}, nil
@@ -142,22 +142,22 @@ func NewTagSearchResult(hit map[string]interface{}) *sharedpb.TagSearchResult {
 
 	// Create the tag search result
 	return &sharedpb.TagSearchResult{
-		Id:                      id,
-		Name:                    name,
-		Type:                    sharedpb.TagType(sharedpb.TagType_value[tagType]),
-		ContentRating:           sharedpb.ContentRating(sharedpb.ContentRating_value[contentRating]),
-		MetaTags:                convertToStringSlice(metaTags),
-		ContentDescriptors:      convertToStringSlice(contentDescriptors),
-		Tags:                    tags,
-		Context:                 context,
-		Public:                  public,
-		HasQuestions:            hasQuestions,
-		HasChildren:             hasChildren,
-		BatchId:                 batchId,
-		MissingMetaTags:         missingMetaTags,
-		MissingContentRating:    missingContentRating,
+		Id:                        id,
+		Name:                      name,
+		Type:                      sharedpb.TagType(sharedpb.TagType_value[tagType]),
+		ContentRating:             sharedpb.ContentRating(sharedpb.ContentRating_value[contentRating]),
+		MetaTags:                  convertToStringSlice(metaTags),
+		ContentDescriptors:        convertToStringSlice(contentDescriptors),
+		Tags:                      tags,
+		Context:                   context,
+		Public:                    public,
+		HasQuestions:              hasQuestions,
+		HasChildren:               hasChildren,
+		BatchId:                   batchId,
+		MissingMetaTags:           missingMetaTags,
+		MissingContentRating:      missingContentRating,
 		MissingContentDescriptors: missingContentDescriptors,
-		ObjectId:                objectID,
+		ObjectId:                  objectID,
 	}
 }
 
@@ -181,11 +181,11 @@ func NewTagSearchPath(tagMap map[string]interface{}, index int) (*sharedpb.TagSe
 
 	// Log if any required fields are missing
 	if !idOk || !nameOk || !typeOk {
-		log.Printf("Warning: Missing required fields in tag object at index %d. ID: %v, Name: %v, Type: %v", 
+		log.Printf("Warning: Missing required fields in tag object at index %d. ID: %v, Name: %v, Type: %v",
 			index, idOk, nameOk, typeOk)
 		return nil, fmt.Errorf("missing required fields in tag object")
 	}
-	
+
 	return &sharedpb.TagSearchPath{
 		Id:   id,
 		Name: name,
@@ -230,13 +230,13 @@ func NewUserSearchResult(hit map[string]interface{}) *sharedpb.UserSearchResult 
 	objectID, _ := hit["objectID"].(string)
 
 	return &sharedpb.UserSearchResult{
-		Id: id,
-		Name: name,
-		Email: email,
-		GamerTag: gamerTag,
-		CreatedAt: createdAt,
+		Id:               id,
+		Name:             name,
+		Email:            email,
+		GamerTag:         gamerTag,
+		CreatedAt:        createdAt,
 		StripeCustomerId: stripeCustomerId,
-		ObjectId: objectID,
+		ObjectId:         objectID,
 	}
 }
 
@@ -249,7 +249,3 @@ func NewUserSearchResults(hits []map[string]interface{}) []*sharedpb.UserSearchR
 	}
 	return results
 }
-
-
-
-
