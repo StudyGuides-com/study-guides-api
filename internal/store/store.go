@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/studyguides-com/study-guides-api/internal/store/question"
 	"github.com/studyguides-com/study-guides-api/internal/store/search"
 	"github.com/studyguides-com/study-guides-api/internal/store/tag"
 	"github.com/studyguides-com/study-guides-api/internal/store/user"
@@ -11,17 +12,18 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-
 type Store interface {
 	SearchStore() search.SearchStore
 	TagStore() tag.TagStore
 	UserStore() user.UserStore
+	QuestionStore() question.QuestionStore
 }
 
 type store struct {
-	searchStore search.SearchStore
-	tagStore    tag.TagStore
-	userStore   user.UserStore
+	searchStore  search.SearchStore
+	tagStore     tag.TagStore
+	userStore    user.UserStore
+	questionStore question.QuestionStore
 }
 
 func (s *store) SearchStore() search.SearchStore {
@@ -34,6 +36,10 @@ func (s *store) TagStore() tag.TagStore {
 
 func (s *store) UserStore() user.UserStore {
 	return s.userStore
+}
+
+func (s *store) QuestionStore() question.QuestionStore {
+	return s.questionStore
 }
 
 func NewStore() (Store, error) {
@@ -60,9 +66,16 @@ func NewStore() (Store, error) {
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+
+	questionStore, err := question.NewSqlQuestionStore(ctx, dbURL)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	return &store{
-		searchStore: searchStore,
-		tagStore:    tagStore,
-		userStore:   userStore,
+		searchStore:  searchStore,
+		tagStore:     tagStore,
+		userStore:    userStore,
+		questionStore: questionStore,
 	}, nil
 }

@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	healthpb "github.com/studyguides-com/study-guides-api/api/v1/health"
+	questionpb "github.com/studyguides-com/study-guides-api/api/v1/question"
 	searchpb "github.com/studyguides-com/study-guides-api/api/v1/search"
 	tagpb "github.com/studyguides-com/study-guides-api/api/v1/tag"
 	userpb "github.com/studyguides-com/study-guides-api/api/v1/user"
@@ -78,6 +79,7 @@ func main() {
 	searchpb.RegisterSearchServiceServer(grpcServer, services.NewSearchService(appStore))
 	userpb.RegisterUserServiceServer(grpcServer, services.NewUserService())
 	tagpb.RegisterTagServiceServer(grpcServer, services.NewTagService(appStore))
+	questionpb.RegisterQuestionServiceServer(grpcServer, services.NewQuestionService(appStore))
 
 	// Enable gRPC reflection
 	reflection.Register(grpcServer)

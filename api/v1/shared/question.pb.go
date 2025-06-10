@@ -26,24 +26,24 @@ const (
 type Question struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Id              string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	BatchId         string                 `protobuf:"bytes,2,opt,name=batch_id,json=batchId,proto3" json:"batch_id,omitempty"`
+	BatchId         *string                `protobuf:"bytes,2,opt,name=batch_id,json=batchId,proto3,oneof" json:"batch_id,omitempty"`
 	QuestionText    string                 `protobuf:"bytes,3,opt,name=question_text,json=questionText,proto3" json:"question_text,omitempty"`
 	AnswerText      string                 `protobuf:"bytes,4,opt,name=answer_text,json=answerText,proto3" json:"answer_text,omitempty"`
 	Hash            string                 `protobuf:"bytes,5,opt,name=hash,proto3" json:"hash,omitempty"`
-	LearnMore       string                 `protobuf:"bytes,6,opt,name=learn_more,json=learnMore,proto3" json:"learn_more,omitempty"`
+	LearnMore       *string                `protobuf:"bytes,6,opt,name=learn_more,json=learnMore,proto3,oneof" json:"learn_more,omitempty"`
 	Distractors     []string               `protobuf:"bytes,7,rep,name=distractors,proto3" json:"distractors,omitempty"`
-	VideoUrl        string                 `protobuf:"bytes,8,opt,name=video_url,json=videoUrl,proto3" json:"video_url,omitempty"`
-	ImageUrl        string                 `protobuf:"bytes,9,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
+	VideoUrl        *string                `protobuf:"bytes,8,opt,name=video_url,json=videoUrl,proto3,oneof" json:"video_url,omitempty"`
+	ImageUrl        *string                `protobuf:"bytes,9,opt,name=image_url,json=imageUrl,proto3,oneof" json:"image_url,omitempty"`
 	Version         int32                  `protobuf:"varint,10,opt,name=version,proto3" json:"version,omitempty"`
 	Public          bool                   `protobuf:"varint,11,opt,name=public,proto3" json:"public,omitempty"`
 	Metadata        map[string]string      `protobuf:"bytes,12,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	CreatedAt       *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt       *timestamppb.Timestamp `protobuf:"bytes,14,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	CorrectCount    int32                  `protobuf:"varint,15,opt,name=correct_count,json=correctCount,proto3" json:"correct_count,omitempty"`
-	DifficultyRatio float64                `protobuf:"fixed64,16,opt,name=difficulty_ratio,json=difficultyRatio,proto3" json:"difficulty_ratio,omitempty"`
-	IncorrectCount  int32                  `protobuf:"varint,17,opt,name=incorrect_count,json=incorrectCount,proto3" json:"incorrect_count,omitempty"`
-	OwnerId         string                 `protobuf:"bytes,18,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
-	PassageId       string                 `protobuf:"bytes,19,opt,name=passage_id,json=passageId,proto3" json:"passage_id,omitempty"`
+	CorrectCount    *int32                 `protobuf:"varint,15,opt,name=correct_count,json=correctCount,proto3,oneof" json:"correct_count,omitempty"`
+	DifficultyRatio *float64               `protobuf:"fixed64,16,opt,name=difficulty_ratio,json=difficultyRatio,proto3,oneof" json:"difficulty_ratio,omitempty"`
+	IncorrectCount  *int32                 `protobuf:"varint,17,opt,name=incorrect_count,json=incorrectCount,proto3,oneof" json:"incorrect_count,omitempty"`
+	OwnerId         *string                `protobuf:"bytes,18,opt,name=owner_id,json=ownerId,proto3,oneof" json:"owner_id,omitempty"`
+	PassageId       *string                `protobuf:"bytes,19,opt,name=passage_id,json=passageId,proto3,oneof" json:"passage_id,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -86,8 +86,8 @@ func (x *Question) GetId() string {
 }
 
 func (x *Question) GetBatchId() string {
-	if x != nil {
-		return x.BatchId
+	if x != nil && x.BatchId != nil {
+		return *x.BatchId
 	}
 	return ""
 }
@@ -114,8 +114,8 @@ func (x *Question) GetHash() string {
 }
 
 func (x *Question) GetLearnMore() string {
-	if x != nil {
-		return x.LearnMore
+	if x != nil && x.LearnMore != nil {
+		return *x.LearnMore
 	}
 	return ""
 }
@@ -128,15 +128,15 @@ func (x *Question) GetDistractors() []string {
 }
 
 func (x *Question) GetVideoUrl() string {
-	if x != nil {
-		return x.VideoUrl
+	if x != nil && x.VideoUrl != nil {
+		return *x.VideoUrl
 	}
 	return ""
 }
 
 func (x *Question) GetImageUrl() string {
-	if x != nil {
-		return x.ImageUrl
+	if x != nil && x.ImageUrl != nil {
+		return *x.ImageUrl
 	}
 	return ""
 }
@@ -177,36 +177,36 @@ func (x *Question) GetUpdatedAt() *timestamppb.Timestamp {
 }
 
 func (x *Question) GetCorrectCount() int32 {
-	if x != nil {
-		return x.CorrectCount
+	if x != nil && x.CorrectCount != nil {
+		return *x.CorrectCount
 	}
 	return 0
 }
 
 func (x *Question) GetDifficultyRatio() float64 {
-	if x != nil {
-		return x.DifficultyRatio
+	if x != nil && x.DifficultyRatio != nil {
+		return *x.DifficultyRatio
 	}
 	return 0
 }
 
 func (x *Question) GetIncorrectCount() int32 {
-	if x != nil {
-		return x.IncorrectCount
+	if x != nil && x.IncorrectCount != nil {
+		return *x.IncorrectCount
 	}
 	return 0
 }
 
 func (x *Question) GetOwnerId() string {
-	if x != nil {
-		return x.OwnerId
+	if x != nil && x.OwnerId != nil {
+		return *x.OwnerId
 	}
 	return ""
 }
 
 func (x *Question) GetPassageId() string {
-	if x != nil {
-		return x.PassageId
+	if x != nil && x.PassageId != nil {
+		return *x.PassageId
 	}
 	return ""
 }
@@ -215,19 +215,19 @@ var File_v1_shared_question_proto protoreflect.FileDescriptor
 
 const file_v1_shared_question_proto_rawDesc = "" +
 	"\n" +
-	"\x18v1/shared/question.proto\x12\tshared.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe1\x05\n" +
+	"\x18v1/shared/question.proto\x12\tshared.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9d\a\n" +
 	"\bQuestion\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
-	"\bbatch_id\x18\x02 \x01(\tR\abatchId\x12#\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1e\n" +
+	"\bbatch_id\x18\x02 \x01(\tH\x00R\abatchId\x88\x01\x01\x12#\n" +
 	"\rquestion_text\x18\x03 \x01(\tR\fquestionText\x12\x1f\n" +
 	"\vanswer_text\x18\x04 \x01(\tR\n" +
 	"answerText\x12\x12\n" +
-	"\x04hash\x18\x05 \x01(\tR\x04hash\x12\x1d\n" +
+	"\x04hash\x18\x05 \x01(\tR\x04hash\x12\"\n" +
 	"\n" +
-	"learn_more\x18\x06 \x01(\tR\tlearnMore\x12 \n" +
-	"\vdistractors\x18\a \x03(\tR\vdistractors\x12\x1b\n" +
-	"\tvideo_url\x18\b \x01(\tR\bvideoUrl\x12\x1b\n" +
-	"\timage_url\x18\t \x01(\tR\bimageUrl\x12\x18\n" +
+	"learn_more\x18\x06 \x01(\tH\x01R\tlearnMore\x88\x01\x01\x12 \n" +
+	"\vdistractors\x18\a \x03(\tR\vdistractors\x12 \n" +
+	"\tvideo_url\x18\b \x01(\tH\x02R\bvideoUrl\x88\x01\x01\x12 \n" +
+	"\timage_url\x18\t \x01(\tH\x03R\bimageUrl\x88\x01\x01\x12\x18\n" +
 	"\aversion\x18\n" +
 	" \x01(\x05R\aversion\x12\x16\n" +
 	"\x06public\x18\v \x01(\bR\x06public\x12=\n" +
@@ -235,16 +235,27 @@ const file_v1_shared_question_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x0e \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12#\n" +
-	"\rcorrect_count\x18\x0f \x01(\x05R\fcorrectCount\x12)\n" +
-	"\x10difficulty_ratio\x18\x10 \x01(\x01R\x0fdifficultyRatio\x12'\n" +
-	"\x0fincorrect_count\x18\x11 \x01(\x05R\x0eincorrectCount\x12\x19\n" +
-	"\bowner_id\x18\x12 \x01(\tR\aownerId\x12\x1d\n" +
+	"updated_at\x18\x0e \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12(\n" +
+	"\rcorrect_count\x18\x0f \x01(\x05H\x04R\fcorrectCount\x88\x01\x01\x12.\n" +
+	"\x10difficulty_ratio\x18\x10 \x01(\x01H\x05R\x0fdifficultyRatio\x88\x01\x01\x12,\n" +
+	"\x0fincorrect_count\x18\x11 \x01(\x05H\x06R\x0eincorrectCount\x88\x01\x01\x12\x1e\n" +
+	"\bowner_id\x18\x12 \x01(\tH\aR\aownerId\x88\x01\x01\x12\"\n" +
 	"\n" +
-	"passage_id\x18\x13 \x01(\tR\tpassageId\x1a;\n" +
+	"passage_id\x18\x13 \x01(\tH\bR\tpassageId\x88\x01\x01\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01BDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\v\n" +
+	"\t_batch_idB\r\n" +
+	"\v_learn_moreB\f\n" +
+	"\n" +
+	"_video_urlB\f\n" +
+	"\n" +
+	"_image_urlB\x10\n" +
+	"\x0e_correct_countB\x13\n" +
+	"\x11_difficulty_ratioB\x12\n" +
+	"\x10_incorrect_countB\v\n" +
+	"\t_owner_idB\r\n" +
+	"\v_passage_idBDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
 
 var (
 	file_v1_shared_question_proto_rawDescOnce sync.Once
@@ -280,6 +291,7 @@ func file_v1_shared_question_proto_init() {
 	if File_v1_shared_question_proto != nil {
 		return
 	}
+	file_v1_shared_question_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
