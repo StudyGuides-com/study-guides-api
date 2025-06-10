@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/studyguides-com/study-guides-api/internal/store/interaction"
 	"github.com/studyguides-com/study-guides-api/internal/store/question"
 	"github.com/studyguides-com/study-guides-api/internal/store/search"
 	"github.com/studyguides-com/study-guides-api/internal/store/tag"
@@ -24,6 +25,7 @@ type store struct {
 	tagStore     tag.TagStore
 	userStore    user.UserStore
 	questionStore question.QuestionStore
+	interactionStore interaction.InteractionStore
 }
 
 func (s *store) SearchStore() search.SearchStore {
@@ -40,6 +42,10 @@ func (s *store) UserStore() user.UserStore {
 
 func (s *store) QuestionStore() question.QuestionStore {
 	return s.questionStore
+}
+
+func (s *store) InteractionStore() interaction.InteractionStore {
+	return s.interactionStore
 }
 
 func NewStore() (Store, error) {
@@ -72,10 +78,16 @@ func NewStore() (Store, error) {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	interactionStore, err := interaction.NewSqlInteractionStore(ctx, dbURL)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	return &store{
 		searchStore:  searchStore,
 		tagStore:     tagStore,
 		userStore:    userStore,
 		questionStore: questionStore,
+		interactionStore: interactionStore,
 	}, nil
 }
