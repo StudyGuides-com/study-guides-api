@@ -25,7 +25,7 @@ type TagSearchPath struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	Type          TagType                `protobuf:"varint,3,opt,name=type,proto3,enum=shared.v1.TagType" json:"type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -74,19 +74,19 @@ func (x *TagSearchPath) GetName() string {
 	return ""
 }
 
-func (x *TagSearchPath) GetType() string {
+func (x *TagSearchPath) GetType() TagType {
 	if x != nil {
 		return x.Type
 	}
-	return ""
+	return TagType_TAG_TYPE_UNSPECIFIED
 }
 
 type TagSearchResult struct {
 	state                     protoimpl.MessageState `protogen:"open.v1"`
 	Id                        string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name                      string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Type                      string                 `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
-	ContentRating             string                 `protobuf:"bytes,7,opt,name=content_rating,json=contentRating,proto3" json:"content_rating,omitempty"`
+	Type                      TagType                `protobuf:"varint,4,opt,name=type,proto3,enum=shared.v1.TagType" json:"type,omitempty"`
+	ContentRating             ContentRating          `protobuf:"varint,7,opt,name=content_rating,json=contentRating,proto3,enum=shared.v1.ContentRating" json:"content_rating,omitempty"`
 	MetaTags                  []string               `protobuf:"bytes,8,rep,name=meta_tags,json=metaTags,proto3" json:"meta_tags,omitempty"`
 	ContentDescriptors        []string               `protobuf:"bytes,9,rep,name=content_descriptors,json=contentDescriptors,proto3" json:"content_descriptors,omitempty"`
 	Tags                      []*TagSearchPath       `protobuf:"bytes,10,rep,name=tags,proto3" json:"tags,omitempty"`
@@ -147,18 +147,18 @@ func (x *TagSearchResult) GetName() string {
 	return ""
 }
 
-func (x *TagSearchResult) GetType() string {
+func (x *TagSearchResult) GetType() TagType {
 	if x != nil {
 		return x.Type
 	}
-	return ""
+	return TagType_TAG_TYPE_UNSPECIFIED
 }
 
-func (x *TagSearchResult) GetContentRating() string {
+func (x *TagSearchResult) GetContentRating() ContentRating {
 	if x != nil {
 		return x.ContentRating
 	}
-	return ""
+	return ContentRating_CONTENT_RATING_UNSPECIFIED
 }
 
 func (x *TagSearchResult) GetMetaTags() []string {
@@ -249,16 +249,16 @@ var File_v1_shared_tagsearchresult_proto protoreflect.FileDescriptor
 
 const file_v1_shared_tagsearchresult_proto_rawDesc = "" +
 	"\n" +
-	"\x1fv1/shared/tagsearchresult.proto\x12\tshared.v1\"G\n" +
+	"\x1fv1/shared/tagsearchresult.proto\x12\tshared.v1\x1a\x17v1/shared/tagtype.proto\x1a\x1dv1/shared/contentrating.proto\"[\n" +
 	"\rTagSearchPath\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
-	"\x04type\x18\x03 \x01(\tR\x04type\"\xc0\x04\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12&\n" +
+	"\x04type\x18\x03 \x01(\x0e2\x12.shared.v1.TagTypeR\x04type\"\xee\x04\n" +
 	"\x0fTagSearchResult\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
-	"\x04type\x18\x04 \x01(\tR\x04type\x12%\n" +
-	"\x0econtent_rating\x18\a \x01(\tR\rcontentRating\x12\x1b\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12&\n" +
+	"\x04type\x18\x04 \x01(\x0e2\x12.shared.v1.TagTypeR\x04type\x12?\n" +
+	"\x0econtent_rating\x18\a \x01(\x0e2\x18.shared.v1.ContentRatingR\rcontentRating\x12\x1b\n" +
 	"\tmeta_tags\x18\b \x03(\tR\bmetaTags\x12/\n" +
 	"\x13content_descriptors\x18\t \x03(\tR\x12contentDescriptors\x12,\n" +
 	"\x04tags\x18\n" +
@@ -289,14 +289,19 @@ var file_v1_shared_tagsearchresult_proto_msgTypes = make([]protoimpl.MessageInfo
 var file_v1_shared_tagsearchresult_proto_goTypes = []any{
 	(*TagSearchPath)(nil),   // 0: shared.v1.TagSearchPath
 	(*TagSearchResult)(nil), // 1: shared.v1.TagSearchResult
+	(TagType)(0),            // 2: shared.v1.TagType
+	(ContentRating)(0),      // 3: shared.v1.ContentRating
 }
 var file_v1_shared_tagsearchresult_proto_depIdxs = []int32{
-	0, // 0: shared.v1.TagSearchResult.tags:type_name -> shared.v1.TagSearchPath
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	2, // 0: shared.v1.TagSearchPath.type:type_name -> shared.v1.TagType
+	2, // 1: shared.v1.TagSearchResult.type:type_name -> shared.v1.TagType
+	3, // 2: shared.v1.TagSearchResult.content_rating:type_name -> shared.v1.ContentRating
+	0, // 3: shared.v1.TagSearchResult.tags:type_name -> shared.v1.TagSearchPath
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_v1_shared_tagsearchresult_proto_init() }
@@ -304,6 +309,8 @@ func file_v1_shared_tagsearchresult_proto_init() {
 	if File_v1_shared_tagsearchresult_proto != nil {
 		return
 	}
+	file_v1_shared_tagtype_proto_init()
+	file_v1_shared_contentrating_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

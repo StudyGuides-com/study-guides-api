@@ -24,10 +24,18 @@ import "v1/shared/usersearchresult.proto";
   message SearchUsersResponse {
     repeated shared.v1.UserSearchResult results = 1;
   }
-  
+
+  message ListIndexesRequest {
+    string query = 1;
+  }
+
+  message ListIndexesResponse {
+    repeated string indexes = 1;
+  }
 
 service SearchService {
   rpc SearchTags(SearchTagsRequest) returns (SearchTagsResponse);
   rpc SearchUsers(SearchUsersRequest) returns (SearchUsersResponse);
+  rpc ListIndexes(ListIndexesRequest) returns (ListIndexesResponse);
 }
 

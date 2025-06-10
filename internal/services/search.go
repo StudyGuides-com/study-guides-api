@@ -5,7 +5,7 @@ import (
 	"log"
 
 	searchpb "github.com/studyguides-com/study-guides-api/api/v1/search"
-	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
+	"github.com/studyguides-com/study-guides-api/internal/middleware"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 	"github.com/studyguides-com/study-guides-api/internal/store/search"
 	"google.golang.org/grpc/codes"
@@ -24,14 +24,10 @@ func NewSearchService(s store.Store) *SearchService {
 }
 
 func (s *SearchService) SearchTags(ctx context.Context, req *searchpb.SearchTagsRequest) (*searchpb.SearchTagsResponse, error) {
-	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, userID *string, userRoles *[]sharedpb.UserRole) (interface{}, error) {
-		log.Printf("Search request from user %s: query=%s", *userID, req.Query)
+	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, session *middleware.SessionDetails) (interface{}, error) {
+		log.Printf("Search request from user %s: query=%s", *session.UserID, req.Query)
 
-		opts := &search.SearchOptions{
-			UserID:      userID,
-			UserRoles:   userRoles,
-			ContextType: FromProtoContextType(req.Context),
-		}
+		opts := search.NewSearchOptionsFromRequest(ctx, req)
 		results, err := s.store.SearchStore().SearchTags(ctx, req.Query, opts)
 		if err != nil {
 			return nil, err
@@ -50,13 +46,10 @@ func (s *SearchService) SearchTags(ctx context.Context, req *searchpb.SearchTags
 }
 
 func (s *SearchService) SearchUsers(ctx context.Context, req *searchpb.SearchUsersRequest) (*searchpb.SearchUsersResponse, error) {
-	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, userID *string, userRoles *[]sharedpb.UserRole) (interface{}, error) {
-		log.Printf("Search request from user %s: query=%s", *userID, req.Query)
+	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, session *middleware.SessionDetails) (interface{}, error) {
+		log.Printf("Search request from user %s: query=%s", *session.UserID, req.Query)
 
-		opts := &search.SearchOptions{
-			UserID:      userID,
-			UserRoles:   userRoles,
-		}
+		opts := search.NewSearchOptionsFrom(ctx)
 		results, err := s.store.SearchStore().SearchUsers(ctx, req.Query, opts)
 		if err != nil {
 			return nil, err

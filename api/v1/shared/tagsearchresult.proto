@@ -3,18 +3,20 @@ syntax = "proto3";
 package shared.v1;
 option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
 
+import "v1/shared/tagtype.proto";
+import "v1/shared/contentrating.proto";
 
 message TagSearchPath {
   string id = 1;
   string name = 2;
-  string type = 3;
+  TagType type = 3;
 }
 
 message TagSearchResult {
     string id = 1;
     string name = 2;
-    string type = 4;
-    string content_rating = 7;
+    TagType type = 4;
+    ContentRating content_rating = 7;
     repeated string meta_tags = 8;
     repeated string content_descriptors = 9;
     repeated TagSearchPath tags = 10;

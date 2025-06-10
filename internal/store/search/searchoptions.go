@@ -1,7 +1,11 @@
 package search
 
 import (
+	"context"
+
+	searchpb "github.com/studyguides-com/study-guides-api/api/v1/search"
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
+	"github.com/studyguides-com/study-guides-api/internal/middleware"
 	"github.com/studyguides-com/study-guides-api/internal/types"
 )
 
@@ -36,4 +40,48 @@ func WithContextType(contextType types.ContextType) func(*SearchOptions) {
 	return func(o *SearchOptions) {
 		o.ContextType = contextType
 	}
+}
+
+// WithUserRoles sets the UserRoles field
+func WithUserRoles(userRoles *[]sharedpb.UserRole) func(*SearchOptions) {
+	return func(o *SearchOptions) {
+		o.UserRoles = userRoles
+	}
+}
+
+// FromProtoContextType converts a proto ContextType to our internal types.ContextType
+func FromProtoContextType(ct sharedpb.ContextType) types.ContextType {
+	switch ct {
+	case sharedpb.ContextType_CONTEXT_TYPE_COLLEGES:
+		return types.ContextTypeColleges
+	case sharedpb.ContextType_CONTEXT_TYPE_CERTIFICATIONS:
+		return types.ContextTypeCertifications
+	case sharedpb.ContextType_CONTEXT_TYPE_ENTRANCE_EXAMS:
+		return types.ContextTypeEntranceExams
+	case sharedpb.ContextType_CONTEXT_TYPE_AP_EXAMS:
+		return types.ContextTypeAPExams
+	case sharedpb.ContextType_CONTEXT_TYPE_DOD:
+		return types.ContextTypeDoD
+	default:
+		return types.ContextTypeAll
+	}
+}
+
+// NewSearchOptionsFromRequest creates a new SearchOptions from the context and request
+func NewSearchOptionsFromRequest(ctx context.Context, req *searchpb.SearchTagsRequest) *SearchOptions {
+	session := middleware.GetSessionDetails(ctx)
+	return NewSearchOptions(
+		WithUserID(session.UserID),
+		WithUserRoles(session.UserRoles),
+		WithContextType(FromProtoContextType(req.Context)),
+	)
+}
+
+// NewSearchOptionsFrom creates a new SearchOptions from the context for user search
+func NewSearchOptionsFrom(ctx context.Context) *SearchOptions {
+	session := middleware.GetSessionDetails(ctx)
+	return NewSearchOptions(
+		WithUserID(session.UserID),
+		WithUserRoles(session.UserRoles),
+	)
 } 

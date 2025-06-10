@@ -7,6 +7,7 @@ import (
 
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 	userpb "github.com/studyguides-com/study-guides-api/api/v1/user"
+	"github.com/studyguides-com/study-guides-api/internal/middleware"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -21,13 +22,13 @@ func NewUserService() *UserService {
 }
 
 func (s *UserService) Profile(ctx context.Context, req *userpb.ProfileRequest) (*userpb.ProfileResponse, error) {
-	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, userID *string, userRoles *[]sharedpb.UserRole) (interface{}, error) {
-		if userID == nil {
+	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, session *middleware.SessionDetails) (interface{}, error) {
+		if session.UserID == nil {
 			log.Printf("Profile request from anonymous user")
 			return nil, status.Error(codes.Unauthenticated, "authentication required")
 		}
 
-		log.Printf("Profile request from user %s", *userID)
+		log.Printf("Profile request from user %s", *session.UserID)
 
 		// TODO: Implement actual user profile lookup
 		// For now, return a placeholder response
@@ -39,7 +40,7 @@ func (s *UserService) Profile(ctx context.Context, req *userpb.ProfileRequest) (
 
 		return &userpb.ProfileResponse{
 			User: &sharedpb.User{
-				Id:            *userID,
+				Id:            *session.UserID,
 				Name:          &name,
 				GamerTag:      &gamerTag,
 				Email:         &email,

@@ -96,8 +96,8 @@ func NewTagSearchResult(hit map[string]interface{}) *sharedpb.TagSearchResult {
 	return &sharedpb.TagSearchResult{
 		Id:                      id,
 		Name:                    name,
-		Type:                    tagType,
-		ContentRating:           contentRating,
+		Type:                    sharedpb.TagType(sharedpb.TagType_value[tagType]),
+		ContentRating:           sharedpb.ContentRating(sharedpb.ContentRating_value[contentRating]),
 		MetaTags:                convertToStringSlice(metaTags),
 		ContentDescriptors:      convertToStringSlice(contentDescriptors),
 		Tags:                    tags,
@@ -141,7 +141,7 @@ func NewTagSearchPath(tagMap map[string]interface{}, index int) (*sharedpb.TagSe
 	return &sharedpb.TagSearchPath{
 		Id:   id,
 		Name: name,
-		Type: tagType,
+		Type: sharedpb.TagType(sharedpb.TagType_value[tagType]),
 	}, nil
 }
 

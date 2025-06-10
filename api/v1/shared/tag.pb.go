@@ -29,10 +29,10 @@ type Tag struct {
 	Hash               string                 `protobuf:"bytes,3,opt,name=hash,proto3" json:"hash,omitempty"`
 	Name               string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 	Description        *string                `protobuf:"bytes,5,opt,name=description,proto3,oneof" json:"description,omitempty"`
-	Type               string                 `protobuf:"bytes,6,opt,name=type,proto3" json:"type,omitempty"`
+	Type               TagType                `protobuf:"varint,6,opt,name=type,proto3,enum=shared.v1.TagType" json:"type,omitempty"`
 	Context            string                 `protobuf:"bytes,7,opt,name=context,proto3" json:"context,omitempty"`
 	ParentTagId        *string                `protobuf:"bytes,8,opt,name=parent_tag_id,json=parentTagId,proto3,oneof" json:"parent_tag_id,omitempty"`
-	ContentRating      string                 `protobuf:"bytes,9,opt,name=content_rating,json=contentRating,proto3" json:"content_rating,omitempty"`
+	ContentRating      ContentRating          `protobuf:"varint,9,opt,name=content_rating,json=contentRating,proto3,enum=shared.v1.ContentRating" json:"content_rating,omitempty"`
 	ContentDescriptors []string               `protobuf:"bytes,10,rep,name=content_descriptors,json=contentDescriptors,proto3" json:"content_descriptors,omitempty"`
 	MetaTags           []string               `protobuf:"bytes,11,rep,name=meta_tags,json=metaTags,proto3" json:"meta_tags,omitempty"`
 	Public             bool                   `protobuf:"varint,12,opt,name=public,proto3" json:"public,omitempty"`
@@ -112,11 +112,11 @@ func (x *Tag) GetDescription() string {
 	return ""
 }
 
-func (x *Tag) GetType() string {
+func (x *Tag) GetType() TagType {
 	if x != nil {
 		return x.Type
 	}
-	return ""
+	return TagType_TAG_TYPE_UNSPECIFIED
 }
 
 func (x *Tag) GetContext() string {
@@ -133,11 +133,11 @@ func (x *Tag) GetParentTagId() string {
 	return ""
 }
 
-func (x *Tag) GetContentRating() string {
+func (x *Tag) GetContentRating() ContentRating {
 	if x != nil {
 		return x.ContentRating
 	}
-	return ""
+	return ContentRating_CONTENT_RATING_UNSPECIFIED
 }
 
 func (x *Tag) GetContentDescriptors() []string {
@@ -214,17 +214,17 @@ var File_v1_shared_tag_proto protoreflect.FileDescriptor
 
 const file_v1_shared_tag_proto_rawDesc = "" +
 	"\n" +
-	"\x13v1/shared/tag.proto\x12\tshared.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9c\x06\n" +
+	"\x13v1/shared/tag.proto\x12\tshared.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17v1/shared/tagtype.proto\x1a\x1dv1/shared/contentrating.proto\"\xca\x06\n" +
 	"\x03Tag\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1e\n" +
 	"\bbatch_id\x18\x02 \x01(\tH\x00R\abatchId\x88\x01\x01\x12\x12\n" +
 	"\x04hash\x18\x03 \x01(\tR\x04hash\x12\x12\n" +
 	"\x04name\x18\x04 \x01(\tR\x04name\x12%\n" +
-	"\vdescription\x18\x05 \x01(\tH\x01R\vdescription\x88\x01\x01\x12\x12\n" +
-	"\x04type\x18\x06 \x01(\tR\x04type\x12\x18\n" +
+	"\vdescription\x18\x05 \x01(\tH\x01R\vdescription\x88\x01\x01\x12&\n" +
+	"\x04type\x18\x06 \x01(\x0e2\x12.shared.v1.TagTypeR\x04type\x12\x18\n" +
 	"\acontext\x18\a \x01(\tR\acontext\x12'\n" +
-	"\rparent_tag_id\x18\b \x01(\tH\x02R\vparentTagId\x88\x01\x01\x12%\n" +
-	"\x0econtent_rating\x18\t \x01(\tR\rcontentRating\x12/\n" +
+	"\rparent_tag_id\x18\b \x01(\tH\x02R\vparentTagId\x88\x01\x01\x12?\n" +
+	"\x0econtent_rating\x18\t \x01(\x0e2\x18.shared.v1.ContentRatingR\rcontentRating\x12/\n" +
 	"\x13content_descriptors\x18\n" +
 	" \x03(\tR\x12contentDescriptors\x12\x1b\n" +
 	"\tmeta_tags\x18\v \x03(\tR\bmetaTags\x12\x16\n" +
@@ -262,17 +262,21 @@ var file_v1_shared_tag_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_v1_shared_tag_proto_goTypes = []any{
 	(*Tag)(nil),                   // 0: shared.v1.Tag
 	nil,                           // 1: shared.v1.Tag.MetadataEntry
-	(*timestamppb.Timestamp)(nil), // 2: google.protobuf.Timestamp
+	(TagType)(0),                  // 2: shared.v1.TagType
+	(ContentRating)(0),            // 3: shared.v1.ContentRating
+	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
 }
 var file_v1_shared_tag_proto_depIdxs = []int32{
-	1, // 0: shared.v1.Tag.metadata:type_name -> shared.v1.Tag.MetadataEntry
-	2, // 1: shared.v1.Tag.created_at:type_name -> google.protobuf.Timestamp
-	2, // 2: shared.v1.Tag.updated_at:type_name -> google.protobuf.Timestamp
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	2, // 0: shared.v1.Tag.type:type_name -> shared.v1.TagType
+	3, // 1: shared.v1.Tag.content_rating:type_name -> shared.v1.ContentRating
+	1, // 2: shared.v1.Tag.metadata:type_name -> shared.v1.Tag.MetadataEntry
+	4, // 3: shared.v1.Tag.created_at:type_name -> google.protobuf.Timestamp
+	4, // 4: shared.v1.Tag.updated_at:type_name -> google.protobuf.Timestamp
+	5, // [5:5] is the sub-list for method output_type
+	5, // [5:5] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_v1_shared_tag_proto_init() }
@@ -280,6 +284,8 @@ func file_v1_shared_tag_proto_init() {
 	if File_v1_shared_tag_proto != nil {
 		return
 	}
+	file_v1_shared_tagtype_proto_init()
+	file_v1_shared_contentrating_proto_init()
 	file_v1_shared_tag_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

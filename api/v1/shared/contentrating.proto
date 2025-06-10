@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package shared.v1;
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+enum ContentRating {
+  CONTENT_RATING_UNSPECIFIED = 0;
+  CONTENT_RATING_EVERYONE = 1;
+  CONTENT_RATING_EVERYONE_10 = 2;
+  CONTENT_RATING_TEEN = 3;
+  CONTENT_RATING_MATURE = 4;
+  CONTENT_RATING_ADULTS_ONLY = 5;
+  CONTENT_RATING_PENDING = 6;
+} 

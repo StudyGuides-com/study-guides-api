@@ -4,6 +4,8 @@ package shared.v1;
 option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
 
 import "google/protobuf/timestamp.proto";
+import "v1/shared/tagtype.proto";
+import "v1/shared/contentrating.proto";
 
 message Tag {
 	string id = 1;
@@ -11,10 +13,10 @@ message Tag {
 	string hash = 3;
 	string name = 4;
 	optional string description = 5;
-	string type = 6;
+	TagType type = 6;
 	string context = 7;
 	optional string parent_tag_id = 8;
-	string content_rating = 9;
+	ContentRating content_rating = 9;
 	repeated string content_descriptors = 10;
 	repeated string meta_tags = 11;
 	bool public = 12;
