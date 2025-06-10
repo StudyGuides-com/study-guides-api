@@ -2,10 +2,11 @@ package tag
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 )
@@ -33,7 +34,7 @@ func (s *SqlTagStore) GetTagByID(ctx context.Context, id string) (*sharedpb.Tag,
 		WHERE id = $1
 	`, id)
 	if err != nil {
-		return nil, fmt.Errorf("get tag by id: %w", err)
+		return nil, status.Error(codes.Internal, "get tag by id: "+err.Error())
 	}
 
 	return &sharedpb.Tag{
@@ -56,7 +57,7 @@ func (s *SqlTagStore) ListTagsByParent(ctx context.Context, parentID string) ([]
 		WHERE parent_id = $1
 	`, parentID)
 	if err != nil {
-		return nil, fmt.Errorf("list tags by parent: %w", err)
+		return nil, status.Error(codes.Internal, "list tags by parent: "+err.Error())
 	}
 
 	return mapRowsToTags(rows), nil
@@ -71,7 +72,7 @@ func (s *SqlTagStore) ListTagsByType(ctx context.Context, tagType sharedpb.TagTy
 		WHERE type = $1
 	`, tagType.String())
 	if err != nil {
-		return nil, fmt.Errorf("list tags by type: %w", err)
+		return nil, status.Error(codes.Internal, "list tags by type: "+err.Error())
 	}
 
 	return mapRowsToTags(rows), nil
@@ -86,7 +87,7 @@ func (s *SqlTagStore) ListRootTags(ctx context.Context) ([]*sharedpb.Tag, error)
 		WHERE parent_id IS NULL
 	`)
 	if err != nil {
-		return nil, fmt.Errorf("list root tags: %w", err)
+		return nil, status.Error(codes.Internal, "list root tags: "+err.Error())
 	}
 
 	return mapRowsToTags(rows), nil

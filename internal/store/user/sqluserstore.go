@@ -2,11 +2,12 @@ package user
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
@@ -35,7 +36,7 @@ func (s *SqlUserStore) UserByID(ctx context.Context, userID string) (*sharedpb.U
 		WHERE id = $1
 	`, userID)
 	if err != nil {
-		return nil, fmt.Errorf("get user by id: %w", err)
+		return nil, status.Error(codes.Internal, "get user by id: "+err.Error())
 	}
 
 	user := &sharedpb.User{
@@ -53,7 +54,7 @@ func (s *SqlUserStore) UserByID(ctx context.Context, userID string) (*sharedpb.U
 	if row.EmailVerified != nil {
 		parsedTime, err := time.Parse(time.RFC3339, *row.EmailVerified)
 		if err != nil {
-			return nil, fmt.Errorf("parse email verified timestamp: %w", err)
+			return nil, status.Error(codes.Internal, "parse email verified timestamp: "+err.Error())
 		}
 		user.EmailVerified = timestamppb.New(parsedTime)
 	}
@@ -76,7 +77,7 @@ func (s *SqlUserStore) UserByEmail(ctx context.Context, email string) (*sharedpb
 		WHERE email = $1
 	`, email)
 	if err != nil {
-		return nil, fmt.Errorf("get user by email: %w", err)
+		return nil, status.Error(codes.Internal, "get user by email: "+err.Error())
 	}
 
 	user := &sharedpb.User{
@@ -94,7 +95,7 @@ func (s *SqlUserStore) UserByEmail(ctx context.Context, email string) (*sharedpb
 	if row.EmailVerified != nil {
 		parsedTime, err := time.Parse(time.RFC3339, *row.EmailVerified)
 		if err != nil {
-			return nil, fmt.Errorf("parse email verified timestamp: %w", err)
+			return nil, status.Error(codes.Internal, "parse email verified timestamp: "+err.Error())
 		}
 		user.EmailVerified = timestamppb.New(parsedTime)
 	}

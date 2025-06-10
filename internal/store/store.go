@@ -47,6 +47,7 @@ func NewStore() (Store, error) {
 	}
 
 	searchStore := search.NewAlgoliaSearchStore(ctx, algoliaAppID, algoliaAdminAPIKey)
+	
 	userStore, err := user.NewSqlUserStore(ctx, dbURL)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
