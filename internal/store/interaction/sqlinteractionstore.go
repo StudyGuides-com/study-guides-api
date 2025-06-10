@@ -38,11 +38,11 @@ func calculateDifficultyRatio(currentCorrect, currentIncorrect int64, isCorrect 
 	return newCorrect, newIncorrect, newDifficultyRatio
 }
 
-func (s *SqlInteractionStore) AnswerCorrectly(ctx context.Context, req *interactionpb.InteractRequest) error {
+func (s *SqlInteractionStore) AnswerCorrectly(ctx context.Context, req *interactionpb.InteractRequest) (*sharedpb.Question, error) {
 	// Start a transaction
 	tx, err := s.db.Begin(ctx)
 	if err != nil {
-		return status.Error(codes.Internal, "failed to begin transaction")
+		return nil, status.Error(codes.Internal, "failed to begin transaction")
 	}
 	defer tx.Rollback(ctx)
 
@@ -54,7 +54,7 @@ func (s *SqlInteractionStore) AnswerCorrectly(ctx context.Context, req *interact
 		WHERE id = $1
 	`, req.QuestionId).Scan(&currentCorrect, &currentIncorrect)
 	if err != nil {
-		return status.Error(codes.Internal, "failed to fetch question stats")
+		return nil, status.Error(codes.Internal, "failed to fetch question stats")
 	}
 
 	// Calculate new difficulty metrics
@@ -70,7 +70,7 @@ func (s *SqlInteractionStore) AnswerCorrectly(ctx context.Context, req *interact
 		WHERE id = $5
 	`, newCorrect, newIncorrect, newDifficultyRatio, time.Now(), req.QuestionId)
 	if err != nil {
-		return status.Error(codes.Internal, "failed to update question difficulty")
+		return nil, status.Error(codes.Internal, "failed to update question difficulty")
 	}
 
 	// Create interaction record
@@ -81,7 +81,7 @@ func (s *SqlInteractionStore) AnswerCorrectly(ctx context.Context, req *interact
 	}
 	metadataBytes, err := json.Marshal(metadata)
 	if err != nil {
-		return status.Error(codes.Internal, "failed to marshal metadata")
+		return nil, status.Error(codes.Internal, "failed to marshal metadata")
 	}
 
 	_, err = tx.Exec(ctx, `
@@ -92,22 +92,39 @@ func (s *SqlInteractionStore) AnswerCorrectly(ctx context.Context, req *interact
 	`, interactionId, req.UserId, req.QuestionId, sharedpb.InteractionType_INTERACTION_TYPE_ANSWER_CORRECTLY, req.StudyMethod,
 		true, 0.0, metadataBytes, time.Now())
 	if err != nil {
-		return status.Error(codes.Internal, "failed to create interaction record")
+		return nil, status.Error(codes.Internal, "failed to create interaction record")
+	}
+
+	// Get the updated question
+	var question sharedpb.Question
+	err = tx.QueryRow(ctx, `
+		SELECT id, "correctCount", "incorrectCount", "difficultyRatio", "updatedAt"
+		FROM "Question"
+		WHERE id = $1
+	`, req.QuestionId).Scan(
+		&question.Id,
+		&question.CorrectCount,
+		&question.IncorrectCount,
+		&question.DifficultyRatio,
+		&question.UpdatedAt,
+	)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to fetch updated question")
 	}
 
 	// Commit the transaction
 	if err = tx.Commit(ctx); err != nil {
-		return status.Error(codes.Internal, "failed to commit transaction")
+		return nil, status.Error(codes.Internal, "failed to commit transaction")
 	}
 
-	return nil
+	return &question, nil
 }
 
-func (s *SqlInteractionStore) AnswerIncorrectly(ctx context.Context, req *interactionpb.InteractRequest) error {
+func (s *SqlInteractionStore) AnswerIncorrectly(ctx context.Context, req *interactionpb.InteractRequest) (*sharedpb.Question, error) {
 	// Start a transaction
 	tx, err := s.db.Begin(ctx)
 	if err != nil {
-		return status.Error(codes.Internal, "failed to begin transaction")
+		return nil, status.Error(codes.Internal, "failed to begin transaction")
 	}
 	defer tx.Rollback(ctx)
 
@@ -119,7 +136,7 @@ func (s *SqlInteractionStore) AnswerIncorrectly(ctx context.Context, req *intera
 		WHERE id = $1
 	`, req.QuestionId).Scan(&currentCorrect, &currentIncorrect)
 	if err != nil {
-		return status.Error(codes.Internal, "failed to fetch question stats")
+		return nil, status.Error(codes.Internal, "failed to fetch question stats")
 	}
 
 	// Calculate new difficulty metrics
@@ -135,7 +152,7 @@ func (s *SqlInteractionStore) AnswerIncorrectly(ctx context.Context, req *intera
 		WHERE id = $5
 	`, newCorrect, newIncorrect, newDifficultyRatio, time.Now(), req.QuestionId)
 	if err != nil {
-		return status.Error(codes.Internal, "failed to update question difficulty")
+		return nil, status.Error(codes.Internal, "failed to update question difficulty")
 	}
 
 	// Create interaction record
@@ -146,7 +163,7 @@ func (s *SqlInteractionStore) AnswerIncorrectly(ctx context.Context, req *intera
 	}
 	metadataBytes, err := json.Marshal(metadata)
 	if err != nil {
-		return status.Error(codes.Internal, "failed to marshal metadata")
+		return nil, status.Error(codes.Internal, "failed to marshal metadata")
 	}
 
 	_, err = tx.Exec(ctx, `
@@ -157,22 +174,39 @@ func (s *SqlInteractionStore) AnswerIncorrectly(ctx context.Context, req *intera
 	`, interactionId, req.UserId, req.QuestionId, sharedpb.InteractionType_INTERACTION_TYPE_ANSWER_INCORRECTLY, req.StudyMethod,
 		false, 0.0, metadataBytes, time.Now())
 	if err != nil {
-		return status.Error(codes.Internal, "failed to create interaction record")
+		return nil, status.Error(codes.Internal, "failed to create interaction record")
+	}
+
+	// Get the updated question
+	var question sharedpb.Question
+	err = tx.QueryRow(ctx, `
+		SELECT id, "correctCount", "incorrectCount", "difficultyRatio", "updatedAt"
+		FROM "Question"
+		WHERE id = $1
+	`, req.QuestionId).Scan(
+		&question.Id,
+		&question.CorrectCount,
+		&question.IncorrectCount,
+		&question.DifficultyRatio,
+		&question.UpdatedAt,
+	)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to fetch updated question")
 	}
 
 	// Commit the transaction
 	if err = tx.Commit(ctx); err != nil {
-		return status.Error(codes.Internal, "failed to commit transaction")
+		return nil, status.Error(codes.Internal, "failed to commit transaction")
 	}
 
-	return nil
+	return &question, nil
 }
 
-func (s *SqlInteractionStore) AnswerEasy(ctx context.Context, req *interactionpb.InteractRequest) error {
+func (s *SqlInteractionStore) AnswerEasy(ctx context.Context, req *interactionpb.InteractRequest) (*sharedpb.Question, error) {
 	// Start a transaction
 	tx, err := s.db.Begin(ctx)
 	if err != nil {
-		return status.Error(codes.Internal, "failed to begin transaction")
+		return nil, status.Error(codes.Internal, "failed to begin transaction")
 	}
 	defer tx.Rollback(ctx)
 
@@ -184,7 +218,7 @@ func (s *SqlInteractionStore) AnswerEasy(ctx context.Context, req *interactionpb
 	}
 	metadataBytes, err := json.Marshal(metadata)
 	if err != nil {
-		return status.Error(codes.Internal, "failed to marshal metadata")
+		return nil, status.Error(codes.Internal, "failed to marshal metadata")
 	}
 
 	_, err = tx.Exec(ctx, `
@@ -195,22 +229,39 @@ func (s *SqlInteractionStore) AnswerEasy(ctx context.Context, req *interactionpb
 	`, interactionId, req.UserId, req.QuestionId, sharedpb.InteractionType_INTERACTION_TYPE_ANSWER_EASY, req.StudyMethod,
 		true, 0.0, metadataBytes, time.Now())
 	if err != nil {
-		return status.Error(codes.Internal, "failed to create interaction record")
+		return nil, status.Error(codes.Internal, "failed to create interaction record")
+	}
+
+	// Get the current question
+	var question sharedpb.Question
+	err = tx.QueryRow(ctx, `
+		SELECT id, "correctCount", "incorrectCount", "difficultyRatio", "updatedAt"
+		FROM "Question"
+		WHERE id = $1
+	`, req.QuestionId).Scan(
+		&question.Id,
+		&question.CorrectCount,
+		&question.IncorrectCount,
+		&question.DifficultyRatio,
+		&question.UpdatedAt,
+	)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to fetch question")
 	}
 
 	// Commit the transaction
 	if err = tx.Commit(ctx); err != nil {
-		return status.Error(codes.Internal, "failed to commit transaction")
+		return nil, status.Error(codes.Internal, "failed to commit transaction")
 	}
 
-	return nil
+	return &question, nil
 }
 
-func (s *SqlInteractionStore) AnswerHard(ctx context.Context, req *interactionpb.InteractRequest) error {
+func (s *SqlInteractionStore) AnswerHard(ctx context.Context, req *interactionpb.InteractRequest) (*sharedpb.Question, error) {
 	// Start a transaction
 	tx, err := s.db.Begin(ctx)
 	if err != nil {
-		return status.Error(codes.Internal, "failed to begin transaction")
+		return nil, status.Error(codes.Internal, "failed to begin transaction")
 	}
 	defer tx.Rollback(ctx)
 
@@ -222,7 +273,7 @@ func (s *SqlInteractionStore) AnswerHard(ctx context.Context, req *interactionpb
 	}
 	metadataBytes, err := json.Marshal(metadata)
 	if err != nil {
-		return status.Error(codes.Internal, "failed to marshal metadata")
+		return nil, status.Error(codes.Internal, "failed to marshal metadata")
 	}
 
 	_, err = tx.Exec(ctx, `
@@ -233,15 +284,32 @@ func (s *SqlInteractionStore) AnswerHard(ctx context.Context, req *interactionpb
 	`, interactionId, req.UserId, req.QuestionId, sharedpb.InteractionType_INTERACTION_TYPE_ANSWER_HARD, req.StudyMethod,
 		false, 0.0, metadataBytes, time.Now())
 	if err != nil {
-		return status.Error(codes.Internal, "failed to create interaction record")
+		return nil, status.Error(codes.Internal, "failed to create interaction record")
+	}
+
+	// Get the current question
+	var question sharedpb.Question
+	err = tx.QueryRow(ctx, `
+		SELECT id, "correctCount", "incorrectCount", "difficultyRatio", "updatedAt"
+		FROM "Question"
+		WHERE id = $1
+	`, req.QuestionId).Scan(
+		&question.Id,
+		&question.CorrectCount,
+		&question.IncorrectCount,
+		&question.DifficultyRatio,
+		&question.UpdatedAt,
+	)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to fetch question")
 	}
 
 	// Commit the transaction
 	if err = tx.Commit(ctx); err != nil {
-		return status.Error(codes.Internal, "failed to commit transaction")
+		return nil, status.Error(codes.Internal, "failed to commit transaction")
 	}
 
-	return nil
+	return &question, nil
 }
 
 func (s *SqlInteractionStore) Reveal(ctx context.Context, req *interactionpb.InteractRequest) error {

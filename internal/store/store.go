@@ -18,6 +18,7 @@ type Store interface {
 	TagStore() tag.TagStore
 	UserStore() user.UserStore
 	QuestionStore() question.QuestionStore
+	InteractionStore() interaction.InteractionStore
 }
 
 type store struct {

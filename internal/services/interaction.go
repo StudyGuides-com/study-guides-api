@@ -45,41 +45,77 @@ func (s *InteractionService) Interact(ctx context.Context, req *interactionpb.In
 }
 
 func (s *InteractionService) answerCorrectly(ctx context.Context, req *interactionpb.InteractRequest) (*interactionpb.InteractResponse, error) {
-	log.Printf("answerCorrectly %s %s %s",req.StudyMethod,req.InteractionType,req.DeckAssignment)
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+	log.Printf("answerCorrectly %s %s %s", req.StudyMethod, req.InteractionType, req.DeckAssignment)
+	question, err := s.store.InteractionStore().AnswerCorrectly(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &interactionpb.InteractResponse{
+		Question: question,
+	}, nil
 }
 
 func (s *InteractionService) answerIncorrectly(ctx context.Context, req *interactionpb.InteractRequest) (*interactionpb.InteractResponse, error) {
-	log.Printf("answerIncorrectly %s %s %s",req.StudyMethod,req.InteractionType,req.DeckAssignment)
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+	log.Printf("answerIncorrectly %s %s %s", req.StudyMethod, req.InteractionType, req.DeckAssignment)
+	question, err := s.store.InteractionStore().AnswerIncorrectly(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &interactionpb.InteractResponse{
+		Question: question,
+	}, nil
 }
 
 func (s *InteractionService) answerEasy(ctx context.Context, req *interactionpb.InteractRequest) (*interactionpb.InteractResponse, error) {
-	log.Printf("answerEasy %s %s %s",req.StudyMethod,req.InteractionType,req.DeckAssignment)
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+	log.Printf("answerEasy %s %s %s", req.StudyMethod, req.InteractionType, req.DeckAssignment)
+	question, err := s.store.InteractionStore().AnswerEasy(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &interactionpb.InteractResponse{
+		Question: question,
+	}, nil
 }
 
 func (s *InteractionService) answerHard(ctx context.Context, req *interactionpb.InteractRequest) (*interactionpb.InteractResponse, error) {
-	log.Printf("answerHard %s %s %s",req.StudyMethod,req.InteractionType,req.DeckAssignment)
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+	log.Printf("answerHard %s %s %s", req.StudyMethod, req.InteractionType, req.DeckAssignment)
+	question, err := s.store.InteractionStore().AnswerHard(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &interactionpb.InteractResponse{
+		Question: question,
+	}, nil
 }
 
 func (s *InteractionService) reveal(ctx context.Context, req *interactionpb.InteractRequest) (*interactionpb.InteractResponse, error) {
-	log.Printf("reveal %s %s %s",req.StudyMethod,req.InteractionType,req.DeckAssignment)
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+	log.Printf("reveal %s %s %s", req.StudyMethod, req.InteractionType, req.DeckAssignment)
+	err := s.store.InteractionStore().Reveal(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &interactionpb.InteractResponse{}, nil
 }
 
 func (s *InteractionService) viewLearnMore(ctx context.Context, req *interactionpb.InteractRequest) (*interactionpb.InteractResponse, error) {
-	log.Printf("viewLearnMore %s %s %s",req.StudyMethod,req.InteractionType,req.DeckAssignment)
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+	log.Printf("viewLearnMore %s %s %s", req.StudyMethod, req.InteractionType, req.DeckAssignment)
+	err := s.store.InteractionStore().ViewLearnMore(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &interactionpb.InteractResponse{}, nil
 }
 
 func (s *InteractionService) viewPassage(ctx context.Context, req *interactionpb.InteractRequest) (*interactionpb.InteractResponse, error) {
-	log.Printf("viewPassage %s %s %s",req.StudyMethod,req.InteractionType,req.DeckAssignment)
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+	log.Printf("viewPassage %s %s %s", req.StudyMethod, req.InteractionType, req.DeckAssignment)
+	err := s.store.InteractionStore().ViewPassage(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &interactionpb.InteractResponse{}, nil
 }
 
 func (s *InteractionService) none(ctx context.Context, req *interactionpb.InteractRequest) (*interactionpb.InteractResponse, error) {
-	log.Printf("none %s %s %s",req.StudyMethod,req.InteractionType,req.DeckAssignment)
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+	log.Printf("none %s %s %s", req.StudyMethod, req.InteractionType, req.DeckAssignment)
+	return &interactionpb.InteractResponse{}, nil
 }
