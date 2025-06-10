@@ -8,11 +8,6 @@ import "v1/shared/studymethod.proto";
 import "v1/shared/interactiontype.proto";
 import "v1/shared/deckassignment.proto";
 
-
-
-
-
-
 message InteractRequest {
   string question_id = 1;
   shared.v1.StudyMethod study_method = 2;
