@@ -31,15 +31,27 @@ func (c *AlgoliaStore) GetIndex(indexName string) *search.Index {
 	return c.client.InitIndex(indexName)
 }
 
-// SearchTags searches for tags using Algolia
+// SearchTags searches for tags using Algolia without any filters
+func (c *AlgoliaStore) SearchTags(ctx context.Context, query string) ([]*sharedpb.TagSearchResult, error) {
+	return c.searchTags(ctx, "", query)
+}
+
+// SearchTagsForContext searches for tags using Algolia with a context filter
 func (c *AlgoliaStore) SearchTagsForContext(ctx context.Context, contextType types.ContextType, query string) ([]*sharedpb.TagSearchResult, error) {
-	
-	log.Printf("Searching for tags with query: %s, contextType: %s", query, contextType)
+	filter := "context:" + string(contextType)
+	return c.searchTags(ctx, filter, query)
+}
+
+// searchTags is the internal implementation for searching tags
+func (c *AlgoliaStore) searchTags(ctx context.Context, filter string, query string) ([]*sharedpb.TagSearchResult, error) {
+	log.Printf("Searching for tags with query: %s, filter: %s", query, filter)
 	index := c.GetIndex("tags")
-	
-	// Create search parameters with context filter
-	opts := []interface{}{
-		opt.Filters("context:" + string(contextType)),
+
+	var opts []interface{}
+	if filter != "" {
+		opts = []interface{}{
+			opt.Filters(filter),
+		}
 	}
 
 	// Perform the search
@@ -58,15 +70,6 @@ func (c *AlgoliaStore) SearchTagsForContext(ctx context.Context, contextType typ
 	}
 
 	return results, nil
-}
-
-func (c *AlgoliaStore) SearchTags(ctx context.Context, tagID string, query string) ([]*sharedpb.TagSearchResult, error) {
-	log.Printf("Searching for tags with query: %s, tagID: %s", query, tagID)
-	index := c.GetIndex("tags")
-
-	opts := []interface{}{
-		opt.Filters("id:" + tagID),
-	}
 }
 
 // NewTagSearchResult creates a TagSearchResult from a hit

@@ -21,20 +21,15 @@ func NewSearchService(s store.Store) *SearchService {
 	}
 }
 
-func (s *SearchService) Search(ctx context.Context, req *searchpb.SearchRequest) (*searchpb.SearchResponse, error) {
+func (s *SearchService) SearchTags(ctx context.Context, req *searchpb.SearchTagsRequest) (*searchpb.SearchTagsResponse, error) {
 	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string) (interface{}, error) {
-		if userID != nil {
-			log.Printf("Search request from user %s: query=%s, context=%s", *userID, req.Query, req.Context)
-		} else {
-			log.Printf("Search request from anonymous user: query=%s, context=%s", req.Query, req.Context)
-		}
-
-		results, err := s.store.SearchStore().SearchTags(ctx, FromProtoContextType(req.Context), req.Query)
+		log.Printf("Search request from user %s: query=%s", *userID, req.Query)
+		results, err := s.store.SearchStore().SearchTags(ctx, req.Query)
 
 		if err != nil {
 			return nil, err
 		}
-		return &searchpb.SearchResponse{
+		return &searchpb.SearchTagsResponse{
 			Results: results,
 		}, nil
 	})
@@ -44,6 +39,26 @@ func (s *SearchService) Search(ctx context.Context, req *searchpb.SearchRequest)
 	if resp == nil {
 		return nil, status.Error(codes.Internal, "search service returned nil response")
 	}
-	return resp.(*searchpb.SearchResponse), nil
+
+	return resp.(*searchpb.SearchTagsResponse), nil
 }
 
+func (s *SearchService) SearchTagsWithContext(ctx context.Context, req *searchpb.SearchTagsWithContextRequest) (*searchpb.SearchTagsResponse, error) {
+	resp, err := PublicBaseHandler(ctx, func(ctx context.Context, userID *string) (interface{}, error) {
+		log.Printf("Search request from user %s: query=%s", *userID, req.Query)
+		results, err := s.store.SearchStore().SearchTagsForContext(ctx, FromProtoContextType(req.Context), req.Query)
+		if err != nil {
+			return nil, err
+		}
+		return &searchpb.SearchTagsResponse{
+			Results: results,
+		}, nil
+	})	
+	if err != nil {
+		return nil, err
+	}
+	if resp == nil {
+		return nil, status.Error(codes.Internal, "search service returned nil response")
+	}
+	return resp.(*searchpb.SearchTagsResponse), nil
+}

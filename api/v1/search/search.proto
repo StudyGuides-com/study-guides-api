@@ -6,17 +6,22 @@ option go_package = "github.com/studyguides-com/study-guides-api/api/v1/search;s
 import "v1/shared/tagsearchresult.proto";
 import "v1/shared/contexttype.proto";
 
-message SearchRequest {
+message SearchTagsRequest {
+    string query = 1;
+  }
+
+  message SearchTagsWithContextRequest {
     string query = 1;
     shared.v1.ContextType context = 2;
   }
   
-  message SearchResponse {
+  message SearchTagsResponse {
     repeated shared.v1.TagSearchResult results = 1;
   }
   
 
 service SearchService {
-  rpc Search(SearchRequest) returns (SearchResponse);
+  rpc SearchTags(SearchTagsRequest) returns (SearchTagsResponse);
+  rpc SearchTagsWithContext(SearchTagsWithContextRequest) returns (SearchTagsResponse);
 }
 

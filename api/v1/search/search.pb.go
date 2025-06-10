@@ -22,7 +22,51 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type SearchRequest struct {
+type SearchTagsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Query         string                 `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SearchTagsRequest) Reset() {
+	*x = SearchTagsRequest{}
+	mi := &file_v1_search_search_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SearchTagsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SearchTagsRequest) ProtoMessage() {}
+
+func (x *SearchTagsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_search_search_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SearchTagsRequest.ProtoReflect.Descriptor instead.
+func (*SearchTagsRequest) Descriptor() ([]byte, []int) {
+	return file_v1_search_search_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *SearchTagsRequest) GetQuery() string {
+	if x != nil {
+		return x.Query
+	}
+	return ""
+}
+
+type SearchTagsWithContextRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Query         string                 `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
 	Context       shared.ContextType     `protobuf:"varint,2,opt,name=context,proto3,enum=shared.v1.ContextType" json:"context,omitempty"`
@@ -30,21 +74,21 @@ type SearchRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *SearchRequest) Reset() {
-	*x = SearchRequest{}
-	mi := &file_v1_search_search_proto_msgTypes[0]
+func (x *SearchTagsWithContextRequest) Reset() {
+	*x = SearchTagsWithContextRequest{}
+	mi := &file_v1_search_search_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SearchRequest) String() string {
+func (x *SearchTagsWithContextRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SearchRequest) ProtoMessage() {}
+func (*SearchTagsWithContextRequest) ProtoMessage() {}
 
-func (x *SearchRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_search_search_proto_msgTypes[0]
+func (x *SearchTagsWithContextRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_search_search_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -55,47 +99,47 @@ func (x *SearchRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SearchRequest.ProtoReflect.Descriptor instead.
-func (*SearchRequest) Descriptor() ([]byte, []int) {
-	return file_v1_search_search_proto_rawDescGZIP(), []int{0}
+// Deprecated: Use SearchTagsWithContextRequest.ProtoReflect.Descriptor instead.
+func (*SearchTagsWithContextRequest) Descriptor() ([]byte, []int) {
+	return file_v1_search_search_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *SearchRequest) GetQuery() string {
+func (x *SearchTagsWithContextRequest) GetQuery() string {
 	if x != nil {
 		return x.Query
 	}
 	return ""
 }
 
-func (x *SearchRequest) GetContext() shared.ContextType {
+func (x *SearchTagsWithContextRequest) GetContext() shared.ContextType {
 	if x != nil {
 		return x.Context
 	}
 	return shared.ContextType(0)
 }
 
-type SearchResponse struct {
+type SearchTagsResponse struct {
 	state         protoimpl.MessageState    `protogen:"open.v1"`
 	Results       []*shared.TagSearchResult `protobuf:"bytes,1,rep,name=results,proto3" json:"results,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *SearchResponse) Reset() {
-	*x = SearchResponse{}
-	mi := &file_v1_search_search_proto_msgTypes[1]
+func (x *SearchTagsResponse) Reset() {
+	*x = SearchTagsResponse{}
+	mi := &file_v1_search_search_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SearchResponse) String() string {
+func (x *SearchTagsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SearchResponse) ProtoMessage() {}
+func (*SearchTagsResponse) ProtoMessage() {}
 
-func (x *SearchResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_search_search_proto_msgTypes[1]
+func (x *SearchTagsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_search_search_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -106,12 +150,12 @@ func (x *SearchResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SearchResponse.ProtoReflect.Descriptor instead.
-func (*SearchResponse) Descriptor() ([]byte, []int) {
-	return file_v1_search_search_proto_rawDescGZIP(), []int{1}
+// Deprecated: Use SearchTagsResponse.ProtoReflect.Descriptor instead.
+func (*SearchTagsResponse) Descriptor() ([]byte, []int) {
+	return file_v1_search_search_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *SearchResponse) GetResults() []*shared.TagSearchResult {
+func (x *SearchTagsResponse) GetResults() []*shared.TagSearchResult {
 	if x != nil {
 		return x.Results
 	}
@@ -122,14 +166,18 @@ var File_v1_search_search_proto protoreflect.FileDescriptor
 
 const file_v1_search_search_proto_rawDesc = "" +
 	"\n" +
-	"\x16v1/search/search.proto\x12\tsearch.v1\x1a\x1fv1/shared/tagsearchresult.proto\x1a\x1bv1/shared/contexttype.proto\"W\n" +
-	"\rSearchRequest\x12\x14\n" +
+	"\x16v1/search/search.proto\x12\tsearch.v1\x1a\x1fv1/shared/tagsearchresult.proto\x1a\x1bv1/shared/contexttype.proto\")\n" +
+	"\x11SearchTagsRequest\x12\x14\n" +
+	"\x05query\x18\x01 \x01(\tR\x05query\"f\n" +
+	"\x1cSearchTagsWithContextRequest\x12\x14\n" +
 	"\x05query\x18\x01 \x01(\tR\x05query\x120\n" +
-	"\acontext\x18\x02 \x01(\x0e2\x16.shared.v1.ContextTypeR\acontext\"F\n" +
-	"\x0eSearchResponse\x124\n" +
-	"\aresults\x18\x01 \x03(\v2\x1a.shared.v1.TagSearchResultR\aresults2N\n" +
-	"\rSearchService\x12=\n" +
-	"\x06Search\x12\x18.search.v1.SearchRequest\x1a\x19.search.v1.SearchResponseBDZBgithub.com/studyguides-com/study-guides-api/api/v1/search;searchv1b\x06proto3"
+	"\acontext\x18\x02 \x01(\x0e2\x16.shared.v1.ContextTypeR\acontext\"J\n" +
+	"\x12SearchTagsResponse\x124\n" +
+	"\aresults\x18\x01 \x03(\v2\x1a.shared.v1.TagSearchResultR\aresults2\xbb\x01\n" +
+	"\rSearchService\x12I\n" +
+	"\n" +
+	"SearchTags\x12\x1c.search.v1.SearchTagsRequest\x1a\x1d.search.v1.SearchTagsResponse\x12_\n" +
+	"\x15SearchTagsWithContext\x12'.search.v1.SearchTagsWithContextRequest\x1a\x1d.search.v1.SearchTagsResponseBDZBgithub.com/studyguides-com/study-guides-api/api/v1/search;searchv1b\x06proto3"
 
 var (
 	file_v1_search_search_proto_rawDescOnce sync.Once
@@ -143,20 +191,23 @@ func file_v1_search_search_proto_rawDescGZIP() []byte {
 	return file_v1_search_search_proto_rawDescData
 }
 
-var file_v1_search_search_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_v1_search_search_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_v1_search_search_proto_goTypes = []any{
-	(*SearchRequest)(nil),          // 0: search.v1.SearchRequest
-	(*SearchResponse)(nil),         // 1: search.v1.SearchResponse
-	(shared.ContextType)(0),        // 2: shared.v1.ContextType
-	(*shared.TagSearchResult)(nil), // 3: shared.v1.TagSearchResult
+	(*SearchTagsRequest)(nil),            // 0: search.v1.SearchTagsRequest
+	(*SearchTagsWithContextRequest)(nil), // 1: search.v1.SearchTagsWithContextRequest
+	(*SearchTagsResponse)(nil),           // 2: search.v1.SearchTagsResponse
+	(shared.ContextType)(0),              // 3: shared.v1.ContextType
+	(*shared.TagSearchResult)(nil),       // 4: shared.v1.TagSearchResult
 }
 var file_v1_search_search_proto_depIdxs = []int32{
-	2, // 0: search.v1.SearchRequest.context:type_name -> shared.v1.ContextType
-	3, // 1: search.v1.SearchResponse.results:type_name -> shared.v1.TagSearchResult
-	0, // 2: search.v1.SearchService.Search:input_type -> search.v1.SearchRequest
-	1, // 3: search.v1.SearchService.Search:output_type -> search.v1.SearchResponse
-	3, // [3:4] is the sub-list for method output_type
-	2, // [2:3] is the sub-list for method input_type
+	3, // 0: search.v1.SearchTagsWithContextRequest.context:type_name -> shared.v1.ContextType
+	4, // 1: search.v1.SearchTagsResponse.results:type_name -> shared.v1.TagSearchResult
+	0, // 2: search.v1.SearchService.SearchTags:input_type -> search.v1.SearchTagsRequest
+	1, // 3: search.v1.SearchService.SearchTagsWithContext:input_type -> search.v1.SearchTagsWithContextRequest
+	2, // 4: search.v1.SearchService.SearchTags:output_type -> search.v1.SearchTagsResponse
+	2, // 5: search.v1.SearchService.SearchTagsWithContext:output_type -> search.v1.SearchTagsResponse
+	4, // [4:6] is the sub-list for method output_type
+	2, // [2:4] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
 	2, // [2:2] is the sub-list for extension extendee
 	0, // [0:2] is the sub-list for field type_name
@@ -173,7 +224,7 @@ func file_v1_search_search_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_search_search_proto_rawDesc), len(file_v1_search_search_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

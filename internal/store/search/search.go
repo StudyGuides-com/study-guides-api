@@ -13,7 +13,7 @@ import (
 
 type SearchStore interface {
 	SearchTagsForContext(ctx context.Context, contextType types.ContextType, query string) ([]*sharedpb.TagSearchResult, error)
-	SearchTags(ctx context.Context, tagID string, query string) ([]*sharedpb.TagSearchResult, error)
+	SearchTags(ctx context.Context, query string) ([]*sharedpb.TagSearchResult, error)
 }
 
 
