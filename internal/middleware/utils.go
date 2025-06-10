@@ -39,3 +39,17 @@ func GetSessionDetails(ctx context.Context) *SessionDetails {
 		UserRoles: &userRoles,
 	}
 }
+
+// HasRole checks if the user has the specified role
+func (s *SessionDetails) HasRole(role sharedpb.UserRole) bool {
+	if s.UserRoles == nil {
+		return false
+	}
+	
+	for _, userRole := range *s.UserRoles {
+		if userRole == role {
+			return true
+		}
+	}
+	return false
+}

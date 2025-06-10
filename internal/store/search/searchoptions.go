@@ -84,4 +84,18 @@ func NewSearchOptionsFrom(ctx context.Context) *SearchOptions {
 		WithUserID(session.UserID),
 		WithUserRoles(session.UserRoles),
 	)
+}
+
+// HasRole checks if the user has the specified role
+func (s *SearchOptions) HasRole(role sharedpb.UserRole) bool {
+	if s.UserRoles == nil {
+		return false
+	}
+	
+	for _, userRole := range *s.UserRoles {
+		if userRole == role {
+			return true
+		}
+	}
+	return false
 } 
