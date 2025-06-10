@@ -82,18 +82,25 @@ func (x *TagSearchPath) GetType() string {
 }
 
 type TagSearchResult struct {
-	state              protoimpl.MessageState `protogen:"open.v1"`
-	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name               string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description        string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Type               string                 `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
-	HasQuestions       bool                   `protobuf:"varint,5,opt,name=has_questions,json=hasQuestions,proto3" json:"has_questions,omitempty"`
-	ContentRating      string                 `protobuf:"bytes,6,opt,name=content_rating,json=contentRating,proto3" json:"content_rating,omitempty"`
-	MetaTags           []string               `protobuf:"bytes,7,rep,name=meta_tags,json=metaTags,proto3" json:"meta_tags,omitempty"`
-	ContentDescriptors []string               `protobuf:"bytes,8,rep,name=content_descriptors,json=contentDescriptors,proto3" json:"content_descriptors,omitempty"`
-	TagHierarchy       []*TagSearchPath       `protobuf:"bytes,9,rep,name=tag_hierarchy,json=tagHierarchy,proto3" json:"tag_hierarchy,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	state                     protoimpl.MessageState `protogen:"open.v1"`
+	Id                        string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name                      string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Type                      string                 `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
+	ContentRating             string                 `protobuf:"bytes,7,opt,name=content_rating,json=contentRating,proto3" json:"content_rating,omitempty"`
+	MetaTags                  []string               `protobuf:"bytes,8,rep,name=meta_tags,json=metaTags,proto3" json:"meta_tags,omitempty"`
+	ContentDescriptors        []string               `protobuf:"bytes,9,rep,name=content_descriptors,json=contentDescriptors,proto3" json:"content_descriptors,omitempty"`
+	Tags                      []*TagSearchPath       `protobuf:"bytes,10,rep,name=tags,proto3" json:"tags,omitempty"`
+	Context                   string                 `protobuf:"bytes,11,opt,name=context,proto3" json:"context,omitempty"`
+	Public                    bool                   `protobuf:"varint,12,opt,name=public,proto3" json:"public,omitempty"`
+	HasQuestions              bool                   `protobuf:"varint,13,opt,name=has_questions,json=hasQuestions,proto3" json:"has_questions,omitempty"`
+	HasChildren               bool                   `protobuf:"varint,14,opt,name=has_children,json=hasChildren,proto3" json:"has_children,omitempty"`
+	BatchId                   string                 `protobuf:"bytes,15,opt,name=batch_id,json=batchId,proto3" json:"batch_id,omitempty"`
+	MissingMetaTags           bool                   `protobuf:"varint,16,opt,name=missing_meta_tags,json=missingMetaTags,proto3" json:"missing_meta_tags,omitempty"`
+	MissingContentRating      bool                   `protobuf:"varint,17,opt,name=missing_content_rating,json=missingContentRating,proto3" json:"missing_content_rating,omitempty"`
+	MissingContentDescriptors bool                   `protobuf:"varint,18,opt,name=missing_content_descriptors,json=missingContentDescriptors,proto3" json:"missing_content_descriptors,omitempty"`
+	ObjectId                  string                 `protobuf:"bytes,19,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
 }
 
 func (x *TagSearchResult) Reset() {
@@ -140,25 +147,11 @@ func (x *TagSearchResult) GetName() string {
 	return ""
 }
 
-func (x *TagSearchResult) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
 func (x *TagSearchResult) GetType() string {
 	if x != nil {
 		return x.Type
 	}
 	return ""
-}
-
-func (x *TagSearchResult) GetHasQuestions() bool {
-	if x != nil {
-		return x.HasQuestions
-	}
-	return false
 }
 
 func (x *TagSearchResult) GetContentRating() string {
@@ -182,11 +175,74 @@ func (x *TagSearchResult) GetContentDescriptors() []string {
 	return nil
 }
 
-func (x *TagSearchResult) GetTagHierarchy() []*TagSearchPath {
+func (x *TagSearchResult) GetTags() []*TagSearchPath {
 	if x != nil {
-		return x.TagHierarchy
+		return x.Tags
 	}
 	return nil
+}
+
+func (x *TagSearchResult) GetContext() string {
+	if x != nil {
+		return x.Context
+	}
+	return ""
+}
+
+func (x *TagSearchResult) GetPublic() bool {
+	if x != nil {
+		return x.Public
+	}
+	return false
+}
+
+func (x *TagSearchResult) GetHasQuestions() bool {
+	if x != nil {
+		return x.HasQuestions
+	}
+	return false
+}
+
+func (x *TagSearchResult) GetHasChildren() bool {
+	if x != nil {
+		return x.HasChildren
+	}
+	return false
+}
+
+func (x *TagSearchResult) GetBatchId() string {
+	if x != nil {
+		return x.BatchId
+	}
+	return ""
+}
+
+func (x *TagSearchResult) GetMissingMetaTags() bool {
+	if x != nil {
+		return x.MissingMetaTags
+	}
+	return false
+}
+
+func (x *TagSearchResult) GetMissingContentRating() bool {
+	if x != nil {
+		return x.MissingContentRating
+	}
+	return false
+}
+
+func (x *TagSearchResult) GetMissingContentDescriptors() bool {
+	if x != nil {
+		return x.MissingContentDescriptors
+	}
+	return false
+}
+
+func (x *TagSearchResult) GetObjectId() string {
+	if x != nil {
+		return x.ObjectId
+	}
+	return ""
 }
 
 var File_v1_shared_tagsearchresult_proto protoreflect.FileDescriptor
@@ -197,17 +253,25 @@ const file_v1_shared_tagsearchresult_proto_rawDesc = "" +
 	"\rTagSearchPath\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
-	"\x04type\x18\x03 \x01(\tR\x04type\"\xc4\x02\n" +
+	"\x04type\x18\x03 \x01(\tR\x04type\"\xc0\x04\n" +
 	"\x0fTagSearchResult\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x12\n" +
-	"\x04type\x18\x04 \x01(\tR\x04type\x12#\n" +
-	"\rhas_questions\x18\x05 \x01(\bR\fhasQuestions\x12%\n" +
-	"\x0econtent_rating\x18\x06 \x01(\tR\rcontentRating\x12\x1b\n" +
-	"\tmeta_tags\x18\a \x03(\tR\bmetaTags\x12/\n" +
-	"\x13content_descriptors\x18\b \x03(\tR\x12contentDescriptors\x12=\n" +
-	"\rtag_hierarchy\x18\t \x03(\v2\x18.shared.v1.TagSearchPathR\ftagHierarchyBDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
+	"\x04type\x18\x04 \x01(\tR\x04type\x12%\n" +
+	"\x0econtent_rating\x18\a \x01(\tR\rcontentRating\x12\x1b\n" +
+	"\tmeta_tags\x18\b \x03(\tR\bmetaTags\x12/\n" +
+	"\x13content_descriptors\x18\t \x03(\tR\x12contentDescriptors\x12,\n" +
+	"\x04tags\x18\n" +
+	" \x03(\v2\x18.shared.v1.TagSearchPathR\x04tags\x12\x18\n" +
+	"\acontext\x18\v \x01(\tR\acontext\x12\x16\n" +
+	"\x06public\x18\f \x01(\bR\x06public\x12#\n" +
+	"\rhas_questions\x18\r \x01(\bR\fhasQuestions\x12!\n" +
+	"\fhas_children\x18\x0e \x01(\bR\vhasChildren\x12\x19\n" +
+	"\bbatch_id\x18\x0f \x01(\tR\abatchId\x12*\n" +
+	"\x11missing_meta_tags\x18\x10 \x01(\bR\x0fmissingMetaTags\x124\n" +
+	"\x16missing_content_rating\x18\x11 \x01(\bR\x14missingContentRating\x12>\n" +
+	"\x1bmissing_content_descriptors\x18\x12 \x01(\bR\x19missingContentDescriptors\x12\x1b\n" +
+	"\tobject_id\x18\x13 \x01(\tR\bobjectIdBDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
 
 var (
 	file_v1_shared_tagsearchresult_proto_rawDescOnce sync.Once
@@ -227,7 +291,7 @@ var file_v1_shared_tagsearchresult_proto_goTypes = []any{
 	(*TagSearchResult)(nil), // 1: shared.v1.TagSearchResult
 }
 var file_v1_shared_tagsearchresult_proto_depIdxs = []int32{
-	0, // 0: shared.v1.TagSearchResult.tag_hierarchy:type_name -> shared.v1.TagSearchPath
+	0, // 0: shared.v1.TagSearchResult.tags:type_name -> shared.v1.TagSearchPath
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

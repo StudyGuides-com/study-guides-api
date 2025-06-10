@@ -1,4 +1,4 @@
-.PHONY: proto clean install-tools build run all run-dev run-test run-prod
+.PHONY: proto clean build run all run-dev run-test run-prod
 
 PROTO_DIR=api/study
 BIN_DIR=bin
@@ -70,9 +70,5 @@ generate-tokens:
 	node scripts/generate_jwt.js > .jwt.dev
 	node scripts/generate_jwt.js > .jwt.test
 	node scripts/generate_jwt.js > .jwt.prod
-
-install-tools:
-	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 all: proto build

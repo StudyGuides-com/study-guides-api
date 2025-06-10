@@ -13,11 +13,18 @@ message TagSearchPath {
 message TagSearchResult {
     string id = 1;
     string name = 2;
-    string description = 3;
     string type = 4;
-    bool has_questions = 5;
-    string content_rating = 6;
-    repeated string meta_tags = 7;
-    repeated string content_descriptors = 8;
-    repeated TagSearchPath tag_hierarchy = 9;
-  }
+    string content_rating = 7;
+    repeated string meta_tags = 8;
+    repeated string content_descriptors = 9;
+    repeated TagSearchPath tags = 10;
+    string context = 11;
+    bool public = 12;
+    bool has_questions = 13;
+    bool has_children = 14;
+    string batch_id = 15;
+    bool missing_meta_tags = 16;
+    bool missing_content_rating = 17;
+    bool missing_content_descriptors = 18;
+    string object_id = 19;
+}
