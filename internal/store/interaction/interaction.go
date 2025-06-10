@@ -7,10 +7,17 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	interactionpb "github.com/studyguides-com/study-guides-api/api/v1/interaction"
 )
 
 type InteractionStore interface {
-	Interact(ctx context.Context) error
+	AnswerCorrectly(ctx context.Context, req *interactionpb.InteractRequest) error
+	AnswerIncorrectly(ctx context.Context, req *interactionpb.InteractRequest) error
+	AnswerEasy(ctx context.Context, req *interactionpb.InteractRequest) error
+	AnswerHard(ctx context.Context, req *interactionpb.InteractRequest) error
+	Reveal(ctx context.Context, req *interactionpb.InteractRequest) error
+	ViewLearnMore(ctx context.Context, req *interactionpb.InteractRequest) error
+	ViewPassage(ctx context.Context, req *interactionpb.InteractRequest) error
 }
 
 

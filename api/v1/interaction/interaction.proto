@@ -10,9 +10,10 @@ import "v1/shared/deckassignment.proto";
 
 message InteractRequest {
   string question_id = 1;
-  shared.v1.StudyMethod study_method = 2;
-  shared.v1.InteractionType interaction_type = 3;
-  shared.v1.DeckAssignment deck_assignment = 4;
+  optional string user_id = 2;
+  shared.v1.StudyMethod study_method = 3;
+  shared.v1.InteractionType interaction_type = 4;
+  shared.v1.DeckAssignment deck_assignment = 5;
 }
 
 message InteractResponse {

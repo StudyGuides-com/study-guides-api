@@ -25,9 +25,10 @@ const (
 type InteractRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	QuestionId      string                 `protobuf:"bytes,1,opt,name=question_id,json=questionId,proto3" json:"question_id,omitempty"`
-	StudyMethod     shared.StudyMethod     `protobuf:"varint,2,opt,name=study_method,json=studyMethod,proto3,enum=shared.v1.StudyMethod" json:"study_method,omitempty"`
-	InteractionType shared.InteractionType `protobuf:"varint,3,opt,name=interaction_type,json=interactionType,proto3,enum=shared.v1.InteractionType" json:"interaction_type,omitempty"`
-	DeckAssignment  shared.DeckAssignment  `protobuf:"varint,4,opt,name=deck_assignment,json=deckAssignment,proto3,enum=shared.v1.DeckAssignment" json:"deck_assignment,omitempty"`
+	UserId          *string                `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3,oneof" json:"user_id,omitempty"`
+	StudyMethod     shared.StudyMethod     `protobuf:"varint,3,opt,name=study_method,json=studyMethod,proto3,enum=shared.v1.StudyMethod" json:"study_method,omitempty"`
+	InteractionType shared.InteractionType `protobuf:"varint,4,opt,name=interaction_type,json=interactionType,proto3,enum=shared.v1.InteractionType" json:"interaction_type,omitempty"`
+	DeckAssignment  shared.DeckAssignment  `protobuf:"varint,5,opt,name=deck_assignment,json=deckAssignment,proto3,enum=shared.v1.DeckAssignment" json:"deck_assignment,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -65,6 +66,13 @@ func (*InteractRequest) Descriptor() ([]byte, []int) {
 func (x *InteractRequest) GetQuestionId() string {
 	if x != nil {
 		return x.QuestionId
+	}
+	return ""
+}
+
+func (x *InteractRequest) GetUserId() string {
+	if x != nil && x.UserId != nil {
+		return *x.UserId
 	}
 	return ""
 }
@@ -138,13 +146,16 @@ var File_v1_interaction_interaction_proto protoreflect.FileDescriptor
 
 const file_v1_interaction_interaction_proto_rawDesc = "" +
 	"\n" +
-	" v1/interaction/interaction.proto\x12\x0einteraction.v1\x1a\x18v1/shared/question.proto\x1a\x1bv1/shared/studymethod.proto\x1a\x1fv1/shared/interactiontype.proto\x1a\x1ev1/shared/deckassignment.proto\"\xf8\x01\n" +
+	" v1/interaction/interaction.proto\x12\x0einteraction.v1\x1a\x18v1/shared/question.proto\x1a\x1bv1/shared/studymethod.proto\x1a\x1fv1/shared/interactiontype.proto\x1a\x1ev1/shared/deckassignment.proto\"\xa2\x02\n" +
 	"\x0fInteractRequest\x12\x1f\n" +
 	"\vquestion_id\x18\x01 \x01(\tR\n" +
-	"questionId\x129\n" +
-	"\fstudy_method\x18\x02 \x01(\x0e2\x16.shared.v1.StudyMethodR\vstudyMethod\x12E\n" +
-	"\x10interaction_type\x18\x03 \x01(\x0e2\x1a.shared.v1.InteractionTypeR\x0finteractionType\x12B\n" +
-	"\x0fdeck_assignment\x18\x04 \x01(\x0e2\x19.shared.v1.DeckAssignmentR\x0edeckAssignment\"C\n" +
+	"questionId\x12\x1c\n" +
+	"\auser_id\x18\x02 \x01(\tH\x00R\x06userId\x88\x01\x01\x129\n" +
+	"\fstudy_method\x18\x03 \x01(\x0e2\x16.shared.v1.StudyMethodR\vstudyMethod\x12E\n" +
+	"\x10interaction_type\x18\x04 \x01(\x0e2\x1a.shared.v1.InteractionTypeR\x0finteractionType\x12B\n" +
+	"\x0fdeck_assignment\x18\x05 \x01(\x0e2\x19.shared.v1.DeckAssignmentR\x0edeckAssignmentB\n" +
+	"\n" +
+	"\b_user_id\"C\n" +
 	"\x10InteractResponse\x12/\n" +
 	"\bquestion\x18\x01 \x01(\v2\x13.shared.v1.QuestionR\bquestion2c\n" +
 	"\x12InteractionService\x12M\n" +
@@ -190,6 +201,7 @@ func file_v1_interaction_interaction_proto_init() {
 	if File_v1_interaction_interaction_proto != nil {
 		return
 	}
+	file_v1_interaction_interaction_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
