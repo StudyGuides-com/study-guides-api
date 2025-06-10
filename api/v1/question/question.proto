@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package question.v1;
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/question;questionv1";
+
+import "v1/shared/question.proto";
+
+
+message ForTagRequest {
+    string tag_id = 1;
+}
+
+message QuestionResponse {
+  repeated shared.v1.Question questions = 1;
+}
+
+service QuestionService {
+  rpc ForTag(ForTagRequest) returns (QuestionResponse);
+
+}
+

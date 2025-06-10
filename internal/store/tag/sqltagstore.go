@@ -2,6 +2,7 @@ package tag
 
 import (
 	"context"
+	"time"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -9,6 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type SqlTagStore struct {
@@ -16,21 +18,35 @@ type SqlTagStore struct {
 }
 
 type tagRow struct {
-	ID            string `db:"id"`
-	Name          string `db:"name"`
-	Type          string `db:"type"`
-	Context       string `db:"context"`
-	ContentRating string `db:"content_rating"`
-	Public        bool   `db:"public"`
-	AccessCount   int64  `db:"access_count"`
+	ID                string            `db:"id"`
+	BatchID           *string           `db:"batchId"`
+	Hash              string            `db:"hash"`
+	Name              string            `db:"name"`
+	Description       *string           `db:"description"`
+	Type              string            `db:"type"`
+	Context           string            `db:"context"`
+	ParentTagID       *string           `db:"parentTagId"`
+	ContentRating     string            `db:"contentRating"`
+	ContentDescriptors []string         `db:"contentDescriptors"`
+	MetaTags          []string          `db:"metaTags"`
+	Public            bool              `db:"public"`
+	AccessCount       int64             `db:"accessCount"`
+	Metadata          map[string]string `db:"metadata"`
+	CreatedAt         time.Time         `db:"createdAt"`
+	UpdatedAt         time.Time         `db:"updatedAt"`
+	OwnerID           *string           `db:"ownerId"`
+	HasQuestions      bool              `db:"hasQuestions"`
+	HasChildren       bool              `db:"hasChildren"`
 }
 
 func (s *SqlTagStore) GetTagByID(ctx context.Context, id string) (*sharedpb.Tag, error) {
 	var row tagRow
 
 	err := pgxscan.Get(ctx, s.db, &row, `
-		SELECT id, name, type, context, content_rating, public, access_count
-		FROM tags
+		SELECT id, "batchId", hash, name, description, type, context, "parentTagId",
+		       "contentRating", "contentDescriptors", "metaTags", public, "accessCount",
+		       metadata, "createdAt", "updatedAt", "ownerId", "hasQuestions", "hasChildren"
+		FROM "Tag"
 		WHERE id = $1
 	`, id)
 	if err != nil {
@@ -38,13 +54,25 @@ func (s *SqlTagStore) GetTagByID(ctx context.Context, id string) (*sharedpb.Tag,
 	}
 
 	return &sharedpb.Tag{
-		Id:            row.ID,
-		Name:          row.Name,
-		Type:          sharedpb.TagType(sharedpb.TagType_value[row.Type]),
-		Context:       row.Context,
-		ContentRating: sharedpb.ContentRating(sharedpb.ContentRating_value[row.ContentRating]),
-		Public:        row.Public,
-		AccessCount:   int32(row.AccessCount),
+		Id:                row.ID,
+		BatchId:           row.BatchID,
+		Hash:              row.Hash,
+		Name:              row.Name,
+		Description:       row.Description,
+		Type:              sharedpb.TagType(sharedpb.TagType_value[row.Type]),
+		Context:           row.Context,
+		ParentTagId:       row.ParentTagID,
+		ContentRating:     sharedpb.ContentRating(sharedpb.ContentRating_value[row.ContentRating]),
+		ContentDescriptors: row.ContentDescriptors,
+		MetaTags:          row.MetaTags,
+		Public:            row.Public,
+		AccessCount:       int32(row.AccessCount),
+		Metadata:          row.Metadata,
+		CreatedAt:         timestamppb.New(row.CreatedAt),
+		UpdatedAt:         timestamppb.New(row.UpdatedAt),
+		OwnerId:           row.OwnerID,
+		HasQuestions:      row.HasQuestions,
+		HasChildren:       row.HasChildren,
 	}, nil
 }
 
@@ -52,9 +80,11 @@ func (s *SqlTagStore) ListTagsByParent(ctx context.Context, parentID string) ([]
 	var rows []tagRow
 
 	err := pgxscan.Select(ctx, s.db, &rows, `
-		SELECT id, name, type, context, content_rating, public, access_count
-		FROM tags
-		WHERE parent_id = $1
+		SELECT id, "batchId", hash, name, description, type, context, "parentTagId",
+		       "contentRating", "contentDescriptors", "metaTags", public, "accessCount",
+		       metadata, "createdAt", "updatedAt", "ownerId", "hasQuestions", "hasChildren"
+		FROM "Tag"
+		WHERE "parentTagId" = $1
 	`, parentID)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "list tags by parent: "+err.Error())
@@ -67,8 +97,10 @@ func (s *SqlTagStore) ListTagsByType(ctx context.Context, tagType sharedpb.TagTy
 	var rows []tagRow
 
 	err := pgxscan.Select(ctx, s.db, &rows, `
-		SELECT id, name, type, context, content_rating, public, access_count
-		FROM tags
+		SELECT id, "batchId", hash, name, description, type, context, "parentTagId",
+		       "contentRating", "contentDescriptors", "metaTags", public, "accessCount",
+		       metadata, "createdAt", "updatedAt", "ownerId", "hasQuestions", "hasChildren"
+		FROM "Tag"
 		WHERE type = $1
 	`, tagType.String())
 	if err != nil {
@@ -82,9 +114,11 @@ func (s *SqlTagStore) ListRootTags(ctx context.Context) ([]*sharedpb.Tag, error)
 	var rows []tagRow
 
 	err := pgxscan.Select(ctx, s.db, &rows, `
-		SELECT id, name, type, context, content_rating, public, access_count
-		FROM tags
-		WHERE parent_id IS NULL
+		SELECT id, "batchId", hash, name, description, type, context, "parentTagId",
+		       "contentRating", "contentDescriptors", "metaTags", public, "accessCount",
+		       metadata, "createdAt", "updatedAt", "ownerId", "hasQuestions", "hasChildren"
+		FROM "Tag"
+		WHERE "parentTagId" IS NULL
 	`)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "list root tags: "+err.Error())
@@ -97,13 +131,25 @@ func mapRowsToTags(rows []tagRow) []*sharedpb.Tag {
 	var tags []*sharedpb.Tag
 	for _, row := range rows {
 		tags = append(tags, &sharedpb.Tag{
-			Id:            row.ID,
-			Name:          row.Name,
-			Type:          sharedpb.TagType(sharedpb.TagType_value[row.Type]),
-			Context:       row.Context,
-			ContentRating: sharedpb.ContentRating(sharedpb.ContentRating_value[row.ContentRating]),
-			Public:        row.Public,
-			AccessCount:   int32(row.AccessCount),
+			Id:                row.ID,
+			BatchId:           row.BatchID,
+			Hash:              row.Hash,
+			Name:              row.Name,
+			Description:       row.Description,
+			Type:              sharedpb.TagType(sharedpb.TagType_value[row.Type]),
+			Context:           row.Context,
+			ParentTagId:       row.ParentTagID,
+			ContentRating:     sharedpb.ContentRating(sharedpb.ContentRating_value[row.ContentRating]),
+			ContentDescriptors: row.ContentDescriptors,
+			MetaTags:          row.MetaTags,
+			Public:            row.Public,
+			AccessCount:       int32(row.AccessCount),
+			Metadata:          row.Metadata,
+			CreatedAt:         timestamppb.New(row.CreatedAt),
+			UpdatedAt:         timestamppb.New(row.UpdatedAt),
+			OwnerId:           row.OwnerID,
+			HasQuestions:      row.HasQuestions,
+			HasChildren:       row.HasChildren,
 		})
 	}
 	return tags

@@ -19,13 +19,20 @@ type AlgoliaStore struct {
 	client *search.Client
 }
 
-// NewAlgoliaSearchClient creates a new Algolia search client
-func NewAlgoliaStore(appID, apiKey string) *AlgoliaStore {
+// NewAlgoliaStore creates a new Algolia search client
+func NewAlgoliaStore(appID, apiKey string) (*AlgoliaStore, error) {
+	if appID == "" || apiKey == "" {
+		return nil, status.Error(codes.InvalidArgument, "appID and apiKey are required")
+	}
+
 	client := search.NewClient(appID, apiKey)
+	if client == nil {
+		return nil, status.Error(codes.Internal, "failed to create Algolia client")
+	}
 	
 	return &AlgoliaStore{
 		client: client,
-	}
+	}, nil
 }
 
 // GetIndex returns an Algolia index by name

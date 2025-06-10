@@ -11,6 +11,6 @@ type SearchStore interface {
 	SearchUsers(ctx context.Context, query string, opts *SearchOptions) ([]*sharedpb.UserSearchResult, error)
 }
 
-func NewAlgoliaSearchStore(ctx context.Context, appID, apiKey string) SearchStore {
+func NewAlgoliaSearchStore(ctx context.Context, appID, apiKey string) (SearchStore, error) {
 	return NewAlgoliaStore(appID, apiKey)
 }

@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package shared.v1;
+
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+import "google/protobuf/timestamp.proto";
+
+// Question represents a question in the system
+message Question {
+  string id = 1;
+  string batch_id = 2;
+  string question_text = 3;
+  string answer_text = 4;
+  string hash = 5;
+  string learn_more = 6;
+  repeated string distractors = 7;
+  string video_url = 8;
+  string image_url = 9;
+  int32 version = 10;
+  bool public = 11;
+  map<string, string> metadata = 12;
+  google.protobuf.Timestamp created_at = 13;
+  google.protobuf.Timestamp updated_at = 14;
+  int32 correct_count = 15;
+  double difficulty_ratio = 16;
+  int32 incorrect_count = 17;
+  string owner_id = 18;
+  string passage_id = 19;
+}

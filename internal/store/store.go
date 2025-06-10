@@ -46,7 +46,10 @@ func NewStore() (Store, error) {
 		return nil, status.Error(codes.FailedPrecondition, "missing required environment variables")
 	}
 
-	searchStore := search.NewAlgoliaSearchStore(ctx, algoliaAppID, algoliaAdminAPIKey)
+	searchStore, err := search.NewAlgoliaSearchStore(ctx, algoliaAppID, algoliaAdminAPIKey)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	
 	userStore, err := user.NewSqlUserStore(ctx, dbURL)
 	if err != nil {
