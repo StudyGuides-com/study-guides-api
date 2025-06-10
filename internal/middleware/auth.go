@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
+	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -37,14 +38,24 @@ func AuthUnaryInterceptor(secret string) grpc.UnaryServerInterceptor {
 					ctx = context.WithValue(ctx, userIDKey, sub)
 				}
 				if role, ok := claims["roles"].([]interface{}); ok {
-					roleStrings := make([]string, len(role))
+					roles := make([]sharedpb.UserRole, len(role))
 					for i, r := range role {
 						if str, ok := r.(string); ok {
-							roleStrings[i] = str
+							switch strings.ToLower(str) {
+							case "admin":
+								roles[i] = sharedpb.UserRole_USER_ROLE_ADMIN
+							case "user":
+								roles[i] = sharedpb.UserRole_USER_ROLE_USER
+							case "freelancer":
+								roles[i] = sharedpb.UserRole_USER_ROLE_FREELANCER
+							case "tester":
+								roles[i] = sharedpb.UserRole_USER_ROLE_TESTER
+							default:
+								roles[i] = sharedpb.UserRole_USER_ROLE_UNSPECIFIED
+							}
 						}
 					}
-					roleStr := strings.Join(roleStrings, ",")
-					ctx = context.WithValue(ctx, userRoleKey, roleStr)
+					ctx = context.WithValue(ctx, userRoleKey, roles)
 				}
 			}
 		}

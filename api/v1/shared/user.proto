@@ -5,6 +5,13 @@ option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;s
 
 import "google/protobuf/timestamp.proto";
 
+enum UserRole {
+	USER_ROLE_UNSPECIFIED = 0;
+	USER_ROLE_ADMIN = 1;
+	USER_ROLE_USER = 2;
+	USER_ROLE_FREELANCER = 3;
+	USER_ROLE_TESTER = 4;
+}
 
 message User {
 	string id = 1;

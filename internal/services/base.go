@@ -5,6 +5,7 @@ package services
 import (
 	"context"
 
+	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 	"github.com/studyguides-com/study-guides-api/internal/middleware"
 )
 
@@ -14,7 +15,7 @@ func PublicBaseHandler(ctx context.Context, fn func(ctx context.Context) (interf
 }
 
 // AuthBaseHandler is used when authentication is required.
-func AuthBaseHandler(ctx context.Context, fn func(ctx context.Context, userID *string, userRoles *[]string) (interface{}, error)) (interface{}, error) {
+func AuthBaseHandler(ctx context.Context, fn func(ctx context.Context, userID *string, userRoles *[]sharedpb.UserRole) (interface{}, error)) (interface{}, error) {
 	userID, ok := middleware.UserIDFromContext(ctx)
 	userRoles, rolesOk := middleware.UserRolesFromContext(ctx)
 	if ok && rolesOk {

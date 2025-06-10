@@ -5,6 +5,7 @@ import (
 	"log"
 
 	searchpb "github.com/studyguides-com/study-guides-api/api/v1/search"
+	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 	"github.com/studyguides-com/study-guides-api/internal/store/search"
 	"google.golang.org/grpc/codes"
@@ -23,7 +24,7 @@ func NewSearchService(s store.Store) *SearchService {
 }
 
 func (s *SearchService) SearchTags(ctx context.Context, req *searchpb.SearchTagsRequest) (*searchpb.SearchTagsResponse, error) {
-	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, userID *string, userRoles *[]string) (interface{}, error) {
+	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, userID *string, userRoles *[]sharedpb.UserRole) (interface{}, error) {
 		log.Printf("Search request from user %s: query=%s", *userID, req.Query)
 
 		opts := &search.SearchOptions{
@@ -49,7 +50,7 @@ func (s *SearchService) SearchTags(ctx context.Context, req *searchpb.SearchTags
 }
 
 func (s *SearchService) SearchUsers(ctx context.Context, req *searchpb.SearchUsersRequest) (*searchpb.SearchUsersResponse, error) {
-	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, userID *string, userRoles *[]string) (interface{}, error) {
+	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, userID *string, userRoles *[]sharedpb.UserRole) (interface{}, error) {
 		log.Printf("Search request from user %s: query=%s", *userID, req.Query)
 
 		opts := &search.SearchOptions{

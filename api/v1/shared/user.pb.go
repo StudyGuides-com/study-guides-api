@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v5.29.3
-// source: v1/shared/user.proto
+// source: api/v1/shared/user.proto
 
 package sharedv1
 
@@ -22,6 +22,61 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type UserRole int32
+
+const (
+	UserRole_USER_ROLE_UNSPECIFIED UserRole = 0
+	UserRole_USER_ROLE_ADMIN       UserRole = 1
+	UserRole_USER_ROLE_USER        UserRole = 2
+	UserRole_USER_ROLE_FREELANCER  UserRole = 3
+	UserRole_USER_ROLE_TESTER      UserRole = 4
+)
+
+// Enum value maps for UserRole.
+var (
+	UserRole_name = map[int32]string{
+		0: "USER_ROLE_UNSPECIFIED",
+		1: "USER_ROLE_ADMIN",
+		2: "USER_ROLE_USER",
+		3: "USER_ROLE_FREELANCER",
+		4: "USER_ROLE_TESTER",
+	}
+	UserRole_value = map[string]int32{
+		"USER_ROLE_UNSPECIFIED": 0,
+		"USER_ROLE_ADMIN":       1,
+		"USER_ROLE_USER":        2,
+		"USER_ROLE_FREELANCER":  3,
+		"USER_ROLE_TESTER":      4,
+	}
+)
+
+func (x UserRole) Enum() *UserRole {
+	p := new(UserRole)
+	*p = x
+	return p
+}
+
+func (x UserRole) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (UserRole) Descriptor() protoreflect.EnumDescriptor {
+	return file_api_v1_shared_user_proto_enumTypes[0].Descriptor()
+}
+
+func (UserRole) Type() protoreflect.EnumType {
+	return &file_api_v1_shared_user_proto_enumTypes[0]
+}
+
+func (x UserRole) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use UserRole.Descriptor instead.
+func (UserRole) EnumDescriptor() ([]byte, []int) {
+	return file_api_v1_shared_user_proto_rawDescGZIP(), []int{0}
+}
+
 type User struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -37,7 +92,7 @@ type User struct {
 
 func (x *User) Reset() {
 	*x = User{}
-	mi := &file_v1_shared_user_proto_msgTypes[0]
+	mi := &file_api_v1_shared_user_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -49,7 +104,7 @@ func (x *User) String() string {
 func (*User) ProtoMessage() {}
 
 func (x *User) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_shared_user_proto_msgTypes[0]
+	mi := &file_api_v1_shared_user_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -62,7 +117,7 @@ func (x *User) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use User.ProtoReflect.Descriptor instead.
 func (*User) Descriptor() ([]byte, []int) {
-	return file_v1_shared_user_proto_rawDescGZIP(), []int{0}
+	return file_api_v1_shared_user_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *User) GetId() string {
@@ -114,11 +169,11 @@ func (x *User) GetContentTagId() string {
 	return ""
 }
 
-var File_v1_shared_user_proto protoreflect.FileDescriptor
+var File_api_v1_shared_user_proto protoreflect.FileDescriptor
 
-const file_v1_shared_user_proto_rawDesc = "" +
+const file_api_v1_shared_user_proto_rawDesc = "" +
 	"\n" +
-	"\x14v1/shared/user.proto\x12\tshared.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xcb\x02\n" +
+	"\x18api/v1/shared/user.proto\x12\tshared.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xcb\x02\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\x04name\x18\x02 \x01(\tH\x00R\x04name\x88\x01\x01\x12 \n" +
@@ -133,27 +188,35 @@ const file_v1_shared_user_proto_rawDesc = "" +
 	"\x06_emailB\x11\n" +
 	"\x0f_email_verifiedB\b\n" +
 	"\x06_imageB\x11\n" +
-	"\x0f_content_tag_idBDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
+	"\x0f_content_tag_id*~\n" +
+	"\bUserRole\x12\x19\n" +
+	"\x15USER_ROLE_UNSPECIFIED\x10\x00\x12\x13\n" +
+	"\x0fUSER_ROLE_ADMIN\x10\x01\x12\x12\n" +
+	"\x0eUSER_ROLE_USER\x10\x02\x12\x18\n" +
+	"\x14USER_ROLE_FREELANCER\x10\x03\x12\x14\n" +
+	"\x10USER_ROLE_TESTER\x10\x04BDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
 
 var (
-	file_v1_shared_user_proto_rawDescOnce sync.Once
-	file_v1_shared_user_proto_rawDescData []byte
+	file_api_v1_shared_user_proto_rawDescOnce sync.Once
+	file_api_v1_shared_user_proto_rawDescData []byte
 )
 
-func file_v1_shared_user_proto_rawDescGZIP() []byte {
-	file_v1_shared_user_proto_rawDescOnce.Do(func() {
-		file_v1_shared_user_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_v1_shared_user_proto_rawDesc), len(file_v1_shared_user_proto_rawDesc)))
+func file_api_v1_shared_user_proto_rawDescGZIP() []byte {
+	file_api_v1_shared_user_proto_rawDescOnce.Do(func() {
+		file_api_v1_shared_user_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_api_v1_shared_user_proto_rawDesc), len(file_api_v1_shared_user_proto_rawDesc)))
 	})
-	return file_v1_shared_user_proto_rawDescData
+	return file_api_v1_shared_user_proto_rawDescData
 }
 
-var file_v1_shared_user_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
-var file_v1_shared_user_proto_goTypes = []any{
-	(*User)(nil),                  // 0: shared.v1.User
-	(*timestamppb.Timestamp)(nil), // 1: google.protobuf.Timestamp
+var file_api_v1_shared_user_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_api_v1_shared_user_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_api_v1_shared_user_proto_goTypes = []any{
+	(UserRole)(0),                 // 0: shared.v1.UserRole
+	(*User)(nil),                  // 1: shared.v1.User
+	(*timestamppb.Timestamp)(nil), // 2: google.protobuf.Timestamp
 }
-var file_v1_shared_user_proto_depIdxs = []int32{
-	1, // 0: shared.v1.User.email_verified:type_name -> google.protobuf.Timestamp
+var file_api_v1_shared_user_proto_depIdxs = []int32{
+	2, // 0: shared.v1.User.email_verified:type_name -> google.protobuf.Timestamp
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -161,27 +224,28 @@ var file_v1_shared_user_proto_depIdxs = []int32{
 	0, // [0:1] is the sub-list for field type_name
 }
 
-func init() { file_v1_shared_user_proto_init() }
-func file_v1_shared_user_proto_init() {
-	if File_v1_shared_user_proto != nil {
+func init() { file_api_v1_shared_user_proto_init() }
+func file_api_v1_shared_user_proto_init() {
+	if File_api_v1_shared_user_proto != nil {
 		return
 	}
-	file_v1_shared_user_proto_msgTypes[0].OneofWrappers = []any{}
+	file_api_v1_shared_user_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_shared_user_proto_rawDesc), len(file_v1_shared_user_proto_rawDesc)),
-			NumEnums:      0,
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_v1_shared_user_proto_rawDesc), len(file_api_v1_shared_user_proto_rawDesc)),
+			NumEnums:      1,
 			NumMessages:   1,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_v1_shared_user_proto_goTypes,
-		DependencyIndexes: file_v1_shared_user_proto_depIdxs,
-		MessageInfos:      file_v1_shared_user_proto_msgTypes,
+		GoTypes:           file_api_v1_shared_user_proto_goTypes,
+		DependencyIndexes: file_api_v1_shared_user_proto_depIdxs,
+		EnumInfos:         file_api_v1_shared_user_proto_enumTypes,
+		MessageInfos:      file_api_v1_shared_user_proto_msgTypes,
 	}.Build()
-	File_v1_shared_user_proto = out.File
-	file_v1_shared_user_proto_goTypes = nil
-	file_v1_shared_user_proto_depIdxs = nil
+	File_api_v1_shared_user_proto = out.File
+	file_api_v1_shared_user_proto_goTypes = nil
+	file_api_v1_shared_user_proto_depIdxs = nil
 }

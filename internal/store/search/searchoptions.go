@@ -1,6 +1,7 @@
 package search
 
 import (
+	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 	"github.com/studyguides-com/study-guides-api/internal/types"
 )
 
@@ -11,7 +12,7 @@ type SearchOptions struct {
 	// ContextType is the type of context to filter by, can be empty for no context filter
 	ContextType types.ContextType
 	// UserRoles is the roles of the user performing the search, can be nil for anonymous users
-	UserRoles *[]string
+	UserRoles *[]sharedpb.UserRole
 }
 
 // NewSearchOptions creates a new SearchOptions with optional fields
