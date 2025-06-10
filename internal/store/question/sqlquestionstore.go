@@ -87,3 +87,16 @@ func (s *SqlQuestionStore) GetQuestionsByTagID(ctx context.Context, tagID string
 
 	return mapRowsToQuestions(rows), nil
 }
+
+func (s *SqlQuestionStore) Report(ctx context.Context, questionID string, userId string, reportType sharedpb.ReportType, reason string) error {
+	_, err := s.db.Exec(ctx, `
+		INSERT INTO "UserQuestionReport" ("userId", "questionId", report)
+		VALUES ($1, $2, $3)
+		ON CONFLICT ("userId", "questionId") 
+		DO UPDATE SET report = $3, "createdAt" = CURRENT_TIMESTAMP
+	`, userId, questionID, reportType)
+	if err != nil {
+		return status.Errorf(codes.Internal, "failed to report question: %v", err)
+	}
+	return nil
+}

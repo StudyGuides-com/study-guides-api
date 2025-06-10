@@ -24,6 +24,9 @@ const (
 	TagService_ListTagsByParent_FullMethodName = "/tag.v1.TagService/ListTagsByParent"
 	TagService_ListTagsByType_FullMethodName   = "/tag.v1.TagService/ListTagsByType"
 	TagService_ListRootTags_FullMethodName     = "/tag.v1.TagService/ListRootTags"
+	TagService_Report_FullMethodName           = "/tag.v1.TagService/Report"
+	TagService_Favorite_FullMethodName         = "/tag.v1.TagService/Favorite"
+	TagService_Unfavorite_FullMethodName       = "/tag.v1.TagService/Unfavorite"
 )
 
 // TagServiceClient is the client API for TagService service.
@@ -34,6 +37,9 @@ type TagServiceClient interface {
 	ListTagsByParent(ctx context.Context, in *ListTagsByParentRequest, opts ...grpc.CallOption) (*ListTagsResponse, error)
 	ListTagsByType(ctx context.Context, in *ListTagsByTypeRequest, opts ...grpc.CallOption) (*ListTagsResponse, error)
 	ListRootTags(ctx context.Context, in *ListRootTagsRequest, opts ...grpc.CallOption) (*ListTagsResponse, error)
+	Report(ctx context.Context, in *ReportTagRequest, opts ...grpc.CallOption) (*ReportTagResponse, error)
+	Favorite(ctx context.Context, in *FavoriteTagRequest, opts ...grpc.CallOption) (*FavoriteTagResponse, error)
+	Unfavorite(ctx context.Context, in *UnfavoriteTagRequest, opts ...grpc.CallOption) (*UnfavoriteTagResponse, error)
 }
 
 type tagServiceClient struct {
@@ -84,6 +90,36 @@ func (c *tagServiceClient) ListRootTags(ctx context.Context, in *ListRootTagsReq
 	return out, nil
 }
 
+func (c *tagServiceClient) Report(ctx context.Context, in *ReportTagRequest, opts ...grpc.CallOption) (*ReportTagResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReportTagResponse)
+	err := c.cc.Invoke(ctx, TagService_Report_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tagServiceClient) Favorite(ctx context.Context, in *FavoriteTagRequest, opts ...grpc.CallOption) (*FavoriteTagResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(FavoriteTagResponse)
+	err := c.cc.Invoke(ctx, TagService_Favorite_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tagServiceClient) Unfavorite(ctx context.Context, in *UnfavoriteTagRequest, opts ...grpc.CallOption) (*UnfavoriteTagResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UnfavoriteTagResponse)
+	err := c.cc.Invoke(ctx, TagService_Unfavorite_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TagServiceServer is the server API for TagService service.
 // All implementations must embed UnimplementedTagServiceServer
 // for forward compatibility.
@@ -92,6 +128,9 @@ type TagServiceServer interface {
 	ListTagsByParent(context.Context, *ListTagsByParentRequest) (*ListTagsResponse, error)
 	ListTagsByType(context.Context, *ListTagsByTypeRequest) (*ListTagsResponse, error)
 	ListRootTags(context.Context, *ListRootTagsRequest) (*ListTagsResponse, error)
+	Report(context.Context, *ReportTagRequest) (*ReportTagResponse, error)
+	Favorite(context.Context, *FavoriteTagRequest) (*FavoriteTagResponse, error)
+	Unfavorite(context.Context, *UnfavoriteTagRequest) (*UnfavoriteTagResponse, error)
 	mustEmbedUnimplementedTagServiceServer()
 }
 
@@ -113,6 +152,15 @@ func (UnimplementedTagServiceServer) ListTagsByType(context.Context, *ListTagsBy
 }
 func (UnimplementedTagServiceServer) ListRootTags(context.Context, *ListRootTagsRequest) (*ListTagsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListRootTags not implemented")
+}
+func (UnimplementedTagServiceServer) Report(context.Context, *ReportTagRequest) (*ReportTagResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Report not implemented")
+}
+func (UnimplementedTagServiceServer) Favorite(context.Context, *FavoriteTagRequest) (*FavoriteTagResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Favorite not implemented")
+}
+func (UnimplementedTagServiceServer) Unfavorite(context.Context, *UnfavoriteTagRequest) (*UnfavoriteTagResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Unfavorite not implemented")
 }
 func (UnimplementedTagServiceServer) mustEmbedUnimplementedTagServiceServer() {}
 func (UnimplementedTagServiceServer) testEmbeddedByValue()                    {}
@@ -207,6 +255,60 @@ func _TagService_ListRootTags_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TagService_Report_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReportTagRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TagServiceServer).Report(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TagService_Report_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TagServiceServer).Report(ctx, req.(*ReportTagRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TagService_Favorite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FavoriteTagRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TagServiceServer).Favorite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TagService_Favorite_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TagServiceServer).Favorite(ctx, req.(*FavoriteTagRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TagService_Unfavorite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UnfavoriteTagRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TagServiceServer).Unfavorite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TagService_Unfavorite_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TagServiceServer).Unfavorite(ctx, req.(*UnfavoriteTagRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TagService_ServiceDesc is the grpc.ServiceDesc for TagService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -229,6 +331,18 @@ var TagService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListRootTags",
 			Handler:    _TagService_ListRootTags_Handler,
+		},
+		{
+			MethodName: "Report",
+			Handler:    _TagService_Report_Handler,
+		},
+		{
+			MethodName: "Favorite",
+			Handler:    _TagService_Favorite_Handler,
+		},
+		{
+			MethodName: "Unfavorite",
+			Handler:    _TagService_Unfavorite_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

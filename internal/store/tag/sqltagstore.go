@@ -154,3 +154,37 @@ func mapRowsToTags(rows []tagRow) []*sharedpb.Tag {
 	}
 	return tags
 }
+
+func (s *SqlTagStore) Report(ctx context.Context, tagID string, userId string, reportType sharedpb.ReportType, reason string) error {
+	_, err := s.db.Exec(ctx, `
+		INSERT INTO "UserTagReport" ("userId", "tagId", report)
+		VALUES ($1, $2, $3)
+		ON CONFLICT ("userId", "tagId") 
+		DO UPDATE SET report = $3, "createdAt" = CURRENT_TIMESTAMP
+	`, userId, tagID, reportType)
+	if err != nil {
+		return status.Errorf(codes.Internal, "failed to report tag: %v", err)
+	}
+	return nil
+}
+
+func (s *SqlTagStore) Favorite(ctx context.Context, tagID string, userId string) error {
+	_, err := s.db.Exec(ctx, `
+		INSERT INTO "UserTagFavorite" ("userId", "tagId", "createdAt")
+		VALUES ($1, $2, CURRENT_TIMESTAMP)
+	`, userId, tagID)
+	if err != nil {
+		return status.Errorf(codes.Internal, "failed to favorite tag: %v", err)
+	}
+	return nil
+}
+
+func (s *SqlTagStore) Unfavorite(ctx context.Context, tagID string, userId string) error {
+	_, err := s.db.Exec(ctx, `
+		DELETE FROM "UserTagFavorite" WHERE "userId" = $1 AND "tagId" = $2
+	`, userId, tagID)
+	if err != nil {
+		return status.Errorf(codes.Internal, "failed to unfavorite tag: %v", err)
+	}
+	return nil
+}

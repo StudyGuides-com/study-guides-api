@@ -4,6 +4,7 @@ package tag.v1;
 option go_package = "github.com/studyguides-com/study-guides-api/api/v1/tag;tagv1";
 
 import "v1/shared/tag.proto";
+import "v1/shared/reporttype.proto";
 
 message GetTagRequest {
   string id = 1;
@@ -33,10 +34,39 @@ message ListTagsResponse {
   string next_page_token = 2;
 }
 
-service TagService {
+message ReportTagRequest {
+  string tag_id = 1;
+  shared.v1.ReportType report_type = 2;
+  string reason = 3;
+}
+
+message ReportTagResponse {
+  bool success = 1;
+}
+
+message FavoriteTagRequest {
+  string tag_id = 1;
+}
+
+message FavoriteTagResponse {
+  bool success = 1;
+}
+
+message UnfavoriteTagRequest {
+  string tag_id = 1;
+}
+
+message UnfavoriteTagResponse {
+  bool success = 1;
+}
+
+  service TagService {
     rpc GetTag(GetTagRequest) returns (shared.v1.Tag) {}
     rpc ListTagsByParent(ListTagsByParentRequest) returns (ListTagsResponse) {}
     rpc ListTagsByType(ListTagsByTypeRequest) returns (ListTagsResponse) {}
-    rpc ListRootTags(ListRootTagsRequest) returns (ListTagsResponse) {} // optional: top-level tags
+    rpc ListRootTags(ListRootTagsRequest) returns (ListTagsResponse) {}
+    rpc Report(ReportTagRequest) returns (ReportTagResponse) {}
+    rpc Favorite(FavoriteTagRequest) returns (FavoriteTagResponse) {}
+    rpc Unfavorite(UnfavoriteTagRequest) returns (UnfavoriteTagResponse) {}
   }
   

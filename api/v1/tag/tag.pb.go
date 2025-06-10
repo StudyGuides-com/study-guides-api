@@ -290,11 +290,291 @@ func (x *ListTagsResponse) GetNextPageToken() string {
 	return ""
 }
 
+type ReportTagRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TagId         string                 `protobuf:"bytes,1,opt,name=tag_id,json=tagId,proto3" json:"tag_id,omitempty"`
+	ReportType    shared.ReportType      `protobuf:"varint,2,opt,name=report_type,json=reportType,proto3,enum=shared.v1.ReportType" json:"report_type,omitempty"`
+	Reason        string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReportTagRequest) Reset() {
+	*x = ReportTagRequest{}
+	mi := &file_v1_tag_tag_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReportTagRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReportTagRequest) ProtoMessage() {}
+
+func (x *ReportTagRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_tag_tag_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReportTagRequest.ProtoReflect.Descriptor instead.
+func (*ReportTagRequest) Descriptor() ([]byte, []int) {
+	return file_v1_tag_tag_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ReportTagRequest) GetTagId() string {
+	if x != nil {
+		return x.TagId
+	}
+	return ""
+}
+
+func (x *ReportTagRequest) GetReportType() shared.ReportType {
+	if x != nil {
+		return x.ReportType
+	}
+	return shared.ReportType(0)
+}
+
+func (x *ReportTagRequest) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+type ReportTagResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReportTagResponse) Reset() {
+	*x = ReportTagResponse{}
+	mi := &file_v1_tag_tag_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReportTagResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReportTagResponse) ProtoMessage() {}
+
+func (x *ReportTagResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_tag_tag_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReportTagResponse.ProtoReflect.Descriptor instead.
+func (*ReportTagResponse) Descriptor() ([]byte, []int) {
+	return file_v1_tag_tag_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ReportTagResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type FavoriteTagRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TagId         string                 `protobuf:"bytes,1,opt,name=tag_id,json=tagId,proto3" json:"tag_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FavoriteTagRequest) Reset() {
+	*x = FavoriteTagRequest{}
+	mi := &file_v1_tag_tag_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FavoriteTagRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FavoriteTagRequest) ProtoMessage() {}
+
+func (x *FavoriteTagRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_tag_tag_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FavoriteTagRequest.ProtoReflect.Descriptor instead.
+func (*FavoriteTagRequest) Descriptor() ([]byte, []int) {
+	return file_v1_tag_tag_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *FavoriteTagRequest) GetTagId() string {
+	if x != nil {
+		return x.TagId
+	}
+	return ""
+}
+
+type FavoriteTagResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FavoriteTagResponse) Reset() {
+	*x = FavoriteTagResponse{}
+	mi := &file_v1_tag_tag_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FavoriteTagResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FavoriteTagResponse) ProtoMessage() {}
+
+func (x *FavoriteTagResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_tag_tag_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FavoriteTagResponse.ProtoReflect.Descriptor instead.
+func (*FavoriteTagResponse) Descriptor() ([]byte, []int) {
+	return file_v1_tag_tag_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *FavoriteTagResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type UnfavoriteTagRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TagId         string                 `protobuf:"bytes,1,opt,name=tag_id,json=tagId,proto3" json:"tag_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnfavoriteTagRequest) Reset() {
+	*x = UnfavoriteTagRequest{}
+	mi := &file_v1_tag_tag_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnfavoriteTagRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnfavoriteTagRequest) ProtoMessage() {}
+
+func (x *UnfavoriteTagRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_tag_tag_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnfavoriteTagRequest.ProtoReflect.Descriptor instead.
+func (*UnfavoriteTagRequest) Descriptor() ([]byte, []int) {
+	return file_v1_tag_tag_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *UnfavoriteTagRequest) GetTagId() string {
+	if x != nil {
+		return x.TagId
+	}
+	return ""
+}
+
+type UnfavoriteTagResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnfavoriteTagResponse) Reset() {
+	*x = UnfavoriteTagResponse{}
+	mi := &file_v1_tag_tag_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnfavoriteTagResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnfavoriteTagResponse) ProtoMessage() {}
+
+func (x *UnfavoriteTagResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_tag_tag_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnfavoriteTagResponse.ProtoReflect.Descriptor instead.
+func (*UnfavoriteTagResponse) Descriptor() ([]byte, []int) {
+	return file_v1_tag_tag_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *UnfavoriteTagResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
 var File_v1_tag_tag_proto protoreflect.FileDescriptor
 
 const file_v1_tag_tag_proto_rawDesc = "" +
 	"\n" +
-	"\x10v1/tag/tag.proto\x12\x06tag.v1\x1a\x13v1/shared/tag.proto\"\x1f\n" +
+	"\x10v1/tag/tag.proto\x12\x06tag.v1\x1a\x13v1/shared/tag.proto\x1a\x1av1/shared/reporttype.proto\"\x1f\n" +
 	"\rGetTagRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"r\n" +
 	"\x17ListTagsByParentRequest\x12\x1b\n" +
@@ -313,13 +593,32 @@ const file_v1_tag_tag_proto_rawDesc = "" +
 	"page_token\x18\x02 \x01(\tR\tpageToken\"^\n" +
 	"\x10ListTagsResponse\x12\"\n" +
 	"\x04tags\x18\x01 \x03(\v2\x0e.shared.v1.TagR\x04tags\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken2\xa6\x02\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"y\n" +
+	"\x10ReportTagRequest\x12\x15\n" +
+	"\x06tag_id\x18\x01 \x01(\tR\x05tagId\x126\n" +
+	"\vreport_type\x18\x02 \x01(\x0e2\x15.shared.v1.ReportTypeR\n" +
+	"reportType\x12\x16\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\"-\n" +
+	"\x11ReportTagResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"+\n" +
+	"\x12FavoriteTagRequest\x12\x15\n" +
+	"\x06tag_id\x18\x01 \x01(\tR\x05tagId\"/\n" +
+	"\x13FavoriteTagResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"-\n" +
+	"\x14UnfavoriteTagRequest\x12\x15\n" +
+	"\x06tag_id\x18\x01 \x01(\tR\x05tagId\"1\n" +
+	"\x15UnfavoriteTagResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess2\xfb\x03\n" +
 	"\n" +
 	"TagService\x121\n" +
 	"\x06GetTag\x12\x15.tag.v1.GetTagRequest\x1a\x0e.shared.v1.Tag\"\x00\x12O\n" +
 	"\x10ListTagsByParent\x12\x1f.tag.v1.ListTagsByParentRequest\x1a\x18.tag.v1.ListTagsResponse\"\x00\x12K\n" +
 	"\x0eListTagsByType\x12\x1d.tag.v1.ListTagsByTypeRequest\x1a\x18.tag.v1.ListTagsResponse\"\x00\x12G\n" +
-	"\fListRootTags\x12\x1b.tag.v1.ListRootTagsRequest\x1a\x18.tag.v1.ListTagsResponse\"\x00B>Z<github.com/studyguides-com/study-guides-api/api/v1/tag;tagv1b\x06proto3"
+	"\fListRootTags\x12\x1b.tag.v1.ListRootTagsRequest\x1a\x18.tag.v1.ListTagsResponse\"\x00\x12?\n" +
+	"\x06Report\x12\x18.tag.v1.ReportTagRequest\x1a\x19.tag.v1.ReportTagResponse\"\x00\x12E\n" +
+	"\bFavorite\x12\x1a.tag.v1.FavoriteTagRequest\x1a\x1b.tag.v1.FavoriteTagResponse\"\x00\x12K\n" +
+	"\n" +
+	"Unfavorite\x12\x1c.tag.v1.UnfavoriteTagRequest\x1a\x1d.tag.v1.UnfavoriteTagResponse\"\x00B>Z<github.com/studyguides-com/study-guides-api/api/v1/tag;tagv1b\x06proto3"
 
 var (
 	file_v1_tag_tag_proto_rawDescOnce sync.Once
@@ -333,30 +632,44 @@ func file_v1_tag_tag_proto_rawDescGZIP() []byte {
 	return file_v1_tag_tag_proto_rawDescData
 }
 
-var file_v1_tag_tag_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_v1_tag_tag_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_v1_tag_tag_proto_goTypes = []any{
 	(*GetTagRequest)(nil),           // 0: tag.v1.GetTagRequest
 	(*ListTagsByParentRequest)(nil), // 1: tag.v1.ListTagsByParentRequest
 	(*ListTagsByTypeRequest)(nil),   // 2: tag.v1.ListTagsByTypeRequest
 	(*ListRootTagsRequest)(nil),     // 3: tag.v1.ListRootTagsRequest
 	(*ListTagsResponse)(nil),        // 4: tag.v1.ListTagsResponse
-	(*shared.Tag)(nil),              // 5: shared.v1.Tag
+	(*ReportTagRequest)(nil),        // 5: tag.v1.ReportTagRequest
+	(*ReportTagResponse)(nil),       // 6: tag.v1.ReportTagResponse
+	(*FavoriteTagRequest)(nil),      // 7: tag.v1.FavoriteTagRequest
+	(*FavoriteTagResponse)(nil),     // 8: tag.v1.FavoriteTagResponse
+	(*UnfavoriteTagRequest)(nil),    // 9: tag.v1.UnfavoriteTagRequest
+	(*UnfavoriteTagResponse)(nil),   // 10: tag.v1.UnfavoriteTagResponse
+	(*shared.Tag)(nil),              // 11: shared.v1.Tag
+	(shared.ReportType)(0),          // 12: shared.v1.ReportType
 }
 var file_v1_tag_tag_proto_depIdxs = []int32{
-	5, // 0: tag.v1.ListTagsResponse.tags:type_name -> shared.v1.Tag
-	0, // 1: tag.v1.TagService.GetTag:input_type -> tag.v1.GetTagRequest
-	1, // 2: tag.v1.TagService.ListTagsByParent:input_type -> tag.v1.ListTagsByParentRequest
-	2, // 3: tag.v1.TagService.ListTagsByType:input_type -> tag.v1.ListTagsByTypeRequest
-	3, // 4: tag.v1.TagService.ListRootTags:input_type -> tag.v1.ListRootTagsRequest
-	5, // 5: tag.v1.TagService.GetTag:output_type -> shared.v1.Tag
-	4, // 6: tag.v1.TagService.ListTagsByParent:output_type -> tag.v1.ListTagsResponse
-	4, // 7: tag.v1.TagService.ListTagsByType:output_type -> tag.v1.ListTagsResponse
-	4, // 8: tag.v1.TagService.ListRootTags:output_type -> tag.v1.ListTagsResponse
-	5, // [5:9] is the sub-list for method output_type
-	1, // [1:5] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	11, // 0: tag.v1.ListTagsResponse.tags:type_name -> shared.v1.Tag
+	12, // 1: tag.v1.ReportTagRequest.report_type:type_name -> shared.v1.ReportType
+	0,  // 2: tag.v1.TagService.GetTag:input_type -> tag.v1.GetTagRequest
+	1,  // 3: tag.v1.TagService.ListTagsByParent:input_type -> tag.v1.ListTagsByParentRequest
+	2,  // 4: tag.v1.TagService.ListTagsByType:input_type -> tag.v1.ListTagsByTypeRequest
+	3,  // 5: tag.v1.TagService.ListRootTags:input_type -> tag.v1.ListRootTagsRequest
+	5,  // 6: tag.v1.TagService.Report:input_type -> tag.v1.ReportTagRequest
+	7,  // 7: tag.v1.TagService.Favorite:input_type -> tag.v1.FavoriteTagRequest
+	9,  // 8: tag.v1.TagService.Unfavorite:input_type -> tag.v1.UnfavoriteTagRequest
+	11, // 9: tag.v1.TagService.GetTag:output_type -> shared.v1.Tag
+	4,  // 10: tag.v1.TagService.ListTagsByParent:output_type -> tag.v1.ListTagsResponse
+	4,  // 11: tag.v1.TagService.ListTagsByType:output_type -> tag.v1.ListTagsResponse
+	4,  // 12: tag.v1.TagService.ListRootTags:output_type -> tag.v1.ListTagsResponse
+	6,  // 13: tag.v1.TagService.Report:output_type -> tag.v1.ReportTagResponse
+	8,  // 14: tag.v1.TagService.Favorite:output_type -> tag.v1.FavoriteTagResponse
+	10, // 15: tag.v1.TagService.Unfavorite:output_type -> tag.v1.UnfavoriteTagResponse
+	9,  // [9:16] is the sub-list for method output_type
+	2,  // [2:9] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_v1_tag_tag_proto_init() }
@@ -370,7 +683,7 @@ func file_v1_tag_tag_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_tag_tag_proto_rawDesc), len(file_v1_tag_tag_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

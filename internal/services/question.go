@@ -34,3 +34,15 @@ func (s *QuestionService) ForTag(ctx context.Context, req *questionpb.ForTagRequ
 	}
 	return resp.(*questionpb.QuestionsResponse), nil
 }
+
+func (s *QuestionService) Report(ctx context.Context, req *questionpb.ReportQuestionRequest) (*questionpb.ReportQuestionResponse, error) {
+	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, session *middleware.SessionDetails) (interface{}, error) {
+		return &questionpb.ReportQuestionResponse{
+			Success: true,
+		}, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*questionpb.ReportQuestionResponse), nil
+}

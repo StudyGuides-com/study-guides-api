@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	QuestionService_ForTag_FullMethodName = "/question.v1.QuestionService/ForTag"
+	QuestionService_Report_FullMethodName = "/question.v1.QuestionService/Report"
 )
 
 // QuestionServiceClient is the client API for QuestionService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type QuestionServiceClient interface {
 	ForTag(ctx context.Context, in *ForTagRequest, opts ...grpc.CallOption) (*QuestionsResponse, error)
+	Report(ctx context.Context, in *ReportQuestionRequest, opts ...grpc.CallOption) (*ReportQuestionResponse, error)
 }
 
 type questionServiceClient struct {
@@ -47,11 +49,22 @@ func (c *questionServiceClient) ForTag(ctx context.Context, in *ForTagRequest, o
 	return out, nil
 }
 
+func (c *questionServiceClient) Report(ctx context.Context, in *ReportQuestionRequest, opts ...grpc.CallOption) (*ReportQuestionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReportQuestionResponse)
+	err := c.cc.Invoke(ctx, QuestionService_Report_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QuestionServiceServer is the server API for QuestionService service.
 // All implementations must embed UnimplementedQuestionServiceServer
 // for forward compatibility.
 type QuestionServiceServer interface {
 	ForTag(context.Context, *ForTagRequest) (*QuestionsResponse, error)
+	Report(context.Context, *ReportQuestionRequest) (*ReportQuestionResponse, error)
 	mustEmbedUnimplementedQuestionServiceServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedQuestionServiceServer struct{}
 
 func (UnimplementedQuestionServiceServer) ForTag(context.Context, *ForTagRequest) (*QuestionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ForTag not implemented")
+}
+func (UnimplementedQuestionServiceServer) Report(context.Context, *ReportQuestionRequest) (*ReportQuestionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Report not implemented")
 }
 func (UnimplementedQuestionServiceServer) mustEmbedUnimplementedQuestionServiceServer() {}
 func (UnimplementedQuestionServiceServer) testEmbeddedByValue()                         {}
@@ -104,6 +120,24 @@ func _QuestionService_ForTag_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _QuestionService_Report_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReportQuestionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QuestionServiceServer).Report(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: QuestionService_Report_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QuestionServiceServer).Report(ctx, req.(*ReportQuestionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // QuestionService_ServiceDesc is the grpc.ServiceDesc for QuestionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var QuestionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ForTag",
 			Handler:    _QuestionService_ForTag_Handler,
+		},
+		{
+			MethodName: "Report",
+			Handler:    _QuestionService_Report_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

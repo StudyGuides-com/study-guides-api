@@ -12,6 +12,7 @@ import (
 
 type QuestionStore interface {
 	GetQuestionsByTagID(ctx context.Context, tagID string) ([]*sharedpb.Question, error)
+	Report(ctx context.Context, questionID string, userId string, reportType sharedpb.ReportType, reason string) error
 }
 
 func NewSqlQuestionStore(ctx context.Context, dbURL string) (*SqlQuestionStore, error) {

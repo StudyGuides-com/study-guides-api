@@ -27,7 +27,8 @@ proto:
 		$(PROTO_DIR)/v1/shared/deckassignment.proto \
 		$(PROTO_DIR)/v1/interaction/interaction.proto \
 		$(PROTO_DIR)/v1/tag/tag.proto \
-		$(PROTO_DIR)/v1/question/question.proto
+		$(PROTO_DIR)/v1/question/question.proto \
+		$(PROTO_DIR)/v1/shared/reporttype.proto
 
 
 build:
