@@ -22,6 +22,10 @@ proto:
 		$(PROTO_DIR)/v1/shared/tagtype.proto \
 		$(PROTO_DIR)/v1/shared/contentrating.proto \
 		$(PROTO_DIR)/v1/shared/question.proto \
+		$(PROTO_DIR)/v1/shared/studymethod.proto \
+		$(PROTO_DIR)/v1/shared/interactiontype.proto \
+		$(PROTO_DIR)/v1/shared/deckassignment.proto \
+		$(PROTO_DIR)/v1/interaction/interaction.proto \
 		$(PROTO_DIR)/v1/tag/tag.proto \
 		$(PROTO_DIR)/v1/question/question.proto
 

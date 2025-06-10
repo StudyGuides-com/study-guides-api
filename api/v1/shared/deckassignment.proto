@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package shared.v1;
+
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+
+
+enum DeckAssignment {
+    DIFFICULTY_LEVEL_EASY = 0;
+    DIFFICULTY_LEVEL_HARD = 1;
+    DIFFICULTY_LEVEL_UNSPECIFIED = 2;
+  }

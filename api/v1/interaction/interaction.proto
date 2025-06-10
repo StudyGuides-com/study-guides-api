@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package interaction.v1;
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/interaction;interactionv1";
+
+import "v1/shared/question.proto";
+import "v1/shared/studymethod.proto";
+import "v1/shared/interactiontype.proto";
+import "v1/shared/deckassignment.proto";
+
+
+
+
+
+
+message InteractRequest {
+  string question_id = 1;
+  shared.v1.StudyMethod study_method = 2;
+  shared.v1.InteractionType interaction_type = 3;
+  shared.v1.DeckAssignment deck_assignment = 4;
+}
+
+message InteractResponse {
+  shared.v1.Question question = 1;
+}
+
+service InteractionService {
+  rpc Interact(InteractRequest) returns (InteractResponse);
+}
+

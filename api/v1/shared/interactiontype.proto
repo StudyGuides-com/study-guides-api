@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package shared.v1;
+
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+
+
+enum InteractionType {
+    INTERACTION_TYPE_ANSWER_CORRECTLY = 0;
+    INTERACTION_TYPE_ANSWER_INCORRECTLY = 1;
+    INTERACTION_TYPE_REVEAL = 2;
+    INTERACTION_TYPE_ANSWER_EASY = 3;
+    INTERACTION_TYPE_ANSWER_HARD = 4;
+    INTERACTION_TYPE_VIEW_LEARN_MORE = 5;
+    INTERACTION_TYPE_VIEW_PASSAGE = 6;
+    INTERACTION_TYPE_NONE = 7;
+  }

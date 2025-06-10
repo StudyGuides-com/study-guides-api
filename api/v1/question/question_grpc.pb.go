@@ -26,7 +26,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type QuestionServiceClient interface {
-	ForTag(ctx context.Context, in *ForTagRequest, opts ...grpc.CallOption) (*QuestionResponse, error)
+	ForTag(ctx context.Context, in *ForTagRequest, opts ...grpc.CallOption) (*QuestionsResponse, error)
 }
 
 type questionServiceClient struct {
@@ -37,9 +37,9 @@ func NewQuestionServiceClient(cc grpc.ClientConnInterface) QuestionServiceClient
 	return &questionServiceClient{cc}
 }
 
-func (c *questionServiceClient) ForTag(ctx context.Context, in *ForTagRequest, opts ...grpc.CallOption) (*QuestionResponse, error) {
+func (c *questionServiceClient) ForTag(ctx context.Context, in *ForTagRequest, opts ...grpc.CallOption) (*QuestionsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(QuestionResponse)
+	out := new(QuestionsResponse)
 	err := c.cc.Invoke(ctx, QuestionService_ForTag_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (c *questionServiceClient) ForTag(ctx context.Context, in *ForTagRequest, o
 // All implementations must embed UnimplementedQuestionServiceServer
 // for forward compatibility.
 type QuestionServiceServer interface {
-	ForTag(context.Context, *ForTagRequest) (*QuestionResponse, error)
+	ForTag(context.Context, *ForTagRequest) (*QuestionsResponse, error)
 	mustEmbedUnimplementedQuestionServiceServer()
 }
 
@@ -62,7 +62,7 @@ type QuestionServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedQuestionServiceServer struct{}
 
-func (UnimplementedQuestionServiceServer) ForTag(context.Context, *ForTagRequest) (*QuestionResponse, error) {
+func (UnimplementedQuestionServiceServer) ForTag(context.Context, *ForTagRequest) (*QuestionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ForTag not implemented")
 }
 func (UnimplementedQuestionServiceServer) mustEmbedUnimplementedQuestionServiceServer() {}

@@ -10,12 +10,15 @@ message ForTagRequest {
     string tag_id = 1;
 }
 
-message QuestionResponse {
+message QuestionsResponse {
   repeated shared.v1.Question questions = 1;
 }
 
-service QuestionService {
-  rpc ForTag(ForTagRequest) returns (QuestionResponse);
+message QuestionResponse {
+  shared.v1.Question question = 1;
+}
 
+service QuestionService {
+  rpc ForTag(ForTagRequest) returns (QuestionsResponse);
 }
 

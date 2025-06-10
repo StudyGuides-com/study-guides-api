@@ -66,16 +66,60 @@ func (x *ForTagRequest) GetTagId() string {
 	return ""
 }
 
-type QuestionResponse struct {
+type QuestionsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Questions     []*shared.Question     `protobuf:"bytes,1,rep,name=questions,proto3" json:"questions,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
+func (x *QuestionsResponse) Reset() {
+	*x = QuestionsResponse{}
+	mi := &file_v1_question_question_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *QuestionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*QuestionsResponse) ProtoMessage() {}
+
+func (x *QuestionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_question_question_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use QuestionsResponse.ProtoReflect.Descriptor instead.
+func (*QuestionsResponse) Descriptor() ([]byte, []int) {
+	return file_v1_question_question_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *QuestionsResponse) GetQuestions() []*shared.Question {
+	if x != nil {
+		return x.Questions
+	}
+	return nil
+}
+
+type QuestionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Question      *shared.Question       `protobuf:"bytes,1,opt,name=question,proto3" json:"question,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
 func (x *QuestionResponse) Reset() {
 	*x = QuestionResponse{}
-	mi := &file_v1_question_question_proto_msgTypes[1]
+	mi := &file_v1_question_question_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -87,7 +131,7 @@ func (x *QuestionResponse) String() string {
 func (*QuestionResponse) ProtoMessage() {}
 
 func (x *QuestionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_question_question_proto_msgTypes[1]
+	mi := &file_v1_question_question_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -100,12 +144,12 @@ func (x *QuestionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QuestionResponse.ProtoReflect.Descriptor instead.
 func (*QuestionResponse) Descriptor() ([]byte, []int) {
-	return file_v1_question_question_proto_rawDescGZIP(), []int{1}
+	return file_v1_question_question_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *QuestionResponse) GetQuestions() []*shared.Question {
+func (x *QuestionResponse) GetQuestion() *shared.Question {
 	if x != nil {
-		return x.Questions
+		return x.Question
 	}
 	return nil
 }
@@ -116,11 +160,13 @@ const file_v1_question_question_proto_rawDesc = "" +
 	"\n" +
 	"\x1av1/question/question.proto\x12\vquestion.v1\x1a\x18v1/shared/question.proto\"&\n" +
 	"\rForTagRequest\x12\x15\n" +
-	"\x06tag_id\x18\x01 \x01(\tR\x05tagId\"E\n" +
-	"\x10QuestionResponse\x121\n" +
-	"\tquestions\x18\x01 \x03(\v2\x13.shared.v1.QuestionR\tquestions2V\n" +
-	"\x0fQuestionService\x12C\n" +
-	"\x06ForTag\x12\x1a.question.v1.ForTagRequest\x1a\x1d.question.v1.QuestionResponseBHZFgithub.com/studyguides-com/study-guides-api/api/v1/question;questionv1b\x06proto3"
+	"\x06tag_id\x18\x01 \x01(\tR\x05tagId\"F\n" +
+	"\x11QuestionsResponse\x121\n" +
+	"\tquestions\x18\x01 \x03(\v2\x13.shared.v1.QuestionR\tquestions\"C\n" +
+	"\x10QuestionResponse\x12/\n" +
+	"\bquestion\x18\x01 \x01(\v2\x13.shared.v1.QuestionR\bquestion2W\n" +
+	"\x0fQuestionService\x12D\n" +
+	"\x06ForTag\x12\x1a.question.v1.ForTagRequest\x1a\x1e.question.v1.QuestionsResponseBHZFgithub.com/studyguides-com/study-guides-api/api/v1/question;questionv1b\x06proto3"
 
 var (
 	file_v1_question_question_proto_rawDescOnce sync.Once
@@ -134,21 +180,23 @@ func file_v1_question_question_proto_rawDescGZIP() []byte {
 	return file_v1_question_question_proto_rawDescData
 }
 
-var file_v1_question_question_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_v1_question_question_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_v1_question_question_proto_goTypes = []any{
-	(*ForTagRequest)(nil),    // 0: question.v1.ForTagRequest
-	(*QuestionResponse)(nil), // 1: question.v1.QuestionResponse
-	(*shared.Question)(nil),  // 2: shared.v1.Question
+	(*ForTagRequest)(nil),     // 0: question.v1.ForTagRequest
+	(*QuestionsResponse)(nil), // 1: question.v1.QuestionsResponse
+	(*QuestionResponse)(nil),  // 2: question.v1.QuestionResponse
+	(*shared.Question)(nil),   // 3: shared.v1.Question
 }
 var file_v1_question_question_proto_depIdxs = []int32{
-	2, // 0: question.v1.QuestionResponse.questions:type_name -> shared.v1.Question
-	0, // 1: question.v1.QuestionService.ForTag:input_type -> question.v1.ForTagRequest
-	1, // 2: question.v1.QuestionService.ForTag:output_type -> question.v1.QuestionResponse
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	3, // 0: question.v1.QuestionsResponse.questions:type_name -> shared.v1.Question
+	3, // 1: question.v1.QuestionResponse.question:type_name -> shared.v1.Question
+	0, // 2: question.v1.QuestionService.ForTag:input_type -> question.v1.ForTagRequest
+	1, // 3: question.v1.QuestionService.ForTag:output_type -> question.v1.QuestionsResponse
+	3, // [3:4] is the sub-list for method output_type
+	2, // [2:3] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_v1_question_question_proto_init() }
@@ -162,7 +210,7 @@ func file_v1_question_question_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_question_question_proto_rawDesc), len(file_v1_question_question_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -19,18 +19,18 @@ func NewQuestionService(store store.Store) *QuestionService {
 	}
 }
 
-func (s *QuestionService) ForTag(ctx context.Context, req *questionpb.ForTagRequest) (*questionpb.QuestionResponse, error) {
+func (s *QuestionService) ForTag(ctx context.Context, req *questionpb.ForTagRequest) (*questionpb.QuestionsResponse, error) {
 	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, session *middleware.SessionDetails) (interface{}, error) {
 		questions, err := s.store.QuestionStore().GetQuestionsByTagID(ctx, req.TagId)
 		if err != nil {
 			return nil, err
 		}
-		return &questionpb.QuestionResponse{
+		return &questionpb.QuestionsResponse{
 			Questions: questions,
 		}, nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	return resp.(*questionpb.QuestionResponse), nil
+	return resp.(*questionpb.QuestionsResponse), nil
 } 

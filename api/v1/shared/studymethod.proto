@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package shared.v1;
+
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+enum StudyMethod {
+  STUDY_METHOD_STUDY_GUIDE = 0;
+  STUDY_METHOD_FLASHCARDS = 1;
+  STUDY_METHOD_MULTIPLE_CHOICE = 2;
+  STUDY_METHOD_SURVIVAL = 3;
+  STUDY_METHOD_MATCH_GAME = 4;
+  STUDY_METHOD_TEST = 6;
+  STUDY_METHOD_QUIZ = 7;
+  STUDY_METHOD_NONE = 8;
+}
+
