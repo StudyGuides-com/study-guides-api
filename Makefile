@@ -1,4 +1,4 @@
-.PHONY: proto clean build run all run-dev run-test run-prod
+.PHONY: proto clean build run all run-dev run-test run-prod deploy-dev deploy-test deploy-prod
 
 PROTO_DIR=api/study
 BIN_DIR=bin
@@ -94,3 +94,21 @@ generate-tokens:
 	node scripts/generate_jwt.js > .jwt.prod
 
 all: proto build
+
+deploy-dev:
+	@echo "Deploying to Heroku Dev..."
+	heroku container:push web --app studyguides-api-dev --arg ENV=dev
+	heroku container:release web --app studyguides-api-dev
+	@echo "Dev deployment complete!"
+
+deploy-test:
+	@echo "Deploying to Heroku Test..."
+	heroku container:push web --app studyguides-api-test --arg ENV=test
+	heroku container:release web --app studyguides-api-test
+	@echo "Test deployment complete!"
+
+deploy-prod:
+	@echo "Deploying to Heroku Prod..."
+	heroku container:push web --app studyguides-api-prod --arg ENV=prod
+	heroku container:release web --app studyguides-api-prod
+	@echo "Prod deployment complete!"
