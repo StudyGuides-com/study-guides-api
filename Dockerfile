@@ -1,6 +1,13 @@
-FROM golang:1.21-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
+
+# Install make and protoc dependencies
+RUN apk add --no-cache make protobuf-dev protoc
+
+# Install Go protobuf plugins
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
+    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 # Copy go mod and sum files
 COPY go.mod go.sum ./
