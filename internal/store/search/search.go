@@ -3,8 +3,8 @@ package search
 import (
 	"context"
 
-	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 	searchpb "github.com/studyguides-com/study-guides-api/api/v1/search"
+	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 )
 
 type SearchStore interface {

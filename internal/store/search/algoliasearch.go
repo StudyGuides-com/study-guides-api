@@ -266,7 +266,7 @@ func (s *AlgoliaStore) ListIndexes(ctx context.Context) *searchpb.ListIndexesRes
 	for _, indexRes := range indices.Items {
 		// Get the actual index object
 		index := s.GetIndex(indexRes.Name)
-		
+
 		// Get the number of entries using a search with empty query
 		searchRes, err := index.Search("")
 		if err != nil {
