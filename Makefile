@@ -28,7 +28,8 @@ proto:
 		$(PROTO_DIR)/v1/interaction/interaction.proto \
 		$(PROTO_DIR)/v1/tag/tag.proto \
 		$(PROTO_DIR)/v1/question/question.proto \
-		$(PROTO_DIR)/v1/shared/reporttype.proto
+		$(PROTO_DIR)/v1/shared/reporttype.proto \
+		$(PROTO_DIR)/v1/chat/chat.proto
 
 
 build:

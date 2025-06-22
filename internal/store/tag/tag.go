@@ -21,6 +21,7 @@ type TagStore interface {
 	Report(ctx context.Context, tagID string, userId string, reportType sharedpb.ReportType, reason string) error
 	Favorite(ctx context.Context, tagID string, userId string) error
 	Unfavorite(ctx context.Context, tagID string, userId string) error
+	CountTags(ctx context.Context, params map[string]string) (int, error)
 }
 
 func NewSqlTagStore(ctx context.Context, dbURL string) (*SqlTagStore, error) {

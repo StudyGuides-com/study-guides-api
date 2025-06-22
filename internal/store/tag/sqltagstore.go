@@ -2,6 +2,7 @@ package tag
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
@@ -187,4 +188,26 @@ func (s *SqlTagStore) Unfavorite(ctx context.Context, tagID string, userId strin
 		return status.Errorf(codes.Internal, "failed to unfavorite tag: %v", err)
 	}
 	return nil
+}
+
+func (s *SqlTagStore) CountTags(ctx context.Context, params map[string]string) (int, error) {
+	query := `SELECT COUNT(*) FROM public."Tag" WHERE TRUE`
+	args := []interface{}{}
+  
+	if tagType, ok := params["type"]; ok && tagType != "" {
+		query += fmt.Sprintf(` AND type = $%d`, len(args)+1)
+		args = append(args, tagType)
+	  }
+	  
+	  if contextType, ok := params["contextType"]; ok && contextType != "" {
+		query += fmt.Sprintf(` AND context_type = $%d`, len(args)+1)
+		args = append(args, contextType)
+	  }
+	  
+  
+	var count int
+	if err := s.db.QueryRow(ctx, query, args...).Scan(&count); err != nil {
+	  return 0, err
+	}
+	return count, nil
 }

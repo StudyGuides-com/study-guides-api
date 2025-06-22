@@ -9,11 +9,13 @@ import (
 	healthpb "github.com/studyguides-com/study-guides-api/api/v1/health"
 	questionpb "github.com/studyguides-com/study-guides-api/api/v1/question"
 	searchpb "github.com/studyguides-com/study-guides-api/api/v1/search"
+	chatpb "github.com/studyguides-com/study-guides-api/api/v1/chat"
 	tagpb "github.com/studyguides-com/study-guides-api/api/v1/tag"
 	userpb "github.com/studyguides-com/study-guides-api/api/v1/user"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 
 	"github.com/joho/godotenv"
+	"github.com/studyguides-com/study-guides-api/internal/lib/router"
 	"github.com/studyguides-com/study-guides-api/internal/middleware"
 	"github.com/studyguides-com/study-guides-api/internal/services"
 	"golang.org/x/time/rate"
@@ -77,9 +79,12 @@ func main() {
 
 	healthpb.RegisterHealthServiceServer(grpcServer, services.NewHealthService())
 	searchpb.RegisterSearchServiceServer(grpcServer, services.NewSearchService(appStore))
-	userpb.RegisterUserServiceServer(grpcServer, services.NewUserService())
+	userpb.RegisterUserServiceServer(grpcServer, services.NewUserService(appStore))
 	tagpb.RegisterTagServiceServer(grpcServer, services.NewTagService(appStore))
 	questionpb.RegisterQuestionServiceServer(grpcServer, services.NewQuestionService(appStore))
+
+	router := router.NewRouter(appStore)
+	chatpb.RegisterChatServiceServer(grpcServer, services.NewChatService(router))
 
 	// Enable gRPC reflection
 	reflection.Register(grpcServer)

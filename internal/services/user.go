@@ -8,6 +8,7 @@ import (
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 	userpb "github.com/studyguides-com/study-guides-api/api/v1/user"
 	"github.com/studyguides-com/study-guides-api/internal/middleware"
+	"github.com/studyguides-com/study-guides-api/internal/store"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -15,10 +16,13 @@ import (
 
 type UserService struct {
 	userpb.UnimplementedUserServiceServer
+	store store.Store
 }
 
-func NewUserService() *UserService {
-	return &UserService{}
+func NewUserService(store store.Store) *UserService {
+	return &UserService{
+		store: store,
+	}
 }
 
 func (s *UserService) Profile(ctx context.Context, req *userpb.ProfileRequest) (*userpb.ProfileResponse, error) {
