@@ -6,12 +6,13 @@ import (
 	"os"
 	"strconv"
 
+	chatpb "github.com/studyguides-com/study-guides-api/api/v1/chat"
 	healthpb "github.com/studyguides-com/study-guides-api/api/v1/health"
 	questionpb "github.com/studyguides-com/study-guides-api/api/v1/question"
 	searchpb "github.com/studyguides-com/study-guides-api/api/v1/search"
-	chatpb "github.com/studyguides-com/study-guides-api/api/v1/chat"
 	tagpb "github.com/studyguides-com/study-guides-api/api/v1/tag"
 	userpb "github.com/studyguides-com/study-guides-api/api/v1/user"
+	"github.com/studyguides-com/study-guides-api/internal/lib/ai"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 
 	"github.com/joho/godotenv"
@@ -77,14 +78,25 @@ func main() {
 		log.Fatalf("failed to initialize store: %v", err)
 	}
 
+	// Register Health Service
 	healthpb.RegisterHealthServiceServer(grpcServer, services.NewHealthService())
+
+	// Register Search Service
 	searchpb.RegisterSearchServiceServer(grpcServer, services.NewSearchService(appStore))
+
+	// Register User Service
 	userpb.RegisterUserServiceServer(grpcServer, services.NewUserService(appStore))
+
+	// Register Tag Service
 	tagpb.RegisterTagServiceServer(grpcServer, services.NewTagService(appStore))
+
+	// Register Question Service
 	questionpb.RegisterQuestionServiceServer(grpcServer, services.NewQuestionService(appStore))
 
+	// Register Chat Service
 	router := router.NewRouter(appStore)
-	chatpb.RegisterChatServiceServer(grpcServer, services.NewChatService(router))
+	ai := ai.NewClient(os.Getenv("OPENAI_API_KEY"), os.Getenv("OPENAI_MODEL"))
+	chatpb.RegisterChatServiceServer(grpcServer, services.NewChatService(router, ai))
 
 	// Enable gRPC reflection
 	reflection.Register(grpcServer)
