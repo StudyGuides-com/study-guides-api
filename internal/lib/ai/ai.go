@@ -13,6 +13,9 @@ type AiClient interface {
 
 	// ChatCompletionWithTools generates a chat completion with JSON response format and tools
 	ChatCompletionWithTools(ctx context.Context, systemPrompt, userPrompt string, tools []openai.Tool, toolChoice *openai.ToolChoice) (string, error)
+
+	// ChatCompletionWithHistory generates a chat completion with conversation history
+	ChatCompletionWithHistory(ctx context.Context, systemPrompt string, messages []openai.ChatCompletionMessage, tools []openai.Tool, toolChoice *openai.ToolChoice) (string, error)
 }
 
 type OpenAiClient struct {
@@ -98,6 +101,46 @@ func (c *OpenAiClient) ChatCompletionWithTools(ctx context.Context, systemPrompt
 
 	// Create the JSON chat completion request using the helper function
 	req := CreateJSONChatCompletionRequest(c.model, messages, tools, toolChoice)
+
+	// Make the API call
+	resp, err := c.client.CreateChatCompletion(ctx, req)
+	if err != nil {
+		return "", errors.ErrFailedToCreateChatCompletionWithTools
+	}
+
+	// Return the tool call output if present
+	if len(resp.Choices) > 0 {
+		toolCalls := resp.Choices[0].Message.ToolCalls
+		if len(toolCalls) > 0 {
+			return toolCalls[0].Function.Arguments, nil
+		}
+		// Fallback to message content
+		return resp.Choices[0].Message.Content, nil
+	}
+
+	return "", errors.ErrNoCompletionChoicesReturned
+}
+
+// ChatCompletionWithHistory generates a chat completion with conversation history
+func (c *OpenAiClient) ChatCompletionWithHistory(ctx context.Context, systemPrompt string, messages []openai.ChatCompletionMessage, tools []openai.Tool, toolChoice *openai.ToolChoice) (string, error) {
+	// Validate system prompt
+	if systemPrompt == "" {
+		return "", errors.ErrSystemPromptEmpty
+	}
+
+	// Create messages with system prompt at the beginning
+	allMessages := []openai.ChatCompletionMessage{
+		{
+			Role:    openai.ChatMessageRoleSystem,
+			Content: systemPrompt,
+		},
+	}
+	
+	// Add conversation history
+	allMessages = append(allMessages, messages...)
+
+	// Create the JSON chat completion request using the helper function
+	req := CreateJSONChatCompletionRequest(c.model, allMessages, tools, toolChoice)
 
 	// Make the API call
 	resp, err := c.client.CreateChatCompletion(ctx, req)

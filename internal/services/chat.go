@@ -3,6 +3,8 @@ package services
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"strings"
 
 	chatpb "github.com/studyguides-com/study-guides-api/api/v1/chat"
 	"github.com/studyguides-com/study-guides-api/internal/errors"
@@ -14,6 +16,50 @@ import (
 )
 
 const ToolChoiceTypeAuto = "auto"
+
+// ConversationHistory manages conversation history using Context metadata
+type ConversationHistory struct {
+	Messages []openai.ChatCompletionMessage
+}
+
+// NewConversationHistory creates a new conversation history
+func NewConversationHistory() *ConversationHistory {
+	return &ConversationHistory{
+		Messages: []openai.ChatCompletionMessage{},
+	}
+}
+
+// FromContextMetadata loads conversation history from context metadata
+func FromContextMetadata(metadata map[string]string) *ConversationHistory {
+	history := NewConversationHistory()
+	
+	if historyJSON, exists := metadata["conversation_history"]; exists && historyJSON != "" {
+		var messages []openai.ChatCompletionMessage
+		if err := json.Unmarshal([]byte(historyJSON), &messages); err == nil {
+			history.Messages = messages
+		}
+	}
+	
+	return history
+}
+
+// ToContextMetadata saves conversation history to context metadata
+func (ch *ConversationHistory) ToContextMetadata() map[string]string {
+	metadata := make(map[string]string)
+	
+	if len(ch.Messages) > 0 {
+		if historyJSON, err := json.Marshal(ch.Messages); err == nil {
+			metadata["conversation_history"] = string(historyJSON)
+		}
+	}
+	
+	return metadata
+}
+
+// AddMessage adds a message to the conversation history
+func (ch *ConversationHistory) AddMessage(message openai.ChatCompletionMessage) {
+	ch.Messages = append(ch.Messages, message)
+}
 
 type ChatService struct {
 	chatpb.UnimplementedChatServiceServer
@@ -28,20 +74,59 @@ func NewChatService(router router.Router, ai ai.AiClient) *ChatService {
 	}
 }
 
-func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatpb.ChatResponse, error) {
-	resp, err := PublicBaseHandler(ctx, func(ctx context.Context) (interface{}, error) {
-
-		systemPrompt := `
-	You are an intent router. Allowed operations: GetTagCount.
-	For GetTagCount, allowed parameters: type, contextType.
+// buildSystemPrompt dynamically creates a system prompt based on available tools
+func buildSystemPrompt() string {
+	toolDefinitions := tools.GetClassificationDefinitions()
+	
+	var operations []string
+	var operationDetails []string
+	
+	for _, toolDef := range toolDefinitions {
+		operationName := toolDef.Name
+		operations = append(operations, operationName)
+		
+		// Build parameter list for this operation
+		var params []string
+		for _, param := range toolDef.Parameters {
+			params = append(params, param.Name)
+		}
+		
+		if len(params) > 0 {
+			operationDetails = append(operationDetails, fmt.Sprintf("For %s, allowed parameters: %s.", operationName, strings.Join(params, ", ")))
+		} else {
+			operationDetails = append(operationDetails, fmt.Sprintf("For %s, no parameters required.", operationName))
+		}
+	}
+	
+	operationsList := strings.Join(operations, ", ")
+	detailsList := strings.Join(operationDetails, "\n")
+	
+	return fmt.Sprintf(`
+	You are an intent router. Allowed operations: %s.
+	%s
 	If none apply, call Unknown.
 	Always pick exactly one.
 	Please respond using the provided tool to return your response in JSON format.
-	`
+	`, operationsList, detailsList)
+}
+
+func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatpb.ChatResponse, error) {
+	resp, err := PublicBaseHandler(ctx, func(ctx context.Context) (interface{}, error) {
+
+		systemPrompt := buildSystemPrompt()
+
+		// Add current user message to history
+		currentUserMessage := openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleUser,
+			Content: req.Message,
+		}
+		// Get conversation history from context metadata
+		conversationHistory := FromContextMetadata(req.Context.GetMetadata())
+		conversationHistory.AddMessage(currentUserMessage)
 
 		tools := tools.GetClassificationTools()
 
-		raw, err := s.ai.ChatCompletionWithTools(ctx, systemPrompt, req.Message, tools, &openai.ToolChoice{
+		raw, err := s.ai.ChatCompletionWithHistory(ctx, systemPrompt, conversationHistory.Messages, tools, &openai.ToolChoice{
 			Type: ToolChoiceTypeAuto,
 		})
 		if err != nil {
@@ -72,8 +157,22 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 			return nil, err
 		}
 
+		// Add assistant response to conversation history
+		assistantMessage := openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleAssistant,
+			Content: answer,
+		}
+		conversationHistory.AddMessage(assistantMessage)
+
+		// Create updated context with conversation history
+		updatedContext := &chatpb.Context{
+			UserId:    req.Context.GetUserId(),
+			SessionId: req.Context.GetSessionId(),
+			Metadata:  conversationHistory.ToContextMetadata(),
+		}
+
 		return &chatpb.ChatResponse{
-			Context:    req.Context,
+			Context:    updatedContext,
 			Operation:  plan.Operation,
 			Parameters: plan.Parameters,
 			Answer:     answer,

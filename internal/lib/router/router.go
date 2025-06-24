@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 
+	"github.com/studyguides-com/study-guides-api/internal/lib/tools"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 )
 
@@ -19,17 +20,24 @@ type OperationHandler func(ctx context.Context, params map[string]string) (strin
 func NewRouter(store store.Store) *OperationRouter {
 	return &OperationRouter{
 		Handlers: map[string]OperationHandler{
-			"GetTagCount": func(ctx context.Context, params map[string]string) (string, error) {
+			string(tools.ToolNameTagCount): func(ctx context.Context, params map[string]string) (string, error) {
 				return handleTagCount(ctx, store, params)
+			},
+			string(tools.ToolNameListTags): func(ctx context.Context, params map[string]string) (string, error) {
+				return handleListTags(ctx, store, params)
+			},
+			string(tools.ToolNameUnknown): func(ctx context.Context, params map[string]string) (string, error) {
+				return handleUnknown(ctx, store, params)
 			},
 		},
 	}
 }
 
 func (r *OperationRouter) Route(ctx context.Context, op string, params map[string]string) (string, error) {
+	unknownHandler := r.Handlers[string(tools.ToolNameUnknown)]
 	handler, ok := r.Handlers[op]
 	if !ok {
-		return "Sorry, I can't help with that.", nil
+		return unknownHandler(ctx, params)
 	}
 	return handler(ctx, params)
 }
