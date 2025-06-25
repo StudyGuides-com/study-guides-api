@@ -138,7 +138,31 @@ func handleTagCount(ctx context.Context, store store.Store, params map[string]st
 		return "", err
 	}
 
-	return fmt.Sprintf("You have %d tags matching the criteria.", count), nil
+	// Build a descriptive message based on the filters used
+	var filterDesc string
+	
+	hasTypeFilter := false
+	hasContextFilter := false
+	
+	if tagType, ok := params["type"]; ok && tagType != "" {
+		hasTypeFilter = true
+	}
+	
+	if contextType, ok := params["contextType"]; ok && contextType != "" {
+		hasContextFilter = true
+	}
+	
+	if hasTypeFilter && hasContextFilter {
+		filterDesc = fmt.Sprintf(" of type '%s' and context '%s'", params["type"], params["contextType"])
+	} else if hasTypeFilter {
+		filterDesc = fmt.Sprintf(" of type '%s'", params["type"])
+	} else if hasContextFilter {
+		filterDesc = fmt.Sprintf(" with context '%s'", params["contextType"])
+	} else {
+		filterDesc = " in total"
+	}
+
+	return fmt.Sprintf("You have %d tags%s.", count, filterDesc), nil
 }
 
 func handleListTags(ctx context.Context, store store.Store, params map[string]string) (string, error) {
