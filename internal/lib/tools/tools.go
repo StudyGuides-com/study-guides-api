@@ -35,8 +35,8 @@ var ClassificationToolDefinitions = []ToolDefinition{
 	
 	NewToolDefinition(
 		string(ToolNameGetTag),
-		"Returns detailed information about a specific tag by its ID. Use this when the user asks to see details of a specific tag or refers to a tag by number from a previous list. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
-	).WithParameters([]string{"tagId"}, NewProperty("tagId", "string", "The ID of the tag to retrieve"), formatProperty),
+		"Returns detailed information about a specific tag by its ID. When user refers to 'tag number X', first use ListTags to get a list of tags with their IDs, then use the actual tag ID from that list. Tag IDs are CUIDs (25-character alphanumeric strings like 'cmav63fwp03ef1jmtqkh9wnvv'). The tagId parameter must be the actual CUID, not a number. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
+	).WithParameters([]string{"tagId"}, NewProperty("tagId", "string", "The actual CUID of the tag to retrieve (25-character alphanumeric string like 'cmav63fwp03ef1jmtqkh9wnvv'). Use ListTags first to get the CUID if user refers to a tag by number."), formatProperty),
 	
 	NewToolDefinition(
 		string(ToolNameUniqueTagTypes),
