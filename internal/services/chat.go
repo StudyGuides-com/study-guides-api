@@ -121,6 +121,13 @@ func buildSystemPrompt() string {
 }
 
 func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatpb.ChatResponse, error) {
+	// Debug: Print incoming request details
+	fmt.Printf("DEBUG: === CHAT REQUEST ===\n")
+	fmt.Printf("DEBUG: User ID: %s\n", req.Context.GetUserId())
+	fmt.Printf("DEBUG: Session ID: %s\n", req.Context.GetSessionId())
+	fmt.Printf("DEBUG: Message: %s\n", req.Message)
+	fmt.Printf("DEBUG: Context Metadata: %+v\n", req.Context.GetMetadata())
+	
 	resp, err := PublicBaseHandler(ctx, func(ctx context.Context) (interface{}, error) {
 
 		systemPrompt := buildSystemPrompt()
@@ -132,7 +139,22 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 		}
 		// Get conversation history from context metadata
 		conversationHistory := FromContextMetadata(req.Context.GetMetadata())
+		
+		// Debug: Print conversation history
+		fmt.Printf("DEBUG: === CONVERSATION HISTORY ===\n")
+		fmt.Printf("DEBUG: History length: %d messages\n", len(conversationHistory.Messages))
+		for i, msg := range conversationHistory.Messages {
+			fmt.Printf("DEBUG: Message %d - Role: %s, Content: %s\n", i+1, msg.Role, msg.Content)
+		}
+		
 		conversationHistory.AddMessage(currentUserMessage)
+		
+		// Debug: Print updated history
+		fmt.Printf("DEBUG: === UPDATED HISTORY ===\n")
+		fmt.Printf("DEBUG: Updated history length: %d messages\n", len(conversationHistory.Messages))
+		for i, msg := range conversationHistory.Messages {
+			fmt.Printf("DEBUG: Message %d - Role: %s, Content: %s\n", i+1, msg.Role, msg.Content)
+		}
 
 		tools := tools.GetClassificationTools()
 
@@ -159,11 +181,20 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 		if err := json.Unmarshal([]byte(toolCall.Function.Arguments), &plan.Parameters); err != nil {
 			return nil, err
 		}
+		
+		// Debug: Print AI response and plan
+		fmt.Printf("DEBUG: === AI RESPONSE ===\n")
+		fmt.Printf("DEBUG: Operation: %s\n", plan.Operation)
+		fmt.Printf("DEBUG: Parameters: %+v\n", plan.Parameters)
 
 		answer, err := s.router.Route(ctx, plan.Operation, plan.Parameters)
 		if err != nil {
 			return nil, err
 		}
+		
+		// Debug: Print router answer
+		fmt.Printf("DEBUG: === ROUTER ANSWER ===\n")
+		fmt.Printf("DEBUG: Answer: %s\n", answer)
 
 		// Add assistant response to conversation history
 		assistantMessage := openai.ChatCompletionMessage{
@@ -171,6 +202,13 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 			Content: answer,
 		}
 		conversationHistory.AddMessage(assistantMessage)
+		
+		// Debug: Print final history
+		fmt.Printf("DEBUG: === FINAL HISTORY ===\n")
+		fmt.Printf("DEBUG: Final history length: %d messages\n", len(conversationHistory.Messages))
+		for i, msg := range conversationHistory.Messages {
+			fmt.Printf("DEBUG: Message %d - Role: %s, Content: %s\n", i+1, msg.Role, msg.Content)
+		}
 
 		// Create updated context with conversation history
 		updatedContext := &chatpb.Context{
@@ -178,6 +216,10 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 			SessionId: req.Context.GetSessionId(),
 			Metadata:  conversationHistory.ToContextMetadata(),
 		}
+		
+		// Debug: Print updated context
+		fmt.Printf("DEBUG: === UPDATED CONTEXT ===\n")
+		fmt.Printf("DEBUG: Updated Context Metadata: %+v\n", updatedContext.GetMetadata())
 
 		return &chatpb.ChatResponse{
 			Context:    updatedContext,
