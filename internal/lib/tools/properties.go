@@ -11,3 +11,9 @@ var typeProperty = NewProperty(
 	"string",
 	"Tag type filter, e.g. 'Course'",
 )
+
+var formatProperty = NewProperty(
+	"format",
+	"string",
+	"Output format: 'list' (default, human-readable), 'json' (machine-readable), 'csv' (spreadsheet), or 'table' (markdown table)",
+)

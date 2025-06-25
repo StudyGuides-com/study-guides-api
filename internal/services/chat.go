@@ -15,7 +15,12 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
-const ToolChoiceTypeAuto = "auto"
+const (
+	ToolChoiceTypeAuto = "auto"
+	// Conversation management constants
+	MaxConversationMessages = 10  // Maximum number of messages to keep in history
+	MaxMessageLength        = 1000 // Maximum characters per message to store
+)
 
 // ConversationHistory manages conversation history using Context metadata
 type ConversationHistory struct {
@@ -56,9 +61,113 @@ func (ch *ConversationHistory) ToContextMetadata() map[string]string {
 	return metadata
 }
 
-// AddMessage adds a message to the conversation history
+// createResponseSummary creates a summary of the response for conversation history
+func createResponseSummary(answer string, operation string, params map[string]string) string {
+	// If the response is short, keep it as is
+	if len(answer) <= MaxMessageLength {
+		return answer
+	}
+	
+	// For long responses, create a summary based on the operation
+	switch operation {
+	case "ListTags":
+		// Count lines to estimate number of items
+		lines := strings.Split(answer, "\n")
+		itemCount := 0
+		for _, line := range lines {
+			if strings.Contains(line, ". ") || strings.Contains(line, "|") || strings.Contains(line, "{") {
+				itemCount++
+			}
+		}
+		
+		format := "list"
+		if f, ok := params["format"]; ok {
+			format = f
+		}
+		
+		tagType := ""
+		if t, ok := params["type"]; ok {
+			tagType = t
+		}
+		
+		if tagType != "" {
+			return fmt.Sprintf("Retrieved %d %s tags in %s format", itemCount, tagType, format)
+		} else {
+			return fmt.Sprintf("Retrieved %d root tags in %s format", itemCount, format)
+		}
+		
+	case "TagCount":
+		return "Retrieved tag count information"
+		
+	case "UniqueTagTypes":
+		// Count the number of tag types
+		lines := strings.Split(answer, "\n")
+		typeCount := 0
+		for _, line := range lines {
+			if strings.Contains(line, ". ") {
+				typeCount++
+			}
+		}
+		return fmt.Sprintf("Retrieved %d unique tag types", typeCount)
+		
+	default:
+		// For unknown operations, truncate and add ellipsis
+		if len(answer) > MaxMessageLength {
+			return answer[:MaxMessageLength] + "..."
+		}
+		return answer
+	}
+}
+
+// AddMessage adds a message to the conversation history with management
 func (ch *ConversationHistory) AddMessage(message openai.ChatCompletionMessage) {
+	// Truncate message content if it's too long
+	if len(message.Content) > MaxMessageLength {
+		message.Content = message.Content[:MaxMessageLength] + "..."
+	}
+	
 	ch.Messages = append(ch.Messages, message)
+	
+	// Keep only the most recent messages
+	if len(ch.Messages) > MaxConversationMessages {
+		// Remove oldest messages, keeping the most recent ones
+		ch.Messages = ch.Messages[len(ch.Messages)-MaxConversationMessages:]
+	}
+}
+
+// AddAssistantResponse adds an assistant response with smart summarization
+func (ch *ConversationHistory) AddAssistantResponse(answer string, operation string, params map[string]string) {
+	// Create a summary for conversation history
+	summary := createResponseSummary(answer, operation, params)
+	
+	assistantMessage := openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleAssistant,
+		Content: summary,
+	}
+	
+	ch.AddMessage(assistantMessage)
+}
+
+// TruncateHistory removes old messages to prevent token limit issues
+func (ch *ConversationHistory) TruncateHistory() {
+	if len(ch.Messages) > MaxConversationMessages {
+		// Keep only the most recent messages
+		ch.Messages = ch.Messages[len(ch.Messages)-MaxConversationMessages:]
+	}
+}
+
+// GetMessagesForAI returns messages optimized for AI consumption
+func (ch *ConversationHistory) GetMessagesForAI() []openai.ChatCompletionMessage {
+	// Create a copy and truncate if needed
+	messages := make([]openai.ChatCompletionMessage, len(ch.Messages))
+	copy(messages, ch.Messages)
+	
+	// If we have too many messages, keep only the most recent ones
+	if len(messages) > MaxConversationMessages {
+		messages = messages[len(messages)-MaxConversationMessages:]
+	}
+	
+	return messages
 }
 
 type ChatService struct {
@@ -110,14 +219,25 @@ func buildSystemPrompt() string {
 	Use the exact type name as it appears in the system. Do NOT use synonyms or variations.
 	`
 	
+	// Add format selection guidance
+	formatGuidance := `
+	When using ListTags or TagCount, choose the appropriate format based on user intent:
+	- Use 'list' (default) for human-readable responses, general browsing, or when user asks to "show", "list", or "see" tags
+	- Use 'json' when user mentions "export", "data", "API", "programmatic", "download", or machine-readable needs
+	- Use 'csv' when user mentions "spreadsheet", "Excel", "analysis", "compare", or data import needs
+	- Use 'table' when user specifically asks for table format or markdown
+	- If unsure, default to 'list' for human interaction
+	`
+	
 	return fmt.Sprintf(`
 	You are an intent router. Allowed operations: %s.
+	%s
 	%s
 	%s
 	If none apply, call Unknown.
 	Always pick exactly one.
 	Please respond using the provided tool to return your response in JSON format.
-	`, operationsList, detailsList, tagTypeGuidance)
+	`, operationsList, detailsList, tagTypeGuidance, formatGuidance)
 }
 
 func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatpb.ChatResponse, error) {
@@ -158,7 +278,9 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 
 		tools := tools.GetClassificationTools()
 
-		raw, err := s.ai.ChatCompletionWithHistory(ctx, systemPrompt, conversationHistory.Messages, tools, nil)
+		// Use optimized messages for AI to prevent token limit issues
+		aiMessages := conversationHistory.GetMessagesForAI()
+		raw, err := s.ai.ChatCompletionWithHistory(ctx, systemPrompt, aiMessages, tools, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -197,11 +319,7 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 		fmt.Printf("DEBUG: Answer: %s\n", answer)
 
 		// Add assistant response to conversation history
-		assistantMessage := openai.ChatCompletionMessage{
-			Role:    openai.ChatMessageRoleAssistant,
-			Content: answer,
-		}
-		conversationHistory.AddMessage(assistantMessage)
+		conversationHistory.AddAssistantResponse(answer, plan.Operation, plan.Parameters)
 		
 		// Debug: Print final history
 		fmt.Printf("DEBUG: === FINAL HISTORY ===\n")
@@ -222,20 +340,15 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 		fmt.Printf("DEBUG: Updated Context Metadata: %+v\n", updatedContext.GetMetadata())
 
 		return &chatpb.ChatResponse{
-			Context:    updatedContext,
-			Operation:  plan.Operation,
-			Parameters: plan.Parameters,
-			Answer:     answer,
-			PlanJson:   mustJson(plan),
+			Answer:  answer,
+			Context: updatedContext,
 		}, nil
 	})
-	
-	// Check if resp is nil before type assertion
-	if resp == nil {
+	if err != nil {
 		return nil, err
 	}
-	
-	return resp.(*chatpb.ChatResponse), err
+
+	return resp.(*chatpb.ChatResponse), nil
 }
 
 func mustJson(v any) string {

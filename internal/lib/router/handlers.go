@@ -2,11 +2,135 @@ package router
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 )
+
+// FormatType represents the different output formats available
+type FormatType string
+
+const (
+	FormatList FormatType = "list"
+	FormatJSON FormatType = "json"
+	FormatCSV  FormatType = "csv"
+	FormatTable FormatType = "table"
+)
+
+// TagsAsNumberedList formats a slice of tags as a numbered list with descriptions
+func TagsAsNumberedList(tags []*sharedpb.Tag) string {
+	if len(tags) == 0 {
+		return ""
+	}
+	
+	var response string
+	for i, tag := range tags {
+		response += fmt.Sprintf("%d. %s", i+1, tag.Name)
+		if tag.Description != nil && *tag.Description != "" {
+			response += fmt.Sprintf(" - %s", *tag.Description)
+		}
+		response += "\n"
+	}
+	return response
+}
+
+// TagsAsJSON formats a slice of tags as JSON
+func TagsAsJSON(tags []*sharedpb.Tag) string {
+	if len(tags) == 0 {
+		return "[]"
+	}
+	
+	// Create a simplified structure for JSON output
+	type TagOutput struct {
+		Name        string `json:"name"`
+		Description string `json:"description,omitempty"`
+		Type        string `json:"type"`
+		ID          string `json:"id"`
+	}
+	
+	var output []TagOutput
+	for _, tag := range tags {
+		tagOutput := TagOutput{
+			Name: tag.Name,
+			Type: tag.Type.String(),
+			ID:   tag.Id,
+		}
+		if tag.Description != nil && *tag.Description != "" {
+			tagOutput.Description = *tag.Description
+		}
+		output = append(output, tagOutput)
+	}
+	
+	jsonBytes, err := json.MarshalIndent(output, "", "  ")
+	if err != nil {
+		return fmt.Sprintf("Error formatting as JSON: %v", err)
+	}
+	return string(jsonBytes)
+}
+
+// TagsAsCSV formats a slice of tags as CSV
+func TagsAsCSV(tags []*sharedpb.Tag) string {
+	if len(tags) == 0 {
+		return "name,description,type,id\n"
+	}
+	
+	response := "name,description,type,id\n"
+	for _, tag := range tags {
+		description := ""
+		if tag.Description != nil && *tag.Description != "" {
+			description = *tag.Description
+		}
+		response += fmt.Sprintf("\"%s\",\"%s\",\"%s\",\"%s\"\n", 
+			tag.Name, description, tag.Type.String(), tag.Id)
+	}
+	return response
+}
+
+// TagsAsTable formats a slice of tags as a simple table
+func TagsAsTable(tags []*sharedpb.Tag) string {
+	if len(tags) == 0 {
+		return "No tags found."
+	}
+	
+	response := "| Name | Description | Type | ID |\n"
+	response += "|------|-------------|------|----|\n"
+	
+	for _, tag := range tags {
+		description := ""
+		if tag.Description != nil && *tag.Description != "" {
+			description = *tag.Description
+		}
+		response += fmt.Sprintf("| %s | %s | %s | %s |\n", 
+			tag.Name, description, tag.Type.String(), tag.Id)
+	}
+	return response
+}
+
+// FormatTags formats tags according to the specified format
+func FormatTags(tags []*sharedpb.Tag, format FormatType) string {
+	switch format {
+	case FormatJSON:
+		return TagsAsJSON(tags)
+	case FormatCSV:
+		return TagsAsCSV(tags)
+	case FormatTable:
+		return TagsAsTable(tags)
+	case FormatList:
+		fallthrough
+	default:
+		return TagsAsNumberedList(tags)
+	}
+}
+
+// getFormatFromParams extracts the format parameter from the params map
+func getFormatFromParams(params map[string]string) FormatType {
+	if format, ok := params["format"]; ok && format != "" {
+		return FormatType(format)
+	}
+	return FormatList // default format
+}
 
 func handleTagCount(ctx context.Context, store store.Store, params map[string]string) (string, error) {
 	count, err := store.TagStore().CountTags(ctx, params)
@@ -20,6 +144,9 @@ func handleTagCount(ctx context.Context, store store.Store, params map[string]st
 func handleListTags(ctx context.Context, store store.Store, params map[string]string) (string, error) {
 	// Debug: Print all parameters
 	fmt.Printf("DEBUG: handleListTags called with params: %+v\n", params)
+	
+	// Get the format specified by the AI
+	format := getFormatFromParams(params)
 	
 	// Check if type parameter is provided
 	if tagType, ok := params["type"]; ok && tagType != "" {
@@ -61,16 +188,15 @@ func handleListTags(ctx context.Context, store store.Store, params map[string]st
 			return "No tags found for the specified type.", nil
 		}
 		
-		// Build response with tag details
-		response := fmt.Sprintf("Found %d tags of type %s:\n", len(tags), tagType)
-		for i, tag := range tags {
-			response += fmt.Sprintf("%d. %s", i+1, tag.Name)
-			if tag.Description != nil && *tag.Description != "" {
-				response += fmt.Sprintf(" - %s", *tag.Description)
-			}
-			response += "\n"
+		// Format the response according to the AI-specified format
+		if format == FormatList {
+			response := fmt.Sprintf("Found %d tags of type %s:\n", len(tags), tagType)
+			response += FormatTags(tags, format)
+			return response, nil
+		} else {
+			// For other formats, just return the formatted data
+			return FormatTags(tags, format), nil
 		}
-		return response, nil
 	}
 	
 	// Default to listing root tags if no type specified
@@ -83,16 +209,15 @@ func handleListTags(ctx context.Context, store store.Store, params map[string]st
 		return "No root tags found.", nil
 	}
 	
-	// Build response with tag details
-	response := fmt.Sprintf("Found %d root tags:\n", len(tags))
-	for i, tag := range tags {
-		response += fmt.Sprintf("%d. %s", i+1, tag.Name)
-		if tag.Description != nil && *tag.Description != "" {
-			response += fmt.Sprintf(" - %s", *tag.Description)
-		}
-		response += "\n"
+	// Format the response according to the AI-specified format
+	if format == FormatList {
+		response := fmt.Sprintf("Found %d root tags:\n", len(tags))
+		response += FormatTags(tags, format)
+		return response, nil
+	} else {
+		// For other formats, just return the formatted data
+		return FormatTags(tags, format), nil
 	}
-	return response, nil
 }
 
 func handleUniqueTagTypes(ctx context.Context, store store.Store, params map[string]string) (string, error) {
@@ -105,6 +230,7 @@ func handleUniqueTagTypes(ctx context.Context, store store.Store, params map[str
 		return "No tag types found in the system.", nil
 	}
 	
+	// For now, tag types only support list format since they're simple strings
 	response := fmt.Sprintf("Found %d unique tag types:\n", len(tagTypes))
 	for i, tagType := range tagTypes {
 		response += fmt.Sprintf("%d. %s\n", i+1, tagType.String())
