@@ -103,19 +103,11 @@ func buildSystemPrompt() string {
 	
 	// Add tag type guidance
 	tagTypeGuidance := `
-	When using ListTags with a type parameter, use these valid tag types:
-	- University (for colleges/universities)
-	- Course (for courses)
-	- Topic (for topics/subjects)
-	- Category (for categories)
-	- Department (for departments)
-	- Region (for regions)
-	- Organization (for organizations)
-	- Certification (for certifications)
-	- UserContent (for user-generated content)
-	- UserStudyGuide (for user study guides)
+	When using ListTags with a type parameter, use the exact tag types that exist in the system.
+	Common tag types include: Category, UserContent, UserTopic, Branch, Instruction_Type, 
+	Instruction_Group, Instruction, Chapter, Section, etc.
 	
-	Do NOT use invalid types.
+	Use the exact type name as it appears in the system. Do NOT use synonyms or variations.
 	`
 	
 	return fmt.Sprintf(`

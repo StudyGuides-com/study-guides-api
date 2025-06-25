@@ -18,8 +18,13 @@ func handleTagCount(ctx context.Context, store store.Store, params map[string]st
 }
 
 func handleListTags(ctx context.Context, store store.Store, params map[string]string) (string, error) {
+	// Debug: Print all parameters
+	fmt.Printf("DEBUG: handleListTags called with params: %+v\n", params)
+	
 	// Check if type parameter is provided
 	if tagType, ok := params["type"]; ok && tagType != "" {
+		fmt.Printf("DEBUG: Type parameter found: '%s'\n", tagType)
+		
 		// Get the actual unique tag types from the database
 		uniqueTagTypes, err := store.TagStore().UniqueTagTypes(ctx)
 		if err != nil {
