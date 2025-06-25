@@ -2,6 +2,7 @@ package tag
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -32,7 +33,7 @@ type tagRow struct {
 	MetaTags           []string          `db:"metaTags"`
 	Public             bool              `db:"public"`
 	AccessCount        int64             `db:"accessCount"`
-	Metadata           map[string]string `db:"metadata"`
+	Metadata           json.RawMessage   `db:"metadata"`
 	CreatedAt          time.Time         `db:"createdAt"`
 	UpdatedAt          time.Time         `db:"updatedAt"`
 	OwnerID            *string           `db:"ownerId"`
@@ -47,11 +48,42 @@ func (s *SqlTagStore) GetTagByID(ctx context.Context, id string) (*sharedpb.Tag,
 		SELECT id, "batchId", hash, name, description, type, context, "parentTagId",
 		       "contentRating", "contentDescriptors", "metaTags", public, "accessCount",
 		       metadata, "createdAt", "updatedAt", "ownerId", "hasQuestions", "hasChildren"
-		FROM "Tag"
+		FROM public."Tag"
 		WHERE id = $1
 	`, id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "get tag by id: "+err.Error())
+	}
+
+	metadata := make(map[string]string)
+	if row.Metadata != nil {
+		// First try to unmarshal as map[string]interface{} to handle mixed types
+		var rawMetadata map[string]interface{}
+		if err := json.Unmarshal(row.Metadata, &rawMetadata); err == nil {
+			// Convert all values to strings
+			for k, v := range rawMetadata {
+				switch val := v.(type) {
+				case string:
+					metadata[k] = val
+				case float64:
+					metadata[k] = fmt.Sprintf("%v", val)
+				case bool:
+					metadata[k] = fmt.Sprintf("%v", val)
+				default:
+					// For any other type, convert to JSON string
+					if jsonBytes, err := json.Marshal(val); err == nil {
+						metadata[k] = string(jsonBytes)
+					} else {
+						metadata[k] = fmt.Sprintf("%v", val)
+					}
+				}
+			}
+		} else {
+			// Fallback: try direct unmarshaling to map[string]string
+			if err := json.Unmarshal(row.Metadata, &metadata); err != nil {
+				return nil, status.Error(codes.Internal, "failed to unmarshal metadata: "+err.Error())
+			}
+		}
 	}
 
 	return &sharedpb.Tag{
@@ -68,7 +100,7 @@ func (s *SqlTagStore) GetTagByID(ctx context.Context, id string) (*sharedpb.Tag,
 		MetaTags:           row.MetaTags,
 		Public:             row.Public,
 		AccessCount:        int32(row.AccessCount),
-		Metadata:           row.Metadata,
+		Metadata:           metadata,
 		CreatedAt:          timestamppb.New(row.CreatedAt),
 		UpdatedAt:          timestamppb.New(row.UpdatedAt),
 		OwnerId:            row.OwnerID,
@@ -84,7 +116,7 @@ func (s *SqlTagStore) ListTagsByParent(ctx context.Context, parentID string) ([]
 		SELECT id, "batchId", hash, name, description, type, context, "parentTagId",
 		       "contentRating", "contentDescriptors", "metaTags", public, "accessCount",
 		       metadata, "createdAt", "updatedAt", "ownerId", "hasQuestions", "hasChildren"
-		FROM "Tag"
+		FROM public."Tag"
 		WHERE "parentTagId" = $1
 	`, parentID)
 	if err != nil {
@@ -101,7 +133,7 @@ func (s *SqlTagStore) ListTagsByType(ctx context.Context, tagType sharedpb.TagTy
 		SELECT id, "batchId", hash, name, description, type, context, "parentTagId",
 		       "contentRating", "contentDescriptors", "metaTags", public, "accessCount",
 		       metadata, "createdAt", "updatedAt", "ownerId", "hasQuestions", "hasChildren"
-		FROM "Tag"
+		FROM public."Tag"
 		WHERE type = $1
 	`, tagType.String())
 	if err != nil {
@@ -118,7 +150,7 @@ func (s *SqlTagStore) ListRootTags(ctx context.Context) ([]*sharedpb.Tag, error)
 		SELECT id, "batchId", hash, name, description, type, context, "parentTagId",
 		       "contentRating", "contentDescriptors", "metaTags", public, "accessCount",
 		       metadata, "createdAt", "updatedAt", "ownerId", "hasQuestions", "hasChildren"
-		FROM "Tag"
+		FROM public."Tag"
 		WHERE "parentTagId" IS NULL
 	`)
 	if err != nil {
@@ -131,6 +163,38 @@ func (s *SqlTagStore) ListRootTags(ctx context.Context) ([]*sharedpb.Tag, error)
 func mapRowsToTags(rows []tagRow) []*sharedpb.Tag {
 	var tags []*sharedpb.Tag
 	for _, row := range rows {
+		metadata := make(map[string]string)
+		if row.Metadata != nil {
+			// First try to unmarshal as map[string]interface{} to handle mixed types
+			var rawMetadata map[string]interface{}
+			if err := json.Unmarshal(row.Metadata, &rawMetadata); err == nil {
+				// Convert all values to strings
+				for k, v := range rawMetadata {
+					switch val := v.(type) {
+					case string:
+						metadata[k] = val
+					case float64:
+						metadata[k] = fmt.Sprintf("%v", val)
+					case bool:
+						metadata[k] = fmt.Sprintf("%v", val)
+					default:
+						// For any other type, convert to JSON string
+						if jsonBytes, err := json.Marshal(val); err == nil {
+							metadata[k] = string(jsonBytes)
+						} else {
+							metadata[k] = fmt.Sprintf("%v", val)
+						}
+					}
+				}
+			} else {
+				// Fallback: try direct unmarshaling to map[string]string
+				if err := json.Unmarshal(row.Metadata, &metadata); err != nil {
+					// Log error but continue with empty metadata
+					fmt.Printf("failed to unmarshal metadata for tag %s: %v\n", row.ID, err)
+				}
+			}
+		}
+
 		tags = append(tags, &sharedpb.Tag{
 			Id:                 row.ID,
 			BatchId:            row.BatchID,
@@ -145,7 +209,7 @@ func mapRowsToTags(rows []tagRow) []*sharedpb.Tag {
 			MetaTags:           row.MetaTags,
 			Public:             row.Public,
 			AccessCount:        int32(row.AccessCount),
-			Metadata:           row.Metadata,
+			Metadata:           metadata,
 			CreatedAt:          timestamppb.New(row.CreatedAt),
 			UpdatedAt:          timestamppb.New(row.UpdatedAt),
 			OwnerId:            row.OwnerID,
@@ -209,4 +273,27 @@ func (s *SqlTagStore) CountTags(ctx context.Context, params map[string]string) (
 		return 0, err
 	}
 	return count, nil
+}
+
+func (s *SqlTagStore) UniqueTagTypes(ctx context.Context) ([]sharedpb.TagType, error) {
+	var typeStrings []string
+
+	err := pgxscan.Select(ctx, s.db, &typeStrings, `
+		SELECT DISTINCT type 
+		FROM public."Tag" 
+		WHERE type IS NOT NULL 
+		ORDER BY type
+	`)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "get unique tag types: "+err.Error())
+	}
+
+	var tagTypes []sharedpb.TagType
+	for _, typeStr := range typeStrings {
+		if tagType, exists := sharedpb.TagType_value[typeStr]; exists {
+			tagTypes = append(tagTypes, sharedpb.TagType(tagType))
+		}
+	}
+
+	return tagTypes, nil
 }

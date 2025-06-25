@@ -101,13 +101,31 @@ func buildSystemPrompt() string {
 	operationsList := strings.Join(operations, ", ")
 	detailsList := strings.Join(operationDetails, "\n")
 	
+	// Add tag type guidance
+	tagTypeGuidance := `
+	When using ListTags with a type parameter, use these valid tag types:
+	- University (for colleges/universities)
+	- Course (for courses)
+	- Topic (for topics/subjects)
+	- Category (for categories)
+	- Department (for departments)
+	- Region (for regions)
+	- Organization (for organizations)
+	- Certification (for certifications)
+	- UserContent (for user-generated content)
+	- UserStudyGuide (for user study guides)
+	
+	Do NOT use invalid types.
+	`
+	
 	return fmt.Sprintf(`
 	You are an intent router. Allowed operations: %s.
+	%s
 	%s
 	If none apply, call Unknown.
 	Always pick exactly one.
 	Please respond using the provided tool to return your response in JSON format.
-	`, operationsList, detailsList)
+	`, operationsList, detailsList, tagTypeGuidance)
 }
 
 func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatpb.ChatResponse, error) {
@@ -126,9 +144,7 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 
 		tools := tools.GetClassificationTools()
 
-		raw, err := s.ai.ChatCompletionWithHistory(ctx, systemPrompt, conversationHistory.Messages, tools, &openai.ToolChoice{
-			Type: ToolChoiceTypeAuto,
-		})
+		raw, err := s.ai.ChatCompletionWithHistory(ctx, systemPrompt, conversationHistory.Messages, tools, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -179,6 +195,12 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 			PlanJson:   mustJson(plan),
 		}, nil
 	})
+	
+	// Check if resp is nil before type assertion
+	if resp == nil {
+		return nil, err
+	}
+	
 	return resp.(*chatpb.ChatResponse), err
 }
 

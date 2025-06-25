@@ -51,7 +51,7 @@ func (c *AlgoliaStore) buildTagFilters(opts *SearchOptions) []interface{} {
 	}
 
 	// Add type filter
-	if opts.Type != sharedpb.TagType_TAG_TYPE_UNSPECIFIED {
+	if opts.Type != 0 {
 		filters = append(filters, fmt.Sprintf("type:%s", opts.Type))
 	}
 

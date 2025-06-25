@@ -78,7 +78,7 @@ func (x *TagSearchPath) GetType() TagType {
 	if x != nil {
 		return x.Type
 	}
-	return TagType_TAG_TYPE_UNSPECIFIED
+	return TagType_Category
 }
 
 type TagSearchResult struct {
@@ -151,7 +151,7 @@ func (x *TagSearchResult) GetType() TagType {
 	if x != nil {
 		return x.Type
 	}
-	return TagType_TAG_TYPE_UNSPECIFIED
+	return TagType_Category
 }
 
 func (x *TagSearchResult) GetContentRating() ContentRating {

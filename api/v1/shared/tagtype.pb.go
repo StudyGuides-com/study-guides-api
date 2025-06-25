@@ -24,88 +24,85 @@ const (
 type TagType int32
 
 const (
-	TagType_TAG_TYPE_UNSPECIFIED       TagType = 0
-	TagType_TAG_TYPE_CATEGORY          TagType = 1
-	TagType_TAG_TYPE_SUB_CATEGORY      TagType = 2
-	TagType_TAG_TYPE_UNIVERSITY        TagType = 3
-	TagType_TAG_TYPE_REGION            TagType = 4
-	TagType_TAG_TYPE_DEPARTMENT        TagType = 5
-	TagType_TAG_TYPE_COURSE            TagType = 6
-	TagType_TAG_TYPE_TOPIC             TagType = 7
-	TagType_TAG_TYPE_USER_STUDY_GUIDE  TagType = 8
-	TagType_TAG_TYPE_USER_CONTENT      TagType = 9
-	TagType_TAG_TYPE_USER_FOLDER       TagType = 10
-	TagType_TAG_TYPE_USER_TOPIC        TagType = 11
-	TagType_TAG_TYPE_ORGANIZATION      TagType = 12
-	TagType_TAG_TYPE_CERTIFYING_AGENCY TagType = 13
-	TagType_TAG_TYPE_CERTIFICATION     TagType = 14
-	TagType_TAG_TYPE_MODULE            TagType = 15
-	TagType_TAG_TYPE_DOMAIN            TagType = 16
-	TagType_TAG_TYPE_ENTRANCE_EXAM     TagType = 17
-	TagType_TAG_TYPE_AP_EXAM           TagType = 18
-	TagType_TAG_TYPE_BRANCH            TagType = 19
-	TagType_TAG_TYPE_INSTRUCTION_TYPE  TagType = 20
-	TagType_TAG_TYPE_INSTRUCTION_GROUP TagType = 21
-	TagType_TAG_TYPE_INSTRUCTION       TagType = 22
-	TagType_TAG_TYPE_CHAPTER           TagType = 23
-	TagType_TAG_TYPE_SECTION           TagType = 24
+	TagType_Category          TagType = 0
+	TagType_SubCategory       TagType = 1
+	TagType_University        TagType = 2
+	TagType_Region            TagType = 3
+	TagType_Department        TagType = 4
+	TagType_Course            TagType = 5
+	TagType_Topic             TagType = 6
+	TagType_UserStudyGuide    TagType = 7
+	TagType_UserContent       TagType = 8
+	TagType_UserFolder        TagType = 9
+	TagType_UserTopic         TagType = 10
+	TagType_Organization      TagType = 11
+	TagType_Certifying_Agency TagType = 12
+	TagType_Certification     TagType = 13
+	TagType_Module            TagType = 14
+	TagType_Domain            TagType = 15
+	TagType_Entrance_Exam     TagType = 16
+	TagType_AP_Exam           TagType = 17
+	TagType_Branch            TagType = 18
+	TagType_Instruction_Type  TagType = 19
+	TagType_Instruction_Group TagType = 20
+	TagType_Instruction       TagType = 21
+	TagType_Chapter           TagType = 22
+	TagType_Section           TagType = 23
 )
 
 // Enum value maps for TagType.
 var (
 	TagType_name = map[int32]string{
-		0:  "TAG_TYPE_UNSPECIFIED",
-		1:  "TAG_TYPE_CATEGORY",
-		2:  "TAG_TYPE_SUB_CATEGORY",
-		3:  "TAG_TYPE_UNIVERSITY",
-		4:  "TAG_TYPE_REGION",
-		5:  "TAG_TYPE_DEPARTMENT",
-		6:  "TAG_TYPE_COURSE",
-		7:  "TAG_TYPE_TOPIC",
-		8:  "TAG_TYPE_USER_STUDY_GUIDE",
-		9:  "TAG_TYPE_USER_CONTENT",
-		10: "TAG_TYPE_USER_FOLDER",
-		11: "TAG_TYPE_USER_TOPIC",
-		12: "TAG_TYPE_ORGANIZATION",
-		13: "TAG_TYPE_CERTIFYING_AGENCY",
-		14: "TAG_TYPE_CERTIFICATION",
-		15: "TAG_TYPE_MODULE",
-		16: "TAG_TYPE_DOMAIN",
-		17: "TAG_TYPE_ENTRANCE_EXAM",
-		18: "TAG_TYPE_AP_EXAM",
-		19: "TAG_TYPE_BRANCH",
-		20: "TAG_TYPE_INSTRUCTION_TYPE",
-		21: "TAG_TYPE_INSTRUCTION_GROUP",
-		22: "TAG_TYPE_INSTRUCTION",
-		23: "TAG_TYPE_CHAPTER",
-		24: "TAG_TYPE_SECTION",
+		0:  "Category",
+		1:  "SubCategory",
+		2:  "University",
+		3:  "Region",
+		4:  "Department",
+		5:  "Course",
+		6:  "Topic",
+		7:  "UserStudyGuide",
+		8:  "UserContent",
+		9:  "UserFolder",
+		10: "UserTopic",
+		11: "Organization",
+		12: "Certifying_Agency",
+		13: "Certification",
+		14: "Module",
+		15: "Domain",
+		16: "Entrance_Exam",
+		17: "AP_Exam",
+		18: "Branch",
+		19: "Instruction_Type",
+		20: "Instruction_Group",
+		21: "Instruction",
+		22: "Chapter",
+		23: "Section",
 	}
 	TagType_value = map[string]int32{
-		"TAG_TYPE_UNSPECIFIED":       0,
-		"TAG_TYPE_CATEGORY":          1,
-		"TAG_TYPE_SUB_CATEGORY":      2,
-		"TAG_TYPE_UNIVERSITY":        3,
-		"TAG_TYPE_REGION":            4,
-		"TAG_TYPE_DEPARTMENT":        5,
-		"TAG_TYPE_COURSE":            6,
-		"TAG_TYPE_TOPIC":             7,
-		"TAG_TYPE_USER_STUDY_GUIDE":  8,
-		"TAG_TYPE_USER_CONTENT":      9,
-		"TAG_TYPE_USER_FOLDER":       10,
-		"TAG_TYPE_USER_TOPIC":        11,
-		"TAG_TYPE_ORGANIZATION":      12,
-		"TAG_TYPE_CERTIFYING_AGENCY": 13,
-		"TAG_TYPE_CERTIFICATION":     14,
-		"TAG_TYPE_MODULE":            15,
-		"TAG_TYPE_DOMAIN":            16,
-		"TAG_TYPE_ENTRANCE_EXAM":     17,
-		"TAG_TYPE_AP_EXAM":           18,
-		"TAG_TYPE_BRANCH":            19,
-		"TAG_TYPE_INSTRUCTION_TYPE":  20,
-		"TAG_TYPE_INSTRUCTION_GROUP": 21,
-		"TAG_TYPE_INSTRUCTION":       22,
-		"TAG_TYPE_CHAPTER":           23,
-		"TAG_TYPE_SECTION":           24,
+		"Category":          0,
+		"SubCategory":       1,
+		"University":        2,
+		"Region":            3,
+		"Department":        4,
+		"Course":            5,
+		"Topic":             6,
+		"UserStudyGuide":    7,
+		"UserContent":       8,
+		"UserFolder":        9,
+		"UserTopic":         10,
+		"Organization":      11,
+		"Certifying_Agency": 12,
+		"Certification":     13,
+		"Module":            14,
+		"Domain":            15,
+		"Entrance_Exam":     16,
+		"AP_Exam":           17,
+		"Branch":            18,
+		"Instruction_Type":  19,
+		"Instruction_Group": 20,
+		"Instruction":       21,
+		"Chapter":           22,
+		"Section":           23,
 	}
 )
 
@@ -140,34 +137,41 @@ var File_v1_shared_tagtype_proto protoreflect.FileDescriptor
 
 const file_v1_shared_tagtype_proto_rawDesc = "" +
 	"\n" +
-	"\x17v1/shared/tagtype.proto\x12\tshared.v1*\xff\x04\n" +
-	"\aTagType\x12\x18\n" +
-	"\x14TAG_TYPE_UNSPECIFIED\x10\x00\x12\x15\n" +
-	"\x11TAG_TYPE_CATEGORY\x10\x01\x12\x19\n" +
-	"\x15TAG_TYPE_SUB_CATEGORY\x10\x02\x12\x17\n" +
-	"\x13TAG_TYPE_UNIVERSITY\x10\x03\x12\x13\n" +
-	"\x0fTAG_TYPE_REGION\x10\x04\x12\x17\n" +
-	"\x13TAG_TYPE_DEPARTMENT\x10\x05\x12\x13\n" +
-	"\x0fTAG_TYPE_COURSE\x10\x06\x12\x12\n" +
-	"\x0eTAG_TYPE_TOPIC\x10\a\x12\x1d\n" +
-	"\x19TAG_TYPE_USER_STUDY_GUIDE\x10\b\x12\x19\n" +
-	"\x15TAG_TYPE_USER_CONTENT\x10\t\x12\x18\n" +
-	"\x14TAG_TYPE_USER_FOLDER\x10\n" +
-	"\x12\x17\n" +
-	"\x13TAG_TYPE_USER_TOPIC\x10\v\x12\x19\n" +
-	"\x15TAG_TYPE_ORGANIZATION\x10\f\x12\x1e\n" +
-	"\x1aTAG_TYPE_CERTIFYING_AGENCY\x10\r\x12\x1a\n" +
-	"\x16TAG_TYPE_CERTIFICATION\x10\x0e\x12\x13\n" +
-	"\x0fTAG_TYPE_MODULE\x10\x0f\x12\x13\n" +
-	"\x0fTAG_TYPE_DOMAIN\x10\x10\x12\x1a\n" +
-	"\x16TAG_TYPE_ENTRANCE_EXAM\x10\x11\x12\x14\n" +
-	"\x10TAG_TYPE_AP_EXAM\x10\x12\x12\x13\n" +
-	"\x0fTAG_TYPE_BRANCH\x10\x13\x12\x1d\n" +
-	"\x19TAG_TYPE_INSTRUCTION_TYPE\x10\x14\x12\x1e\n" +
-	"\x1aTAG_TYPE_INSTRUCTION_GROUP\x10\x15\x12\x18\n" +
-	"\x14TAG_TYPE_INSTRUCTION\x10\x16\x12\x14\n" +
-	"\x10TAG_TYPE_CHAPTER\x10\x17\x12\x14\n" +
-	"\x10TAG_TYPE_SECTION\x10\x18BDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
+	"\x17v1/shared/tagtype.proto\x12\tshared.v1*\x87\x03\n" +
+	"\aTagType\x12\f\n" +
+	"\bCategory\x10\x00\x12\x0f\n" +
+	"\vSubCategory\x10\x01\x12\x0e\n" +
+	"\n" +
+	"University\x10\x02\x12\n" +
+	"\n" +
+	"\x06Region\x10\x03\x12\x0e\n" +
+	"\n" +
+	"Department\x10\x04\x12\n" +
+	"\n" +
+	"\x06Course\x10\x05\x12\t\n" +
+	"\x05Topic\x10\x06\x12\x12\n" +
+	"\x0eUserStudyGuide\x10\a\x12\x0f\n" +
+	"\vUserContent\x10\b\x12\x0e\n" +
+	"\n" +
+	"UserFolder\x10\t\x12\r\n" +
+	"\tUserTopic\x10\n" +
+	"\x12\x10\n" +
+	"\fOrganization\x10\v\x12\x15\n" +
+	"\x11Certifying_Agency\x10\f\x12\x11\n" +
+	"\rCertification\x10\r\x12\n" +
+	"\n" +
+	"\x06Module\x10\x0e\x12\n" +
+	"\n" +
+	"\x06Domain\x10\x0f\x12\x11\n" +
+	"\rEntrance_Exam\x10\x10\x12\v\n" +
+	"\aAP_Exam\x10\x11\x12\n" +
+	"\n" +
+	"\x06Branch\x10\x12\x12\x14\n" +
+	"\x10Instruction_Type\x10\x13\x12\x15\n" +
+	"\x11Instruction_Group\x10\x14\x12\x0f\n" +
+	"\vInstruction\x10\x15\x12\v\n" +
+	"\aChapter\x10\x16\x12\v\n" +
+	"\aSection\x10\x17BDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
 
 var (
 	file_v1_shared_tagtype_proto_rawDescOnce sync.Once

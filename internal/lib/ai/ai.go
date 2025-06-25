@@ -2,6 +2,8 @@ package ai
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/studyguides-com/study-guides-api/internal/errors"
@@ -105,7 +107,7 @@ func (c *OpenAiClient) ChatCompletionWithTools(ctx context.Context, systemPrompt
 	// Make the API call
 	resp, err := c.client.CreateChatCompletion(ctx, req)
 	if err != nil {
-		return "", errors.ErrFailedToCreateChatCompletionWithTools
+		return "", fmt.Errorf("failed to create chat completion with tools: %w", err)
 	}
 
 	// Return the tool call output if present
@@ -145,20 +147,16 @@ func (c *OpenAiClient) ChatCompletionWithHistory(ctx context.Context, systemProm
 	// Make the API call
 	resp, err := c.client.CreateChatCompletion(ctx, req)
 	if err != nil {
-		return "", errors.ErrFailedToCreateChatCompletionWithTools
+		return "", fmt.Errorf("failed to create chat completion with tools: %w", err)
 	}
 
-	// Return the tool call output if present
-	if len(resp.Choices) > 0 {
-		toolCalls := resp.Choices[0].Message.ToolCalls
-		if len(toolCalls) > 0 {
-			return toolCalls[0].Function.Arguments, nil
-		}
-		// Fallback to message content
-		return resp.Choices[0].Message.Content, nil
+	// Return the full response as JSON
+	responseJSON, err := json.Marshal(resp)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal response: %w", err)
 	}
 
-	return "", errors.ErrNoCompletionChoicesReturned
+	return string(responseJSON), nil
 }
 
 // CreateJSONChatCompletionRequest creates a chat completion request with JSON response format

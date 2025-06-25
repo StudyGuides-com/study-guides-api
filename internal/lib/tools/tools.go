@@ -7,9 +7,10 @@ import (
 type ToolNames string
 
 const (
-	ToolNameTagCount ToolNames = "TagCount"
-	ToolNameListTags ToolNames = "ListTags"
-	ToolNameUnknown  ToolNames = "Unknown"
+	ToolNameTagCount     ToolNames = "TagCount"
+	ToolNameListTags     ToolNames = "ListTags"
+	ToolNameUniqueTagTypes ToolNames = "UniqueTagTypes"
+	ToolNameUnknown      ToolNames = "Unknown"
 )
 
 // ClassificationToolDefinitions contains all available tool definitions for classification
@@ -23,6 +24,11 @@ var ClassificationToolDefinitions = []ToolDefinition{
 		string(ToolNameListTags),
 		"Returns a list of tags. Optional filters: type and contextType.",
 	).WithParameters(NoRequiredParams, typeProperty, contextProperty),
+	
+	NewToolDefinition(
+		string(ToolNameUniqueTagTypes),
+		"Returns a list of all unique tag types available in the system.",
+	).WithParameters(NoRequiredParams),
 	
 	NewToolDefinition(
 		string(ToolNameUnknown),

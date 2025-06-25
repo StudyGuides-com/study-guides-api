@@ -10,14 +10,12 @@ import (
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 )
 
-type tagStore struct {
-}
-
 type TagStore interface {
 	GetTagByID(ctx context.Context, id string) (*sharedpb.Tag, error)
 	ListTagsByParent(ctx context.Context, parentID string) ([]*sharedpb.Tag, error)
 	ListTagsByType(ctx context.Context, tagType sharedpb.TagType) ([]*sharedpb.Tag, error)
 	ListRootTags(ctx context.Context) ([]*sharedpb.Tag, error)
+	UniqueTagTypes(ctx context.Context) ([]sharedpb.TagType, error)
 	Report(ctx context.Context, tagID string, userId string, reportType sharedpb.ReportType, reason string) error
 	Favorite(ctx context.Context, tagID string, userId string) error
 	Unfavorite(ctx context.Context, tagID string, userId string) error
