@@ -10,6 +10,7 @@ const (
 	ToolNameTagCount     ToolNames = "TagCount"
 	ToolNameListTags     ToolNames = "ListTags"
 	ToolNameListRootTags ToolNames = "ListRootTags"
+	ToolNameGetTag       ToolNames = "GetTag"
 	ToolNameUniqueTagTypes ToolNames = "UniqueTagTypes"
 	ToolNameUniqueContextTypes ToolNames = "UniqueContextTypes"
 	ToolNameUnknown      ToolNames = "Unknown"
@@ -31,6 +32,11 @@ var ClassificationToolDefinitions = []ToolDefinition{
 		string(ToolNameListRootTags),
 		"Returns a list of root tags (tags with no parent). Optional filters: name and public status. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
 	).WithParameters(NoRequiredParams, nameProperty, publicProperty, formatProperty),
+	
+	NewToolDefinition(
+		string(ToolNameGetTag),
+		"Returns detailed information about a specific tag by its ID. Use this when the user asks to see details of a specific tag or refers to a tag by number from a previous list.",
+	).WithParameters([]string{"tagId"}, NewProperty("tagId", "string", "The ID of the tag to retrieve")),
 	
 	NewToolDefinition(
 		string(ToolNameUniqueTagTypes),

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 	"github.com/studyguides-com/study-guides-api/internal/store"
@@ -27,7 +28,7 @@ func TagsAsNumberedList(tags []*sharedpb.Tag) string {
 	
 	var response string
 	for i, tag := range tags {
-		response += fmt.Sprintf("%d. %s", i+1, tag.Name)
+		response += fmt.Sprintf("%d. %s (ID: %s)", i+1, tag.Name, tag.Id)
 		if tag.Description != nil && *tag.Description != "" {
 			response += fmt.Sprintf(" - %s", *tag.Description)
 		}
@@ -418,6 +419,76 @@ func handleListRootTags(ctx context.Context, store store.Store, params map[strin
 		// For other formats, just return the formatted data
 		return FormatTags(tags, format), nil
 	}
+}
+
+func handleGetTag(ctx context.Context, store store.Store, params map[string]string) (string, error) {
+	tagID, ok := params["tagId"]
+	if !ok || tagID == "" {
+		return "Please provide a tag ID to retrieve.", nil
+	}
+	
+	// Get the tag by ID
+	tag, err := store.TagStore().GetTagByID(ctx, tagID)
+	if err != nil {
+		return fmt.Sprintf("Error retrieving tag: %v", err), nil
+	}
+	
+	if tag == nil {
+		return fmt.Sprintf("Tag with ID '%s' not found.", tagID), nil
+	}
+	
+	// Format the tag details in a comprehensive way
+	var response string
+	response += fmt.Sprintf("**Tag Details for ID: %s**\n\n", tag.Id)
+	response += fmt.Sprintf("**Name:** %s\n", tag.Name)
+	
+	if tag.Description != nil && *tag.Description != "" {
+		response += fmt.Sprintf("**Description:** %s\n", *tag.Description)
+	}
+	
+	response += fmt.Sprintf("**Type:** %s\n", tag.Type.String())
+	response += fmt.Sprintf("**Context:** %s\n", tag.Context)
+	
+	if tag.ParentTagId != nil && *tag.ParentTagId != "" {
+		response += fmt.Sprintf("**Parent Tag ID:** %s\n", *tag.ParentTagId)
+	}
+	
+	response += fmt.Sprintf("**Content Rating:** %s\n", tag.ContentRating.String())
+	
+	if len(tag.ContentDescriptors) > 0 {
+		response += fmt.Sprintf("**Content Descriptors:** %s\n", strings.Join(tag.ContentDescriptors, ", "))
+	}
+	
+	if len(tag.MetaTags) > 0 {
+		response += fmt.Sprintf("**Meta Tags:** %s\n", strings.Join(tag.MetaTags, ", "))
+	}
+	
+	response += fmt.Sprintf("**Public:** %t\n", tag.Public)
+	response += fmt.Sprintf("**Access Count:** %d\n", tag.AccessCount)
+	
+	if len(tag.Metadata) > 0 {
+		response += "**Metadata:**\n"
+		for key, value := range tag.Metadata {
+			response += fmt.Sprintf("  - %s: %s\n", key, value)
+		}
+	}
+	
+	if tag.BatchId != nil && *tag.BatchId != "" {
+		response += fmt.Sprintf("**Batch ID:** %s\n", *tag.BatchId)
+	}
+	
+	response += fmt.Sprintf("**Hash:** %s\n", tag.Hash)
+	response += fmt.Sprintf("**Has Questions:** %t\n", tag.HasQuestions)
+	response += fmt.Sprintf("**Has Children:** %t\n", tag.HasChildren)
+	
+	if tag.OwnerId != nil && *tag.OwnerId != "" {
+		response += fmt.Sprintf("**Owner ID:** %s\n", *tag.OwnerId)
+	}
+	
+	response += fmt.Sprintf("**Created:** %s\n", tag.CreatedAt.AsTime().Format("2006-01-02 15:04:05"))
+	response += fmt.Sprintf("**Updated:** %s\n", tag.UpdatedAt.AsTime().Format("2006-01-02 15:04:05"))
+	
+	return response, nil
 }
 
 func handleUniqueTagTypes(ctx context.Context, store store.Store, params map[string]string) (string, error) {

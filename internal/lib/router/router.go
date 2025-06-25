@@ -29,6 +29,9 @@ func NewRouter(store store.Store) *OperationRouter {
 			string(tools.ToolNameListRootTags): func(ctx context.Context, params map[string]string) (string, error) {
 				return handleListRootTags(ctx, store, params)
 			},
+			string(tools.ToolNameGetTag): func(ctx context.Context, params map[string]string) (string, error) {
+				return handleGetTag(ctx, store, params)
+			},
 			string(tools.ToolNameUniqueTagTypes): func(ctx context.Context, params map[string]string) (string, error) {
 				return handleUniqueTagTypes(ctx, store, params)
 			},
