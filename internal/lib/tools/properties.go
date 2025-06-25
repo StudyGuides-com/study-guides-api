@@ -12,6 +12,12 @@ var typeProperty = NewProperty(
 	"Tag type filter, e.g. 'Course'",
 )
 
+var publicProperty = NewProperty(
+	"public",
+	"string",
+	"Filter by public status: 'true' for public tags, 'false' for private tags",
+)
+
 var formatProperty = NewProperty(
 	"format",
 	"string",

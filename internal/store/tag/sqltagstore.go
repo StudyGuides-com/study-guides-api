@@ -177,6 +177,25 @@ func (s *SqlTagStore) ListTagsWithFilters(ctx context.Context, params map[string
 		args = append(args, contextType)
 	}
 
+	if publicStr, ok := params["public"]; ok && publicStr != "" {
+		// Parse the boolean string
+		var public bool
+		if publicStr == "true" {
+			public = true
+		} else if publicStr == "false" {
+			public = false
+		} else {
+			return nil, status.Error(codes.InvalidArgument, "public parameter must be 'true' or 'false'")
+		}
+		query += fmt.Sprintf(` AND public = $%d`, len(args)+1)
+		args = append(args, public)
+	}
+
+	// Handle rootOnly parameter for filtering root tags
+	if rootOnly, ok := params["rootOnly"]; ok && rootOnly == "true" {
+		query += ` AND "parentTagId" IS NULL`
+	}
+
 	var rows []tagRow
 	err := pgxscan.Select(ctx, s.db, &rows, query, args...)
 	if err != nil {
@@ -309,6 +328,20 @@ func (s *SqlTagStore) CountTags(ctx context.Context, params map[string]string) (
 	if contextType, ok := params["contextType"]; ok && contextType != "" {
 		query += fmt.Sprintf(` AND context = $%d`, len(args)+1)
 		args = append(args, contextType)
+	}
+
+	if publicStr, ok := params["public"]; ok && publicStr != "" {
+		// Parse the boolean string
+		var public bool
+		if publicStr == "true" {
+			public = true
+		} else if publicStr == "false" {
+			public = false
+		} else {
+			return 0, status.Error(codes.InvalidArgument, "public parameter must be 'true' or 'false'")
+		}
+		query += fmt.Sprintf(` AND public = $%d`, len(args)+1)
+		args = append(args, public)
 	}
 
 	var count int

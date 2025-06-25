@@ -9,6 +9,7 @@ type ToolNames string
 const (
 	ToolNameTagCount     ToolNames = "TagCount"
 	ToolNameListTags     ToolNames = "ListTags"
+	ToolNameListRootTags ToolNames = "ListRootTags"
 	ToolNameUniqueTagTypes ToolNames = "UniqueTagTypes"
 	ToolNameUnknown      ToolNames = "Unknown"
 )
@@ -17,13 +18,18 @@ const (
 var ClassificationToolDefinitions = []ToolDefinition{
 	NewToolDefinition(
 		string(ToolNameTagCount),
-		"Returns the number of tags. Optional filters: type and contextType.",
-	).WithParameters(NoRequiredParams, typeProperty, contextProperty, formatProperty),
+		"Returns the number of tags. Optional filters: type, contextType, and public status.",
+	).WithParameters(NoRequiredParams, typeProperty, contextProperty, publicProperty, formatProperty),
 	
 	NewToolDefinition(
 		string(ToolNameListTags),
-		"Returns a list of tags. Optional filters: type and contextType. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
-	).WithParameters(NoRequiredParams, typeProperty, contextProperty, formatProperty),
+		"Returns a list of tags. Optional filters: type, contextType, and public status. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
+	).WithParameters(NoRequiredParams, typeProperty, contextProperty, publicProperty, formatProperty),
+	
+	NewToolDefinition(
+		string(ToolNameListRootTags),
+		"Returns a list of root tags (tags with no parent). Optional filter: public status. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
+	).WithParameters(NoRequiredParams, publicProperty, formatProperty),
 	
 	NewToolDefinition(
 		string(ToolNameUniqueTagTypes),
