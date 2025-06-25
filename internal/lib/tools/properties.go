@@ -3,13 +3,13 @@ package tools
 var contextProperty = NewProperty(
 	"contextType",
 	"string",
-	"Context type filter, e.g. 'College'",
+	"Filter by the context/organization where the tag is used (e.g. 'College', 'DoD', 'University', 'Company'). This is different from tag type - context refers to the organizational context.",
 )
 
 var typeProperty = NewProperty(
 	"type",
 	"string",
-	"Tag type filter, e.g. 'Course'",
+	"Filter by the tag's category/classification (e.g. 'Course', 'Subject', 'Topic', 'Department'). This is the tag's inherent type, not its organizational context.",
 )
 
 var publicProperty = NewProperty(

@@ -18,12 +18,12 @@ const (
 var ClassificationToolDefinitions = []ToolDefinition{
 	NewToolDefinition(
 		string(ToolNameTagCount),
-		"Returns the number of tags. Optional filters: type, contextType, and public status.",
+		"Returns the number of tags. Use 'type' for tag categories (Course, Subject, etc.) and 'contextType' for organizational contexts (College, DoD, etc.). Optional filters: type, contextType, and public status.",
 	).WithParameters(NoRequiredParams, typeProperty, contextProperty, publicProperty, formatProperty),
 	
 	NewToolDefinition(
 		string(ToolNameListTags),
-		"Returns a list of tags. Optional filters: type, contextType, and public status. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
+		"Returns a list of tags. Use 'type' for tag categories (Course, Subject, etc.) and 'contextType' for organizational contexts (College, DoD, etc.). Optional filters: type, contextType, and public status. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
 	).WithParameters(NoRequiredParams, typeProperty, contextProperty, publicProperty, formatProperty),
 	
 	NewToolDefinition(
