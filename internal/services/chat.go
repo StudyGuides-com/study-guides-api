@@ -300,8 +300,31 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 		}
 		toolCall := chatResp.Choices[0].Message.ToolCalls[0]
 		plan.Operation = toolCall.Function.Name
-		if err := json.Unmarshal([]byte(toolCall.Function.Arguments), &plan.Parameters); err != nil {
+		
+		// First unmarshal to map[string]interface{} to handle mixed types
+		var rawParams map[string]interface{}
+		if err := json.Unmarshal([]byte(toolCall.Function.Arguments), &rawParams); err != nil {
 			return nil, err
+		}
+		
+		// Convert all values to strings
+		plan.Parameters = make(map[string]string)
+		for k, v := range rawParams {
+			switch val := v.(type) {
+			case string:
+				plan.Parameters[k] = val
+			case float64:
+				plan.Parameters[k] = fmt.Sprintf("%.0f", val) // Convert to integer string
+			case bool:
+				plan.Parameters[k] = fmt.Sprintf("%v", val)
+			default:
+				// For any other type, convert to JSON string
+				if jsonBytes, err := json.Marshal(val); err == nil {
+					plan.Parameters[k] = string(jsonBytes)
+				} else {
+					plan.Parameters[k] = fmt.Sprintf("%v", val)
+				}
+			}
 		}
 		
 		// Debug: Print AI response and plan

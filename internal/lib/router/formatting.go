@@ -179,6 +179,14 @@ func BuildFilterDescription(params map[string]string, hasTypeFilter, hasContextF
 	return ""
 }
 
+// BuildLimitMessage creates a message indicating when results are limited
+func BuildLimitMessage(params map[string]string) string {
+	if limitStr, ok := params["limit"]; ok && limitStr != "" {
+		return fmt.Sprintf(" (limited to first %s results)", limitStr)
+	}
+	return ""
+}
+
 // TagAsFormatted formats a single tag according to the specified format
 func TagAsFormatted(tag *sharedpb.Tag, format FormatType) string {
 	switch format {

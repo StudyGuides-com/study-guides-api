@@ -201,6 +201,12 @@ func (s *SqlTagStore) ListTagsWithFilters(ctx context.Context, params map[string
 		query += ` AND "parentTagId" IS NULL`
 	}
 
+	// Handle limit parameter
+	if limitStr, ok := params["limit"]; ok && limitStr != "" {
+		query += fmt.Sprintf(` LIMIT $%d`, len(args)+1)
+		args = append(args, limitStr)
+	}
+
 	var rows []tagRow
 	err := pgxscan.Select(ctx, s.db, &rows, query, args...)
 	if err != nil {
@@ -210,16 +216,22 @@ func (s *SqlTagStore) ListTagsWithFilters(ctx context.Context, params map[string
 	return mapRowsToTags(rows), nil
 }
 
-func (s *SqlTagStore) ListRootTags(ctx context.Context) ([]*sharedpb.Tag, error) {
-	var rows []tagRow
-
-	err := pgxscan.Select(ctx, s.db, &rows, `
-		SELECT id, "batchId", hash, name, description, type, context, "parentTagId",
+func (s *SqlTagStore) ListRootTags(ctx context.Context, params map[string]string) ([]*sharedpb.Tag, error) {
+	query := `SELECT id, "batchId", hash, name, description, type, context, "parentTagId",
 		       "contentRating", "contentDescriptors", "metaTags", public, "accessCount",
 		       metadata, "createdAt", "updatedAt", "ownerId", "hasQuestions", "hasChildren"
 		FROM public."Tag"
-		WHERE "parentTagId" IS NULL
-	`)
+		WHERE "parentTagId" IS NULL`
+	args := []interface{}{}
+
+	// Handle limit parameter
+	if limitStr, ok := params["limit"]; ok && limitStr != "" {
+		query += fmt.Sprintf(` LIMIT $%d`, len(args)+1)
+		args = append(args, limitStr)
+	}
+
+	var rows []tagRow
+	err := pgxscan.Select(ctx, s.db, &rows, query, args...)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "list root tags: "+err.Error())
 	}

@@ -29,3 +29,9 @@ var formatProperty = NewProperty(
 	"string",
 	"Output format: 'list' (default, human-readable), 'json' (machine-readable), 'csv' (spreadsheet), or 'table' (markdown table)",
 )
+
+var limitProperty = NewProperty(
+	"limit",
+	"integer",
+	"Maximum number of tags to return (e.g. 10 for first 10 results)",
+)

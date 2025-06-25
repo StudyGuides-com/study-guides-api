@@ -66,7 +66,7 @@ func (s *TagService) ListTagsByType(ctx context.Context, req *tagpb.ListTagsByTy
 
 func (s *TagService) ListRootTags(ctx context.Context, req *tagpb.ListRootTagsRequest) (*tagpb.ListTagsResponse, error) {
 	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, session *middleware.SessionDetails) (interface{}, error) {
-		tags, err := s.store.TagStore().ListRootTags(ctx)
+		tags, err := s.store.TagStore().ListRootTags(ctx, make(map[string]string))
 		if err != nil {
 			return nil, err
 		}

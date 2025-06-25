@@ -152,7 +152,8 @@ func handleListTags(ctx context.Context, store store.Store, params map[string]st
 		// Format the response according to the AI-specified format
 		if format == FormatList {
 			filterDesc := BuildFilterDescription(params, hasTypeFilter, hasContextFilter, hasNameFilter, hasPublicFilter)
-			response := fmt.Sprintf("Found %d tags%s:\n", len(tags), filterDesc)
+			limitMsg := BuildLimitMessage(params)
+			response := fmt.Sprintf("Found %d tags%s%s:\n", len(tags), filterDesc, limitMsg)
 			response += FormatTags(tags, format)
 			return response, nil
 		} else {
@@ -162,7 +163,7 @@ func handleListTags(ctx context.Context, store store.Store, params map[string]st
 	}
 	
 	// Default to listing root tags if no filters specified
-	tags, err := store.TagStore().ListRootTags(ctx)
+	tags, err := store.TagStore().ListRootTags(ctx, params)
 	if err != nil {
 		return "", err
 	}
@@ -173,7 +174,8 @@ func handleListTags(ctx context.Context, store store.Store, params map[string]st
 	
 	// Format the response according to the AI-specified format
 	if format == FormatList {
-		response := fmt.Sprintf("Found %d root tags:\n", len(tags))
+		limitMsg := BuildLimitMessage(params)
+		response := fmt.Sprintf("Found %d root tags%s:\n", len(tags), limitMsg)
 		response += FormatTags(tags, format)
 		return response, nil
 	} else {
@@ -212,7 +214,7 @@ func handleListRootTags(ctx context.Context, store store.Store, params map[strin
 		tags, err = store.TagStore().ListTagsWithFilters(ctx, filterParams)
 	} else {
 		// Get root tags without any filters
-		tags, err = store.TagStore().ListRootTags(ctx)
+		tags, err = store.TagStore().ListRootTags(ctx, params)
 	}
 	
 	if err != nil {
@@ -232,15 +234,16 @@ func handleListRootTags(ctx context.Context, store store.Store, params map[strin
 	
 	// Format the response according to the AI-specified format
 	if format == FormatList {
+		limitMsg := BuildLimitMessage(params)
 		var response string
 		if hasNameFilter && hasPublicFilter {
-			response = fmt.Sprintf("Found %d root tags with name containing '%s' that are %s:\n", len(tags), params["name"], GetPublicDescription(params["public"]))
+			response = fmt.Sprintf("Found %d root tags with name containing '%s' that are %s%s:\n", len(tags), params["name"], GetPublicDescription(params["public"]), limitMsg)
 		} else if hasNameFilter {
-			response = fmt.Sprintf("Found %d root tags with name containing '%s':\n", len(tags), params["name"])
+			response = fmt.Sprintf("Found %d root tags with name containing '%s'%s:\n", len(tags), params["name"], limitMsg)
 		} else if hasPublicFilter {
-			response = fmt.Sprintf("Found %d root tags that are %s:\n", len(tags), GetPublicDescription(params["public"]))
+			response = fmt.Sprintf("Found %d root tags that are %s%s:\n", len(tags), GetPublicDescription(params["public"]), limitMsg)
 		} else {
-			response = fmt.Sprintf("Found %d root tags:\n", len(tags))
+			response = fmt.Sprintf("Found %d root tags%s:\n", len(tags), limitMsg)
 		}
 		response += FormatTags(tags, format)
 		return response, nil

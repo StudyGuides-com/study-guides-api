@@ -26,12 +26,12 @@ var ClassificationToolDefinitions = []ToolDefinition{
 	NewToolDefinition(
 		string(ToolNameListTags),
 		"Returns a list of tags. Use 'type' for tag categories (Course, Subject, etc.) and 'contextType' for organizational contexts (College, DoD, etc.). Use 'name' for partial name searches. Optional filters: type, contextType, name, and public status. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
-	).WithParameters(NoRequiredParams, typeProperty, contextProperty, nameProperty, publicProperty, formatProperty),
+	).WithParameters(NoRequiredParams, typeProperty, contextProperty, nameProperty, publicProperty, formatProperty, limitProperty),
 	
 	NewToolDefinition(
 		string(ToolNameListRootTags),
 		"Returns a list of root tags (tags with no parent). Optional filters: name and public status. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
-	).WithParameters(NoRequiredParams, nameProperty, publicProperty, formatProperty),
+	).WithParameters(NoRequiredParams, nameProperty, publicProperty, formatProperty, limitProperty),
 	
 	NewToolDefinition(
 		string(ToolNameGetTag),
