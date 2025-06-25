@@ -18,6 +18,7 @@ type TagStore interface {
 	ListTagsWithFilters(ctx context.Context, params map[string]string) ([]*sharedpb.Tag, error)
 	ListRootTags(ctx context.Context) ([]*sharedpb.Tag, error)
 	UniqueTagTypes(ctx context.Context) ([]sharedpb.TagType, error)
+	UniqueContextTypes(ctx context.Context) ([]string, error)
 	Report(ctx context.Context, tagID string, userId string, reportType sharedpb.ReportType, reason string) error
 	Favorite(ctx context.Context, tagID string, userId string) error
 	Unfavorite(ctx context.Context, tagID string, userId string) error

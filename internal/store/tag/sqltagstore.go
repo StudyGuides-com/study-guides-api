@@ -373,3 +373,19 @@ func (s *SqlTagStore) UniqueTagTypes(ctx context.Context) ([]sharedpb.TagType, e
 
 	return tagTypes, nil
 }
+
+func (s *SqlTagStore) UniqueContextTypes(ctx context.Context) ([]string, error) {
+	var contextStrings []string
+
+	err := pgxscan.Select(ctx, s.db, &contextStrings, `
+		SELECT DISTINCT context 
+		FROM public."Tag" 
+		WHERE context IS NOT NULL 
+		ORDER BY context
+	`)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "get unique context types: "+err.Error())
+	}
+
+	return contextStrings, nil
+}

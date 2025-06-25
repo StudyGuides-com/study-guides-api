@@ -382,6 +382,24 @@ func handleUniqueTagTypes(ctx context.Context, store store.Store, params map[str
 	return response, nil
 }
 
+func handleUniqueContextTypes(ctx context.Context, store store.Store, params map[string]string) (string, error) {
+	contextTypes, err := store.TagStore().UniqueContextTypes(ctx)
+	if err != nil {
+		return "", err
+	}
+	
+	if len(contextTypes) == 0 {
+		return "No context types found in the system.", nil
+	}
+	
+	// For now, context types only support list format since they're simple strings
+	response := fmt.Sprintf("Found %d unique context types:\n", len(contextTypes))
+	for i, contextType := range contextTypes {
+		response += fmt.Sprintf("%d. %s\n", i+1, contextType)
+	}
+	return response, nil
+}
+
 func handleUnknown(ctx context.Context, store store.Store, params map[string]string) (string, error) {
 	return "I'm sorry, I don't understand your request. Could you please rephrase it or ask about something else?", nil
 }
