@@ -177,6 +177,11 @@ func (s *SqlTagStore) ListTagsWithFilters(ctx context.Context, params map[string
 		args = append(args, contextType)
 	}
 
+	if name, ok := params["name"]; ok && name != "" {
+		query += fmt.Sprintf(` AND name ILIKE $%d`, len(args)+1)
+		args = append(args, "%"+name+"%")
+	}
+
 	if publicStr, ok := params["public"]; ok && publicStr != "" {
 		// Parse the boolean string
 		var public bool
@@ -328,6 +333,11 @@ func (s *SqlTagStore) CountTags(ctx context.Context, params map[string]string) (
 	if contextType, ok := params["contextType"]; ok && contextType != "" {
 		query += fmt.Sprintf(` AND context = $%d`, len(args)+1)
 		args = append(args, contextType)
+	}
+
+	if name, ok := params["name"]; ok && name != "" {
+		query += fmt.Sprintf(` AND name ILIKE $%d`, len(args)+1)
+		args = append(args, "%"+name+"%")
 	}
 
 	if publicStr, ok := params["public"]; ok && publicStr != "" {

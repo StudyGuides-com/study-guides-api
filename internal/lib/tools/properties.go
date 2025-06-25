@@ -12,6 +12,12 @@ var typeProperty = NewProperty(
 	"Filter by the tag's category/classification (e.g. 'Course', 'Subject', 'Topic', 'Department'). This is the tag's inherent type, not its organizational context.",
 )
 
+var nameProperty = NewProperty(
+	"name",
+	"string",
+	"Search for tags by name using partial matching (e.g. 'math' will find 'Mathematics', 'Math 101', etc.)",
+)
+
 var publicProperty = NewProperty(
 	"public",
 	"string",
