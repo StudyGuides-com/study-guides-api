@@ -38,6 +38,9 @@ func NewRouter(store store.Store) *OperationRouter {
 			string(tools.ToolNameUniqueContextTypes): func(ctx context.Context, params map[string]string) (string, error) {
 				return handleUniqueContextTypes(ctx, store, params)
 			},
+			string(tools.ToolNameUserCount): func(ctx context.Context, params map[string]string) (string, error) {
+				return handleUserCount(ctx, store, params)
+			},
 			string(tools.ToolNameUnknown): func(ctx context.Context, params map[string]string) (string, error) {
 				return handleUnknown(ctx, store, params)
 			},

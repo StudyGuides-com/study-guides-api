@@ -13,6 +13,7 @@ const (
 	ToolNameGetTag       ToolNames = "GetTag"
 	ToolNameUniqueTagTypes ToolNames = "UniqueTagTypes"
 	ToolNameUniqueContextTypes ToolNames = "UniqueContextTypes"
+	ToolNameUserCount    ToolNames = "UserCount"
 	ToolNameUnknown      ToolNames = "Unknown"
 )
 
@@ -47,6 +48,11 @@ var ClassificationToolDefinitions = []ToolDefinition{
 		string(ToolNameUniqueContextTypes),
 		"Returns a list of all unique context types (organizational contexts) available in the system.",
 	).WithParameters(NoRequiredParams),
+	
+	NewToolDefinition(
+		string(ToolNameUserCount),
+		"Returns the number of users. The system uses intelligent date parsing to handle relative time expressions. For 'this month', 'last year', '3 months ago', etc., extract the appropriate time parameters. The system will automatically correct outdated cached dates. Examples: 'this month' should use current month and year, 'last year' should use previous year, 'last week' should use days=7. Use time-based filters: 'days' for recent users, 'months' for quarterly/annual counts, 'month' and 'year' for specific time periods, or 'since'/'until' for custom date ranges.",
+	).WithParameters(NoRequiredParams, sinceProperty, untilProperty, daysProperty, monthsProperty, yearsProperty, monthProperty, yearProperty),
 	
 	NewToolDefinition(
 		string(ToolNameUnknown),
