@@ -2,182 +2,11 @@ package router
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"strings"
 
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 )
-
-// FormatType represents the different output formats available
-type FormatType string
-
-const (
-	FormatList FormatType = "list"
-	FormatJSON FormatType = "json"
-	FormatCSV  FormatType = "csv"
-	FormatTable FormatType = "table"
-)
-
-// TagsAsNumberedList formats a slice of tags as a numbered list with descriptions
-func TagsAsNumberedList(tags []*sharedpb.Tag) string {
-	if len(tags) == 0 {
-		return ""
-	}
-	
-	var response string
-	for i, tag := range tags {
-		response += fmt.Sprintf("%d. %s (ID: %s)", i+1, tag.Name, tag.Id)
-		if tag.Description != nil && *tag.Description != "" {
-			response += fmt.Sprintf(" - %s", *tag.Description)
-		}
-		response += "\n"
-	}
-	return response
-}
-
-// TagsAsJSON formats a slice of tags as JSON
-func TagsAsJSON(tags []*sharedpb.Tag) string {
-	if len(tags) == 0 {
-		return "[]"
-	}
-	
-	// Create a simplified structure for JSON output
-	type TagOutput struct {
-		Name        string `json:"name"`
-		Description string `json:"description,omitempty"`
-		Type        string `json:"type"`
-		ID          string `json:"id"`
-	}
-	
-	var output []TagOutput
-	for _, tag := range tags {
-		tagOutput := TagOutput{
-			Name: tag.Name,
-			Type: tag.Type.String(),
-			ID:   tag.Id,
-		}
-		if tag.Description != nil && *tag.Description != "" {
-			tagOutput.Description = *tag.Description
-		}
-		output = append(output, tagOutput)
-	}
-	
-	jsonBytes, err := json.MarshalIndent(output, "", "  ")
-	if err != nil {
-		return fmt.Sprintf("Error formatting as JSON: %v", err)
-	}
-	return string(jsonBytes)
-}
-
-// TagsAsCSV formats a slice of tags as CSV
-func TagsAsCSV(tags []*sharedpb.Tag) string {
-	if len(tags) == 0 {
-		return "name,description,type,id\n"
-	}
-	
-	response := "name,description,type,id\n"
-	for _, tag := range tags {
-		description := ""
-		if tag.Description != nil && *tag.Description != "" {
-			description = *tag.Description
-		}
-		response += fmt.Sprintf("\"%s\",\"%s\",\"%s\",\"%s\"\n", 
-			tag.Name, description, tag.Type.String(), tag.Id)
-	}
-	return response
-}
-
-// TagsAsTable formats a slice of tags as a simple table
-func TagsAsTable(tags []*sharedpb.Tag) string {
-	if len(tags) == 0 {
-		return "No tags found."
-	}
-	
-	response := "| Name | Description | Type | ID |\n"
-	response += "|------|-------------|------|----|\n"
-	
-	for _, tag := range tags {
-		description := ""
-		if tag.Description != nil && *tag.Description != "" {
-			description = *tag.Description
-		}
-		response += fmt.Sprintf("| %s | %s | %s | %s |\n", 
-			tag.Name, description, tag.Type.String(), tag.Id)
-	}
-	return response
-}
-
-// FormatTags formats tags according to the specified format
-func FormatTags(tags []*sharedpb.Tag, format FormatType) string {
-	switch format {
-	case FormatJSON:
-		return TagsAsJSON(tags)
-	case FormatCSV:
-		return TagsAsCSV(tags)
-	case FormatTable:
-		return TagsAsTable(tags)
-	case FormatList:
-		fallthrough
-	default:
-		return TagsAsNumberedList(tags)
-	}
-}
-
-// getFormatFromParams extracts the format parameter from the params map
-func getFormatFromParams(params map[string]string) FormatType {
-	if format, ok := params["format"]; ok && format != "" {
-		return FormatType(format)
-	}
-	return FormatList // default format
-}
-
-// getPublicDescription converts a boolean string to a human-readable description
-func getPublicDescription(publicStr string) string {
-	if publicStr == "true" {
-		return "public"
-	} else if publicStr == "false" {
-		return "private"
-	}
-	return "unknown status"
-}
-
-// buildFilterDescription creates a consistent filter description for tag listings
-func buildFilterDescription(params map[string]string, hasTypeFilter, hasContextFilter, hasNameFilter, hasPublicFilter bool) string {
-	if hasTypeFilter && hasContextFilter && hasNameFilter && hasPublicFilter {
-		return fmt.Sprintf(" for type '%s', context '%s', name containing '%s', and %s", params["type"], params["contextType"], params["name"], getPublicDescription(params["public"]))
-	} else if hasTypeFilter && hasContextFilter && hasNameFilter {
-		return fmt.Sprintf(" for type '%s', context '%s', and name containing '%s'", params["type"], params["contextType"], params["name"])
-	} else if hasTypeFilter && hasContextFilter && hasPublicFilter {
-		return fmt.Sprintf(" for type '%s', context '%s', and %s", params["type"], params["contextType"], getPublicDescription(params["public"]))
-	} else if hasTypeFilter && hasNameFilter && hasPublicFilter {
-		return fmt.Sprintf(" for type '%s', name containing '%s', and %s", params["type"], params["name"], getPublicDescription(params["public"]))
-	} else if hasContextFilter && hasNameFilter && hasPublicFilter {
-		return fmt.Sprintf(" for context '%s', name containing '%s', and %s", params["contextType"], params["name"], getPublicDescription(params["public"]))
-	} else if hasTypeFilter && hasContextFilter {
-		return fmt.Sprintf(" for type '%s' and context '%s'", params["type"], params["contextType"])
-	} else if hasTypeFilter && hasNameFilter {
-		return fmt.Sprintf(" for type '%s' and name containing '%s'", params["type"], params["name"])
-	} else if hasTypeFilter && hasPublicFilter {
-		return fmt.Sprintf(" for type '%s' and %s", params["type"], getPublicDescription(params["public"]))
-	} else if hasContextFilter && hasNameFilter {
-		return fmt.Sprintf(" for context '%s' and name containing '%s'", params["contextType"], params["name"])
-	} else if hasContextFilter && hasPublicFilter {
-		return fmt.Sprintf(" for context '%s' and %s", params["contextType"], getPublicDescription(params["public"]))
-	} else if hasNameFilter && hasPublicFilter {
-		return fmt.Sprintf(" with name containing '%s' and %s", params["name"], getPublicDescription(params["public"]))
-	} else if hasTypeFilter {
-		return fmt.Sprintf(" for type '%s'", params["type"])
-	} else if hasContextFilter {
-		return fmt.Sprintf(" for context '%s'", params["contextType"])
-	} else if hasNameFilter {
-		return fmt.Sprintf(" with name containing '%s'", params["name"])
-	} else if hasPublicFilter {
-		return fmt.Sprintf(" that are %s", getPublicDescription(params["public"]))
-	}
-	return ""
-}
 
 func handleTagCount(ctx context.Context, store store.Store, params map[string]string) (string, error) {
 	count, err := store.TagStore().CountTags(ctx, params)
@@ -211,27 +40,27 @@ func handleTagCount(ctx context.Context, store store.Store, params map[string]st
 	
 	// Build filter description with all possible combinations
 	if hasTypeFilter && hasContextFilter && hasNameFilter && hasPublicFilter {
-		filterDesc = fmt.Sprintf(" of type '%s', context '%s', name containing '%s', and %s", params["type"], params["contextType"], params["name"], getPublicDescription(params["public"]))
+		filterDesc = fmt.Sprintf(" of type '%s', context '%s', name containing '%s', and %s", params["type"], params["contextType"], params["name"], GetPublicDescription(params["public"]))
 	} else if hasTypeFilter && hasContextFilter && hasNameFilter {
 		filterDesc = fmt.Sprintf(" of type '%s', context '%s', and name containing '%s'", params["type"], params["contextType"], params["name"])
 	} else if hasTypeFilter && hasContextFilter && hasPublicFilter {
-		filterDesc = fmt.Sprintf(" of type '%s', context '%s', and %s", params["type"], params["contextType"], getPublicDescription(params["public"]))
+		filterDesc = fmt.Sprintf(" of type '%s', context '%s', and %s", params["type"], params["contextType"], GetPublicDescription(params["public"]))
 	} else if hasTypeFilter && hasNameFilter && hasPublicFilter {
-		filterDesc = fmt.Sprintf(" of type '%s', name containing '%s', and %s", params["type"], params["name"], getPublicDescription(params["public"]))
+		filterDesc = fmt.Sprintf(" of type '%s', name containing '%s', and %s", params["type"], params["name"], GetPublicDescription(params["public"]))
 	} else if hasContextFilter && hasNameFilter && hasPublicFilter {
-		filterDesc = fmt.Sprintf(" with context '%s', name containing '%s', and %s", params["contextType"], params["name"], getPublicDescription(params["public"]))
+		filterDesc = fmt.Sprintf(" with context '%s', name containing '%s', and %s", params["contextType"], params["name"], GetPublicDescription(params["public"]))
 	} else if hasTypeFilter && hasContextFilter {
 		filterDesc = fmt.Sprintf(" of type '%s' and context '%s'", params["type"], params["contextType"])
 	} else if hasTypeFilter && hasNameFilter {
 		filterDesc = fmt.Sprintf(" of type '%s' and name containing '%s'", params["type"], params["name"])
 	} else if hasTypeFilter && hasPublicFilter {
-		filterDesc = fmt.Sprintf(" of type '%s' and %s", params["type"], getPublicDescription(params["public"]))
+		filterDesc = fmt.Sprintf(" of type '%s' and %s", params["type"], GetPublicDescription(params["public"]))
 	} else if hasContextFilter && hasNameFilter {
 		filterDesc = fmt.Sprintf(" with context '%s' and name containing '%s'", params["contextType"], params["name"])
 	} else if hasContextFilter && hasPublicFilter {
-		filterDesc = fmt.Sprintf(" with context '%s' and %s", params["contextType"], getPublicDescription(params["public"]))
+		filterDesc = fmt.Sprintf(" with context '%s' and %s", params["contextType"], GetPublicDescription(params["public"]))
 	} else if hasNameFilter && hasPublicFilter {
-		filterDesc = fmt.Sprintf(" with name containing '%s' and %s", params["name"], getPublicDescription(params["public"]))
+		filterDesc = fmt.Sprintf(" with name containing '%s' and %s", params["name"], GetPublicDescription(params["public"]))
 	} else if hasTypeFilter {
 		filterDesc = fmt.Sprintf(" of type '%s'", params["type"])
 	} else if hasContextFilter {
@@ -239,7 +68,7 @@ func handleTagCount(ctx context.Context, store store.Store, params map[string]st
 	} else if hasNameFilter {
 		filterDesc = fmt.Sprintf(" with name containing '%s'", params["name"])
 	} else if hasPublicFilter {
-		filterDesc = fmt.Sprintf(" that are %s", getPublicDescription(params["public"]))
+		filterDesc = fmt.Sprintf(" that are %s", GetPublicDescription(params["public"]))
 	} else {
 		filterDesc = " in total"
 	}
@@ -252,7 +81,7 @@ func handleListTags(ctx context.Context, store store.Store, params map[string]st
 	fmt.Printf("DEBUG: handleListTags called with params: %+v\n", params)
 	
 	// Get the format specified by the AI
-	format := getFormatFromParams(params)
+	format := GetFormatFromParams(params)
 	
 	// Check if we have any filters (type, contextType, name, or public)
 	hasTypeFilter := false
@@ -316,13 +145,13 @@ func handleListTags(ctx context.Context, store store.Store, params map[string]st
 		}
 		
 		if len(tags) == 0 {
-			filterDesc := buildFilterDescription(params, hasTypeFilter, hasContextFilter, hasNameFilter, hasPublicFilter)
+			filterDesc := BuildFilterDescription(params, hasTypeFilter, hasContextFilter, hasNameFilter, hasPublicFilter)
 			return fmt.Sprintf("No tags found%s.", filterDesc), nil
 		}
 		
 		// Format the response according to the AI-specified format
 		if format == FormatList {
-			filterDesc := buildFilterDescription(params, hasTypeFilter, hasContextFilter, hasNameFilter, hasPublicFilter)
+			filterDesc := BuildFilterDescription(params, hasTypeFilter, hasContextFilter, hasNameFilter, hasPublicFilter)
 			response := fmt.Sprintf("Found %d tags%s:\n", len(tags), filterDesc)
 			response += FormatTags(tags, format)
 			return response, nil
@@ -355,7 +184,7 @@ func handleListTags(ctx context.Context, store store.Store, params map[string]st
 
 func handleListRootTags(ctx context.Context, store store.Store, params map[string]string) (string, error) {
 	// Get the format specified by the AI
-	format := getFormatFromParams(params)
+	format := GetFormatFromParams(params)
 	
 	// Check if we have any filters
 	hasNameFilter := false
@@ -392,11 +221,11 @@ func handleListRootTags(ctx context.Context, store store.Store, params map[strin
 	
 	if len(tags) == 0 {
 		if hasNameFilter && hasPublicFilter {
-			return fmt.Sprintf("No root tags found with name containing '%s' that are %s.", params["name"], getPublicDescription(params["public"])), nil
+			return fmt.Sprintf("No root tags found with name containing '%s' that are %s.", params["name"], GetPublicDescription(params["public"])), nil
 		} else if hasNameFilter {
 			return fmt.Sprintf("No root tags found with name containing '%s'.", params["name"]), nil
 		} else if hasPublicFilter {
-			return fmt.Sprintf("No root tags found that are %s.", getPublicDescription(params["public"])), nil
+			return fmt.Sprintf("No root tags found that are %s.", GetPublicDescription(params["public"])), nil
 		}
 		return "No root tags found.", nil
 	}
@@ -405,11 +234,11 @@ func handleListRootTags(ctx context.Context, store store.Store, params map[strin
 	if format == FormatList {
 		var response string
 		if hasNameFilter && hasPublicFilter {
-			response = fmt.Sprintf("Found %d root tags with name containing '%s' that are %s:\n", len(tags), params["name"], getPublicDescription(params["public"]))
+			response = fmt.Sprintf("Found %d root tags with name containing '%s' that are %s:\n", len(tags), params["name"], GetPublicDescription(params["public"]))
 		} else if hasNameFilter {
 			response = fmt.Sprintf("Found %d root tags with name containing '%s':\n", len(tags), params["name"])
 		} else if hasPublicFilter {
-			response = fmt.Sprintf("Found %d root tags that are %s:\n", len(tags), getPublicDescription(params["public"]))
+			response = fmt.Sprintf("Found %d root tags that are %s:\n", len(tags), GetPublicDescription(params["public"]))
 		} else {
 			response = fmt.Sprintf("Found %d root tags:\n", len(tags))
 		}
@@ -437,58 +266,11 @@ func handleGetTag(ctx context.Context, store store.Store, params map[string]stri
 		return fmt.Sprintf("Tag with ID '%s' not found.", tagID), nil
 	}
 	
-	// Format the tag details in a comprehensive way
-	var response string
-	response += fmt.Sprintf("**Tag Details for ID: %s**\n\n", tag.Id)
-	response += fmt.Sprintf("**Name:** %s\n", tag.Name)
+	// Get the format specified by the AI
+	format := GetFormatFromParams(params)
 	
-	if tag.Description != nil && *tag.Description != "" {
-		response += fmt.Sprintf("**Description:** %s\n", *tag.Description)
-	}
-	
-	response += fmt.Sprintf("**Type:** %s\n", tag.Type.String())
-	response += fmt.Sprintf("**Context:** %s\n", tag.Context)
-	
-	if tag.ParentTagId != nil && *tag.ParentTagId != "" {
-		response += fmt.Sprintf("**Parent Tag ID:** %s\n", *tag.ParentTagId)
-	}
-	
-	response += fmt.Sprintf("**Content Rating:** %s\n", tag.ContentRating.String())
-	
-	if len(tag.ContentDescriptors) > 0 {
-		response += fmt.Sprintf("**Content Descriptors:** %s\n", strings.Join(tag.ContentDescriptors, ", "))
-	}
-	
-	if len(tag.MetaTags) > 0 {
-		response += fmt.Sprintf("**Meta Tags:** %s\n", strings.Join(tag.MetaTags, ", "))
-	}
-	
-	response += fmt.Sprintf("**Public:** %t\n", tag.Public)
-	response += fmt.Sprintf("**Access Count:** %d\n", tag.AccessCount)
-	
-	if len(tag.Metadata) > 0 {
-		response += "**Metadata:**\n"
-		for key, value := range tag.Metadata {
-			response += fmt.Sprintf("  - %s: %s\n", key, value)
-		}
-	}
-	
-	if tag.BatchId != nil && *tag.BatchId != "" {
-		response += fmt.Sprintf("**Batch ID:** %s\n", *tag.BatchId)
-	}
-	
-	response += fmt.Sprintf("**Hash:** %s\n", tag.Hash)
-	response += fmt.Sprintf("**Has Questions:** %t\n", tag.HasQuestions)
-	response += fmt.Sprintf("**Has Children:** %t\n", tag.HasChildren)
-	
-	if tag.OwnerId != nil && *tag.OwnerId != "" {
-		response += fmt.Sprintf("**Owner ID:** %s\n", *tag.OwnerId)
-	}
-	
-	response += fmt.Sprintf("**Created:** %s\n", tag.CreatedAt.AsTime().Format("2006-01-02 15:04:05"))
-	response += fmt.Sprintf("**Updated:** %s\n", tag.UpdatedAt.AsTime().Format("2006-01-02 15:04:05"))
-	
-	return response, nil
+	// Format the tag details using the formatting function
+	return TagAsFormatted(tag, format), nil
 }
 
 func handleUniqueTagTypes(ctx context.Context, store store.Store, params map[string]string) (string, error) {
