@@ -14,6 +14,8 @@ type TagStore interface {
 	GetTagByID(ctx context.Context, id string) (*sharedpb.Tag, error)
 	ListTagsByParent(ctx context.Context, parentID string) ([]*sharedpb.Tag, error)
 	ListTagsByType(ctx context.Context, tagType sharedpb.TagType) ([]*sharedpb.Tag, error)
+	ListTagsByContext(ctx context.Context, context string) ([]*sharedpb.Tag, error)
+	ListTagsWithFilters(ctx context.Context, params map[string]string) ([]*sharedpb.Tag, error)
 	ListRootTags(ctx context.Context) ([]*sharedpb.Tag, error)
 	UniqueTagTypes(ctx context.Context) ([]sharedpb.TagType, error)
 	Report(ctx context.Context, tagID string, userId string, reportType sharedpb.ReportType, reason string) error

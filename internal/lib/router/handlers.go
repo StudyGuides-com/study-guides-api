@@ -148,49 +148,78 @@ func handleListTags(ctx context.Context, store store.Store, params map[string]st
 	// Get the format specified by the AI
 	format := getFormatFromParams(params)
 	
-	// Check if type parameter is provided
+	// Check if we have any filters (type or contextType)
+	hasTypeFilter := false
+	hasContextFilter := false
+	
 	if tagType, ok := params["type"]; ok && tagType != "" {
+		hasTypeFilter = true
 		fmt.Printf("DEBUG: Type parameter found: '%s'\n", tagType)
-		
-		// Get the actual unique tag types from the database
-		uniqueTagTypes, err := store.TagStore().UniqueTagTypes(ctx)
-		if err != nil {
-			return "", err
-		}
-		
-		// Check if the requested tag type exists in the database
-		var foundTagType sharedpb.TagType
-		var found bool
-		for _, dbTagType := range uniqueTagTypes {
-			if dbTagType.String() == tagType {
-				foundTagType = dbTagType
-				found = true
-				break
+	}
+	
+	if contextType, ok := params["contextType"]; ok && contextType != "" {
+		hasContextFilter = true
+		fmt.Printf("DEBUG: ContextType parameter found: '%s'\n", contextType)
+	}
+	
+	// If we have any filters, use the new ListTagsWithFilters method
+	if hasTypeFilter || hasContextFilter {
+		// Get the actual unique tag types from the database to validate type parameter
+		if hasTypeFilter {
+			uniqueTagTypes, err := store.TagStore().UniqueTagTypes(ctx)
+			if err != nil {
+				return "", err
+			}
+			
+			// Check if the requested tag type exists in the database
+			tagType := params["type"]
+			var found bool
+			for _, dbTagType := range uniqueTagTypes {
+				if dbTagType.String() == tagType {
+					found = true
+					break
+				}
+			}
+			
+			if !found {
+				// Build a list of available tag types for the error message
+				var availableTypes []string
+				for _, t := range uniqueTagTypes {
+					availableTypes = append(availableTypes, t.String())
+				}
+				return fmt.Sprintf("Invalid tag type '%s'. Available types: %v", tagType, availableTypes), nil
 			}
 		}
 		
-		if !found {
-			// Build a list of available tag types for the error message
-			var availableTypes []string
-			for _, t := range uniqueTagTypes {
-				availableTypes = append(availableTypes, t.String())
-			}
-			return fmt.Sprintf("Invalid tag type '%s'. Available types: %v", tagType, availableTypes), nil
-		}
-		
-		// Use ListTagsByType if type is specified
-		tags, err := store.TagStore().ListTagsByType(ctx, foundTagType)
+		// Use ListTagsWithFilters for filtered queries
+		tags, err := store.TagStore().ListTagsWithFilters(ctx, params)
 		if err != nil {
 			return "", err
 		}
 		
 		if len(tags) == 0 {
-			return "No tags found for the specified type.", nil
+			filterDesc := ""
+			if hasTypeFilter && hasContextFilter {
+				filterDesc = fmt.Sprintf(" for type '%s' and context '%s'", params["type"], params["contextType"])
+			} else if hasTypeFilter {
+				filterDesc = fmt.Sprintf(" for type '%s'", params["type"])
+			} else if hasContextFilter {
+				filterDesc = fmt.Sprintf(" for context '%s'", params["contextType"])
+			}
+			return fmt.Sprintf("No tags found%s.", filterDesc), nil
 		}
 		
 		// Format the response according to the AI-specified format
 		if format == FormatList {
-			response := fmt.Sprintf("Found %d tags of type %s:\n", len(tags), tagType)
+			filterDesc := ""
+			if hasTypeFilter && hasContextFilter {
+				filterDesc = fmt.Sprintf(" of type '%s' and context '%s'", params["type"], params["contextType"])
+			} else if hasTypeFilter {
+				filterDesc = fmt.Sprintf(" of type '%s'", params["type"])
+			} else if hasContextFilter {
+				filterDesc = fmt.Sprintf(" with context '%s'", params["contextType"])
+			}
+			response := fmt.Sprintf("Found %d tags%s:\n", len(tags), filterDesc)
 			response += FormatTags(tags, format)
 			return response, nil
 		} else {
@@ -199,7 +228,7 @@ func handleListTags(ctx context.Context, store store.Store, params map[string]st
 		}
 	}
 	
-	// Default to listing root tags if no type specified
+	// Default to listing root tags if no filters specified
 	tags, err := store.TagStore().ListRootTags(ctx)
 	if err != nil {
 		return "", err

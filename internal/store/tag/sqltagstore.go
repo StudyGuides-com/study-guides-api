@@ -143,6 +143,49 @@ func (s *SqlTagStore) ListTagsByType(ctx context.Context, tagType sharedpb.TagTy
 	return mapRowsToTags(rows), nil
 }
 
+func (s *SqlTagStore) ListTagsByContext(ctx context.Context, context string) ([]*sharedpb.Tag, error) {
+	var rows []tagRow
+
+	err := pgxscan.Select(ctx, s.db, &rows, `
+		SELECT id, "batchId", hash, name, description, type, context, "parentTagId",
+		       "contentRating", "contentDescriptors", "metaTags", public, "accessCount",
+		       metadata, "createdAt", "updatedAt", "ownerId", "hasQuestions", "hasChildren"
+		FROM public."Tag"
+		WHERE context = $1
+	`, context)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "list tags by context: "+err.Error())
+	}
+
+	return mapRowsToTags(rows), nil
+}
+
+func (s *SqlTagStore) ListTagsWithFilters(ctx context.Context, params map[string]string) ([]*sharedpb.Tag, error) {
+	query := `SELECT id, "batchId", hash, name, description, type, context, "parentTagId",
+		       "contentRating", "contentDescriptors", "metaTags", public, "accessCount",
+		       metadata, "createdAt", "updatedAt", "ownerId", "hasQuestions", "hasChildren"
+		FROM public."Tag" WHERE TRUE`
+	args := []interface{}{}
+
+	if tagType, ok := params["type"]; ok && tagType != "" {
+		query += fmt.Sprintf(` AND type = $%d`, len(args)+1)
+		args = append(args, tagType)
+	}
+
+	if contextType, ok := params["contextType"]; ok && contextType != "" {
+		query += fmt.Sprintf(` AND context = $%d`, len(args)+1)
+		args = append(args, contextType)
+	}
+
+	var rows []tagRow
+	err := pgxscan.Select(ctx, s.db, &rows, query, args...)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "list tags with filters: "+err.Error())
+	}
+
+	return mapRowsToTags(rows), nil
+}
+
 func (s *SqlTagStore) ListRootTags(ctx context.Context) ([]*sharedpb.Tag, error) {
 	var rows []tagRow
 
@@ -264,7 +307,7 @@ func (s *SqlTagStore) CountTags(ctx context.Context, params map[string]string) (
 	}
 
 	if contextType, ok := params["contextType"]; ok && contextType != "" {
-		query += fmt.Sprintf(` AND context_type = $%d`, len(args)+1)
+		query += fmt.Sprintf(` AND context = $%d`, len(args)+1)
 		args = append(args, contextType)
 	}
 
