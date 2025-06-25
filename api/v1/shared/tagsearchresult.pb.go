@@ -158,7 +158,7 @@ func (x *TagSearchResult) GetContentRating() ContentRating {
 	if x != nil {
 		return x.ContentRating
 	}
-	return ContentRating_CONTENT_RATING_UNSPECIFIED
+	return ContentRating_Unspecified
 }
 
 func (x *TagSearchResult) GetMetaTags() []string {

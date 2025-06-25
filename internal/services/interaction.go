@@ -24,21 +24,21 @@ func NewInteractionService(store store.Store) *InteractionService {
 
 func (s *InteractionService) Interact(ctx context.Context, req *interactionpb.InteractRequest) (*interactionpb.InteractResponse, error) {
 	switch req.InteractionType {
-	case sharedpb.InteractionType_INTERACTION_TYPE_ANSWER_CORRECTLY:
+	case sharedpb.InteractionType_AnswerCorrectly:
 		return s.answerCorrectly(ctx, req)
-	case sharedpb.InteractionType_INTERACTION_TYPE_ANSWER_INCORRECTLY:
+	case sharedpb.InteractionType_AnswerIncorrectly:
 		return s.answerIncorrectly(ctx, req)
-	case sharedpb.InteractionType_INTERACTION_TYPE_ANSWER_EASY:
+	case sharedpb.InteractionType_AnswerEasy:
 		return s.answerEasy(ctx, req)
-	case sharedpb.InteractionType_INTERACTION_TYPE_ANSWER_HARD:
+	case sharedpb.InteractionType_AnswerHard:
 		return s.answerHard(ctx, req)
-	case sharedpb.InteractionType_INTERACTION_TYPE_REVEAL:
+	case sharedpb.InteractionType_Reveal:
 		return s.reveal(ctx, req)
-	case sharedpb.InteractionType_INTERACTION_TYPE_VIEW_LEARN_MORE:
+	case sharedpb.InteractionType_ViewLearnMore:
 		return s.viewLearnMore(ctx, req)
-	case sharedpb.InteractionType_INTERACTION_TYPE_VIEW_PASSAGE:
+	case sharedpb.InteractionType_ViewPassage:
 		return s.viewPassage(ctx, req)
-	case sharedpb.InteractionType_INTERACTION_TYPE_NONE:
+	case sharedpb.InteractionType_InteractionNone:
 		return s.none(ctx, req)
 	}
 	return nil, status.Error(codes.InvalidArgument, "invalid interaction type")

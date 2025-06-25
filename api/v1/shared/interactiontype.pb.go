@@ -24,37 +24,37 @@ const (
 type InteractionType int32
 
 const (
-	InteractionType_INTERACTION_TYPE_ANSWER_CORRECTLY   InteractionType = 0
-	InteractionType_INTERACTION_TYPE_ANSWER_INCORRECTLY InteractionType = 1
-	InteractionType_INTERACTION_TYPE_REVEAL             InteractionType = 2
-	InteractionType_INTERACTION_TYPE_ANSWER_EASY        InteractionType = 3
-	InteractionType_INTERACTION_TYPE_ANSWER_HARD        InteractionType = 4
-	InteractionType_INTERACTION_TYPE_VIEW_LEARN_MORE    InteractionType = 5
-	InteractionType_INTERACTION_TYPE_VIEW_PASSAGE       InteractionType = 6
-	InteractionType_INTERACTION_TYPE_NONE               InteractionType = 7
+	InteractionType_AnswerCorrectly   InteractionType = 0
+	InteractionType_AnswerIncorrectly InteractionType = 1
+	InteractionType_Reveal            InteractionType = 2
+	InteractionType_AnswerEasy        InteractionType = 3
+	InteractionType_AnswerHard        InteractionType = 4
+	InteractionType_ViewLearnMore     InteractionType = 5
+	InteractionType_ViewPassage       InteractionType = 6
+	InteractionType_InteractionNone   InteractionType = 7
 )
 
 // Enum value maps for InteractionType.
 var (
 	InteractionType_name = map[int32]string{
-		0: "INTERACTION_TYPE_ANSWER_CORRECTLY",
-		1: "INTERACTION_TYPE_ANSWER_INCORRECTLY",
-		2: "INTERACTION_TYPE_REVEAL",
-		3: "INTERACTION_TYPE_ANSWER_EASY",
-		4: "INTERACTION_TYPE_ANSWER_HARD",
-		5: "INTERACTION_TYPE_VIEW_LEARN_MORE",
-		6: "INTERACTION_TYPE_VIEW_PASSAGE",
-		7: "INTERACTION_TYPE_NONE",
+		0: "AnswerCorrectly",
+		1: "AnswerIncorrectly",
+		2: "Reveal",
+		3: "AnswerEasy",
+		4: "AnswerHard",
+		5: "ViewLearnMore",
+		6: "ViewPassage",
+		7: "InteractionNone",
 	}
 	InteractionType_value = map[string]int32{
-		"INTERACTION_TYPE_ANSWER_CORRECTLY":   0,
-		"INTERACTION_TYPE_ANSWER_INCORRECTLY": 1,
-		"INTERACTION_TYPE_REVEAL":             2,
-		"INTERACTION_TYPE_ANSWER_EASY":        3,
-		"INTERACTION_TYPE_ANSWER_HARD":        4,
-		"INTERACTION_TYPE_VIEW_LEARN_MORE":    5,
-		"INTERACTION_TYPE_VIEW_PASSAGE":       6,
-		"INTERACTION_TYPE_NONE":               7,
+		"AnswerCorrectly":   0,
+		"AnswerIncorrectly": 1,
+		"Reveal":            2,
+		"AnswerEasy":        3,
+		"AnswerHard":        4,
+		"ViewLearnMore":     5,
+		"ViewPassage":       6,
+		"InteractionNone":   7,
 	}
 )
 
@@ -89,16 +89,19 @@ var File_v1_shared_interactiontype_proto protoreflect.FileDescriptor
 
 const file_v1_shared_interactiontype_proto_rawDesc = "" +
 	"\n" +
-	"\x1fv1/shared/interactiontype.proto\x12\tshared.v1*\xa6\x02\n" +
-	"\x0fInteractionType\x12%\n" +
-	"!INTERACTION_TYPE_ANSWER_CORRECTLY\x10\x00\x12'\n" +
-	"#INTERACTION_TYPE_ANSWER_INCORRECTLY\x10\x01\x12\x1b\n" +
-	"\x17INTERACTION_TYPE_REVEAL\x10\x02\x12 \n" +
-	"\x1cINTERACTION_TYPE_ANSWER_EASY\x10\x03\x12 \n" +
-	"\x1cINTERACTION_TYPE_ANSWER_HARD\x10\x04\x12$\n" +
-	" INTERACTION_TYPE_VIEW_LEARN_MORE\x10\x05\x12!\n" +
-	"\x1dINTERACTION_TYPE_VIEW_PASSAGE\x10\x06\x12\x19\n" +
-	"\x15INTERACTION_TYPE_NONE\x10\aBDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
+	"\x1fv1/shared/interactiontype.proto\x12\tshared.v1*\xa2\x01\n" +
+	"\x0fInteractionType\x12\x13\n" +
+	"\x0fAnswerCorrectly\x10\x00\x12\x15\n" +
+	"\x11AnswerIncorrectly\x10\x01\x12\n" +
+	"\n" +
+	"\x06Reveal\x10\x02\x12\x0e\n" +
+	"\n" +
+	"AnswerEasy\x10\x03\x12\x0e\n" +
+	"\n" +
+	"AnswerHard\x10\x04\x12\x11\n" +
+	"\rViewLearnMore\x10\x05\x12\x0f\n" +
+	"\vViewPassage\x10\x06\x12\x13\n" +
+	"\x0fInteractionNone\x10\aBDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
 
 var (
 	file_v1_shared_interactiontype_proto_rawDescOnce sync.Once

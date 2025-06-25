@@ -24,34 +24,34 @@ const (
 type ContentRating int32
 
 const (
-	ContentRating_CONTENT_RATING_UNSPECIFIED ContentRating = 0
-	ContentRating_CONTENT_RATING_EVERYONE    ContentRating = 1
-	ContentRating_CONTENT_RATING_EVERYONE_10 ContentRating = 2
-	ContentRating_CONTENT_RATING_TEEN        ContentRating = 3
-	ContentRating_CONTENT_RATING_MATURE      ContentRating = 4
-	ContentRating_CONTENT_RATING_ADULTS_ONLY ContentRating = 5
-	ContentRating_CONTENT_RATING_PENDING     ContentRating = 6
+	ContentRating_Unspecified   ContentRating = 0
+	ContentRating_Everyone      ContentRating = 1
+	ContentRating_Everyone10    ContentRating = 2
+	ContentRating_Teen          ContentRating = 3
+	ContentRating_Mature        ContentRating = 4
+	ContentRating_AdultsOnly    ContentRating = 5
+	ContentRating_RatingPending ContentRating = 6
 )
 
 // Enum value maps for ContentRating.
 var (
 	ContentRating_name = map[int32]string{
-		0: "CONTENT_RATING_UNSPECIFIED",
-		1: "CONTENT_RATING_EVERYONE",
-		2: "CONTENT_RATING_EVERYONE_10",
-		3: "CONTENT_RATING_TEEN",
-		4: "CONTENT_RATING_MATURE",
-		5: "CONTENT_RATING_ADULTS_ONLY",
-		6: "CONTENT_RATING_PENDING",
+		0: "Unspecified",
+		1: "Everyone",
+		2: "Everyone10",
+		3: "Teen",
+		4: "Mature",
+		5: "AdultsOnly",
+		6: "RatingPending",
 	}
 	ContentRating_value = map[string]int32{
-		"CONTENT_RATING_UNSPECIFIED": 0,
-		"CONTENT_RATING_EVERYONE":    1,
-		"CONTENT_RATING_EVERYONE_10": 2,
-		"CONTENT_RATING_TEEN":        3,
-		"CONTENT_RATING_MATURE":      4,
-		"CONTENT_RATING_ADULTS_ONLY": 5,
-		"CONTENT_RATING_PENDING":     6,
+		"Unspecified":   0,
+		"Everyone":      1,
+		"Everyone10":    2,
+		"Teen":          3,
+		"Mature":        4,
+		"AdultsOnly":    5,
+		"RatingPending": 6,
 	}
 )
 
@@ -86,15 +86,18 @@ var File_v1_shared_contentrating_proto protoreflect.FileDescriptor
 
 const file_v1_shared_contentrating_proto_rawDesc = "" +
 	"\n" +
-	"\x1dv1/shared/contentrating.proto\x12\tshared.v1*\xdc\x01\n" +
-	"\rContentRating\x12\x1e\n" +
-	"\x1aCONTENT_RATING_UNSPECIFIED\x10\x00\x12\x1b\n" +
-	"\x17CONTENT_RATING_EVERYONE\x10\x01\x12\x1e\n" +
-	"\x1aCONTENT_RATING_EVERYONE_10\x10\x02\x12\x17\n" +
-	"\x13CONTENT_RATING_TEEN\x10\x03\x12\x19\n" +
-	"\x15CONTENT_RATING_MATURE\x10\x04\x12\x1e\n" +
-	"\x1aCONTENT_RATING_ADULTS_ONLY\x10\x05\x12\x1a\n" +
-	"\x16CONTENT_RATING_PENDING\x10\x06BDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
+	"\x1dv1/shared/contentrating.proto\x12\tshared.v1*w\n" +
+	"\rContentRating\x12\x0f\n" +
+	"\vUnspecified\x10\x00\x12\f\n" +
+	"\bEveryone\x10\x01\x12\x0e\n" +
+	"\n" +
+	"Everyone10\x10\x02\x12\b\n" +
+	"\x04Teen\x10\x03\x12\n" +
+	"\n" +
+	"\x06Mature\x10\x04\x12\x0e\n" +
+	"\n" +
+	"AdultsOnly\x10\x05\x12\x11\n" +
+	"\rRatingPending\x10\x06BDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
 
 var (
 	file_v1_shared_contentrating_proto_rawDescOnce sync.Once

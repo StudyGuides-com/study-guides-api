@@ -24,25 +24,25 @@ const (
 type ReportType int32
 
 const (
-	ReportType_REPORT_TYPE_SPAM          ReportType = 0
-	ReportType_REPORT_TYPE_INAPPROPRIATE ReportType = 1
-	ReportType_REPORT_TYPE_INCORRECT     ReportType = 2
-	ReportType_REPORT_TYPE_OTHER         ReportType = 3
+	ReportType_Spam          ReportType = 0
+	ReportType_Inappropriate ReportType = 1
+	ReportType_Incorrect     ReportType = 2
+	ReportType_Other         ReportType = 3
 )
 
 // Enum value maps for ReportType.
 var (
 	ReportType_name = map[int32]string{
-		0: "REPORT_TYPE_SPAM",
-		1: "REPORT_TYPE_INAPPROPRIATE",
-		2: "REPORT_TYPE_INCORRECT",
-		3: "REPORT_TYPE_OTHER",
+		0: "Spam",
+		1: "Inappropriate",
+		2: "Incorrect",
+		3: "Other",
 	}
 	ReportType_value = map[string]int32{
-		"REPORT_TYPE_SPAM":          0,
-		"REPORT_TYPE_INAPPROPRIATE": 1,
-		"REPORT_TYPE_INCORRECT":     2,
-		"REPORT_TYPE_OTHER":         3,
+		"Spam":          0,
+		"Inappropriate": 1,
+		"Incorrect":     2,
+		"Other":         3,
 	}
 )
 
@@ -77,13 +77,13 @@ var File_v1_shared_reporttype_proto protoreflect.FileDescriptor
 
 const file_v1_shared_reporttype_proto_rawDesc = "" +
 	"\n" +
-	"\x1av1/shared/reporttype.proto\x12\tshared.v1*s\n" +
+	"\x1av1/shared/reporttype.proto\x12\tshared.v1*C\n" +
 	"\n" +
-	"ReportType\x12\x14\n" +
-	"\x10REPORT_TYPE_SPAM\x10\x00\x12\x1d\n" +
-	"\x19REPORT_TYPE_INAPPROPRIATE\x10\x01\x12\x19\n" +
-	"\x15REPORT_TYPE_INCORRECT\x10\x02\x12\x15\n" +
-	"\x11REPORT_TYPE_OTHER\x10\x03BDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
+	"ReportType\x12\b\n" +
+	"\x04Spam\x10\x00\x12\x11\n" +
+	"\rInappropriate\x10\x01\x12\r\n" +
+	"\tIncorrect\x10\x02\x12\t\n" +
+	"\x05Other\x10\x03BDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
 
 var (
 	file_v1_shared_reporttype_proto_rawDescOnce sync.Once

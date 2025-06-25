@@ -3,10 +3,9 @@ syntax = "proto3";
 package shared.v1;
 option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
 
-
 enum ReportType {
-    REPORT_TYPE_SPAM = 0;
-    REPORT_TYPE_INAPPROPRIATE = 1;
-    REPORT_TYPE_INCORRECT = 2;
-    REPORT_TYPE_OTHER = 3;
-  }
+    Spam = 0;
+    Inappropriate = 1;
+    Incorrect = 2;
+    Other = 3;
+}

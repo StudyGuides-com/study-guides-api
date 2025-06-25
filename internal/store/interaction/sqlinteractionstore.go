@@ -89,7 +89,7 @@ func (s *SqlInteractionStore) AnswerCorrectly(ctx context.Context, req *interact
 			id, "userId", "questionId", type, "studyMethod", 
 			correct, "strengthScore", metadata, "occurredAt"
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-	`, interactionId, req.UserId, req.QuestionId, sharedpb.InteractionType_INTERACTION_TYPE_ANSWER_CORRECTLY, req.StudyMethod,
+	`, interactionId, req.UserId, req.QuestionId, sharedpb.InteractionType_AnswerCorrectly, req.StudyMethod,
 		true, 0.0, metadataBytes, time.Now())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to create interaction record")
@@ -171,7 +171,7 @@ func (s *SqlInteractionStore) AnswerIncorrectly(ctx context.Context, req *intera
 			id, "userId", "questionId", type, "studyMethod", 
 			correct, "strengthScore", metadata, "occurredAt"
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-	`, interactionId, req.UserId, req.QuestionId, sharedpb.InteractionType_INTERACTION_TYPE_ANSWER_INCORRECTLY, req.StudyMethod,
+	`, interactionId, req.UserId, req.QuestionId, sharedpb.InteractionType_AnswerIncorrectly, req.StudyMethod,
 		false, 0.0, metadataBytes, time.Now())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to create interaction record")
@@ -226,7 +226,7 @@ func (s *SqlInteractionStore) AnswerEasy(ctx context.Context, req *interactionpb
 			id, "userId", "questionId", type, "studyMethod", 
 			correct, "strengthScore", metadata, "occurredAt"
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-	`, interactionId, req.UserId, req.QuestionId, sharedpb.InteractionType_INTERACTION_TYPE_ANSWER_EASY, req.StudyMethod,
+	`, interactionId, req.UserId, req.QuestionId, sharedpb.InteractionType_AnswerEasy, req.StudyMethod,
 		true, 0.0, metadataBytes, time.Now())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to create interaction record")
@@ -281,7 +281,7 @@ func (s *SqlInteractionStore) AnswerHard(ctx context.Context, req *interactionpb
 			id, "userId", "questionId", type, "studyMethod", 
 			correct, "strengthScore", metadata, "occurredAt"
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-	`, interactionId, req.UserId, req.QuestionId, sharedpb.InteractionType_INTERACTION_TYPE_ANSWER_HARD, req.StudyMethod,
+	`, interactionId, req.UserId, req.QuestionId, sharedpb.InteractionType_AnswerHard, req.StudyMethod,
 		false, 0.0, metadataBytes, time.Now())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to create interaction record")
@@ -336,7 +336,7 @@ func (s *SqlInteractionStore) Reveal(ctx context.Context, req *interactionpb.Int
 			id, "userId", "questionId", type, "studyMethod", 
 			correct, "strengthScore", metadata, "occurredAt"
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-	`, interactionId, req.UserId, req.QuestionId, sharedpb.InteractionType_INTERACTION_TYPE_REVEAL, req.StudyMethod,
+	`, interactionId, req.UserId, req.QuestionId, sharedpb.InteractionType_Reveal, req.StudyMethod,
 		nil, 0.0, metadataBytes, time.Now())
 	if err != nil {
 		return status.Error(codes.Internal, "failed to create interaction record")
@@ -374,7 +374,7 @@ func (s *SqlInteractionStore) ViewLearnMore(ctx context.Context, req *interactio
 			id, "userId", "questionId", type, "studyMethod", 
 			correct, "strengthScore", metadata, "occurredAt"
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-	`, interactionId, req.UserId, req.QuestionId, sharedpb.InteractionType_INTERACTION_TYPE_VIEW_LEARN_MORE, req.StudyMethod,
+	`, interactionId, req.UserId, req.QuestionId, sharedpb.InteractionType_ViewLearnMore, req.StudyMethod,
 		nil, 0.0, metadataBytes, time.Now())
 	if err != nil {
 		return status.Error(codes.Internal, "failed to create interaction record")
@@ -412,7 +412,7 @@ func (s *SqlInteractionStore) ViewPassage(ctx context.Context, req *interactionp
 			id, "userId", "questionId", type, "studyMethod", 
 			correct, "strengthScore", metadata, "occurredAt"
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-	`, interactionId, req.UserId, req.QuestionId, sharedpb.InteractionType_INTERACTION_TYPE_VIEW_PASSAGE, req.StudyMethod,
+	`, interactionId, req.UserId, req.QuestionId, sharedpb.InteractionType_ViewPassage, req.StudyMethod,
 		nil, 0.0, metadataBytes, time.Now())
 	if err != nil {
 		return status.Error(codes.Internal, "failed to create interaction record")

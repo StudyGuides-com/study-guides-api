@@ -24,37 +24,37 @@ const (
 type StudyMethod int32
 
 const (
-	StudyMethod_STUDY_METHOD_STUDY_GUIDE     StudyMethod = 0
-	StudyMethod_STUDY_METHOD_FLASHCARDS      StudyMethod = 1
-	StudyMethod_STUDY_METHOD_MULTIPLE_CHOICE StudyMethod = 2
-	StudyMethod_STUDY_METHOD_SURVIVAL        StudyMethod = 3
-	StudyMethod_STUDY_METHOD_MATCH_GAME      StudyMethod = 4
-	StudyMethod_STUDY_METHOD_TEST            StudyMethod = 6
-	StudyMethod_STUDY_METHOD_QUIZ            StudyMethod = 7
-	StudyMethod_STUDY_METHOD_NONE            StudyMethod = 8
+	StudyMethod_StudyGuide     StudyMethod = 0
+	StudyMethod_Flashcards     StudyMethod = 1
+	StudyMethod_MultipleChoice StudyMethod = 2
+	StudyMethod_Survival       StudyMethod = 3
+	StudyMethod_MatchGame      StudyMethod = 4
+	StudyMethod_Test           StudyMethod = 6
+	StudyMethod_Quiz           StudyMethod = 7
+	StudyMethod_None           StudyMethod = 8
 )
 
 // Enum value maps for StudyMethod.
 var (
 	StudyMethod_name = map[int32]string{
-		0: "STUDY_METHOD_STUDY_GUIDE",
-		1: "STUDY_METHOD_FLASHCARDS",
-		2: "STUDY_METHOD_MULTIPLE_CHOICE",
-		3: "STUDY_METHOD_SURVIVAL",
-		4: "STUDY_METHOD_MATCH_GAME",
-		6: "STUDY_METHOD_TEST",
-		7: "STUDY_METHOD_QUIZ",
-		8: "STUDY_METHOD_NONE",
+		0: "StudyGuide",
+		1: "Flashcards",
+		2: "MultipleChoice",
+		3: "Survival",
+		4: "MatchGame",
+		6: "Test",
+		7: "Quiz",
+		8: "None",
 	}
 	StudyMethod_value = map[string]int32{
-		"STUDY_METHOD_STUDY_GUIDE":     0,
-		"STUDY_METHOD_FLASHCARDS":      1,
-		"STUDY_METHOD_MULTIPLE_CHOICE": 2,
-		"STUDY_METHOD_SURVIVAL":        3,
-		"STUDY_METHOD_MATCH_GAME":      4,
-		"STUDY_METHOD_TEST":            6,
-		"STUDY_METHOD_QUIZ":            7,
-		"STUDY_METHOD_NONE":            8,
+		"StudyGuide":     0,
+		"Flashcards":     1,
+		"MultipleChoice": 2,
+		"Survival":       3,
+		"MatchGame":      4,
+		"Test":           6,
+		"Quiz":           7,
+		"None":           8,
 	}
 )
 
@@ -89,16 +89,18 @@ var File_v1_shared_studymethod_proto protoreflect.FileDescriptor
 
 const file_v1_shared_studymethod_proto_rawDesc = "" +
 	"\n" +
-	"\x1bv1/shared/studymethod.proto\x12\tshared.v1*\xe7\x01\n" +
-	"\vStudyMethod\x12\x1c\n" +
-	"\x18STUDY_METHOD_STUDY_GUIDE\x10\x00\x12\x1b\n" +
-	"\x17STUDY_METHOD_FLASHCARDS\x10\x01\x12 \n" +
-	"\x1cSTUDY_METHOD_MULTIPLE_CHOICE\x10\x02\x12\x19\n" +
-	"\x15STUDY_METHOD_SURVIVAL\x10\x03\x12\x1b\n" +
-	"\x17STUDY_METHOD_MATCH_GAME\x10\x04\x12\x15\n" +
-	"\x11STUDY_METHOD_TEST\x10\x06\x12\x15\n" +
-	"\x11STUDY_METHOD_QUIZ\x10\a\x12\x15\n" +
-	"\x11STUDY_METHOD_NONE\x10\bBDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
+	"\x1bv1/shared/studymethod.proto\x12\tshared.v1*|\n" +
+	"\vStudyMethod\x12\x0e\n" +
+	"\n" +
+	"StudyGuide\x10\x00\x12\x0e\n" +
+	"\n" +
+	"Flashcards\x10\x01\x12\x12\n" +
+	"\x0eMultipleChoice\x10\x02\x12\f\n" +
+	"\bSurvival\x10\x03\x12\r\n" +
+	"\tMatchGame\x10\x04\x12\b\n" +
+	"\x04Test\x10\x06\x12\b\n" +
+	"\x04Quiz\x10\a\x12\b\n" +
+	"\x04None\x10\bBDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
 
 var (
 	file_v1_shared_studymethod_proto_rawDescOnce sync.Once
