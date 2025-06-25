@@ -8,39 +8,39 @@ import (
 func ToProtoContextType(internal types.ContextType) sharedv1.ContextType {
 	switch internal {
 	case types.ContextTypeColleges:
-		return sharedv1.ContextType_CONTEXT_TYPE_COLLEGES
+		return sharedv1.ContextType_Colleges
 	case types.ContextTypeCertifications:
-		return sharedv1.ContextType_CONTEXT_TYPE_CERTIFICATIONS
+		return sharedv1.ContextType_Certifications
 	case types.ContextTypeEntranceExams:
-		return sharedv1.ContextType_CONTEXT_TYPE_ENTRANCE_EXAMS
+		return sharedv1.ContextType_EntranceExams
 	case types.ContextTypeAPExams:
-		return sharedv1.ContextType_CONTEXT_TYPE_AP_EXAMS
+		return sharedv1.ContextType_APExams
 	case types.ContextTypeDoD:
-		return sharedv1.ContextType_CONTEXT_TYPE_DOD
+		return sharedv1.ContextType_DoD
 	case types.ContextTypeUserGeneratedContent:
-		return sharedv1.ContextType_CONTEXT_TYPE_USER_GENERATED_CONTENT
+		return sharedv1.ContextType_UserGeneratedContent
 	case types.ContextTypeAll:
-		return sharedv1.ContextType_CONTEXT_TYPE_ALL
+		return sharedv1.ContextType_All
 	default:
-		return sharedv1.ContextType_CONTEXT_TYPE_ALL
+		return sharedv1.ContextType_All
 	}
 }
 
 func FromProtoContextType(proto sharedv1.ContextType) types.ContextType {
 	switch proto {
-	case sharedv1.ContextType_CONTEXT_TYPE_COLLEGES:
+	case sharedv1.ContextType_Colleges:
 		return types.ContextTypeColleges
-	case sharedv1.ContextType_CONTEXT_TYPE_CERTIFICATIONS:
+	case sharedv1.ContextType_Certifications:
 		return types.ContextTypeCertifications
-	case sharedv1.ContextType_CONTEXT_TYPE_ENTRANCE_EXAMS:
+	case sharedv1.ContextType_EntranceExams:
 		return types.ContextTypeEntranceExams
-	case sharedv1.ContextType_CONTEXT_TYPE_AP_EXAMS:
+	case sharedv1.ContextType_APExams:
 		return types.ContextTypeAPExams
-	case sharedv1.ContextType_CONTEXT_TYPE_DOD:
+	case sharedv1.ContextType_DoD:
 		return types.ContextTypeDoD
-	case sharedv1.ContextType_CONTEXT_TYPE_USER_GENERATED_CONTENT:
+	case sharedv1.ContextType_UserGeneratedContent:
 		return types.ContextTypeUserGeneratedContent
-	case sharedv1.ContextType_CONTEXT_TYPE_ALL:
+	case sharedv1.ContextType_All:
 		return types.ContextTypeAll
 	default:
 		return types.ContextTypeAll

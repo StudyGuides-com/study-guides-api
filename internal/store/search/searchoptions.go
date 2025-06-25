@@ -61,15 +61,15 @@ func WithType(tagType sharedpb.TagType) func(*SearchOptions) {
 // FromProtoContextType converts a proto ContextType to our internal types.ContextType
 func FromProtoContextType(ct sharedpb.ContextType) types.ContextType {
 	switch ct {
-	case sharedpb.ContextType_CONTEXT_TYPE_COLLEGES:
+	case sharedpb.ContextType_Colleges:
 		return types.ContextTypeColleges
-	case sharedpb.ContextType_CONTEXT_TYPE_CERTIFICATIONS:
+	case sharedpb.ContextType_Certifications:
 		return types.ContextTypeCertifications
-	case sharedpb.ContextType_CONTEXT_TYPE_ENTRANCE_EXAMS:
+	case sharedpb.ContextType_EntranceExams:
 		return types.ContextTypeEntranceExams
-	case sharedpb.ContextType_CONTEXT_TYPE_AP_EXAMS:
+	case sharedpb.ContextType_APExams:
 		return types.ContextTypeAPExams
-	case sharedpb.ContextType_CONTEXT_TYPE_DOD:
+	case sharedpb.ContextType_DoD:
 		return types.ContextTypeDoD
 	default:
 		return types.ContextTypeAll
