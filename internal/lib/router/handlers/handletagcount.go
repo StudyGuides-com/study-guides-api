@@ -4,73 +4,80 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/studyguides-com/study-guides-api/internal/lib/router/formatting"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 )
 
 func HandleTagCount(ctx context.Context, store store.Store, params map[string]string) (string, error) {
-	count, err := store.TagStore().CountTags(ctx, params)
-	if err != nil {
-		return "", err
-	}
-
-	// Build a descriptive message based on the filters used
-	var filterDesc string
-	
+	// Check if we have any filters
 	hasTypeFilter := false
 	hasContextFilter := false
 	hasNameFilter := false
 	hasPublicFilter := false
 	
-	if tagType, ok := params["type"]; ok && tagType != "" {
+	if typeStr, ok := params["type"]; ok && typeStr != "" {
 		hasTypeFilter = true
 	}
-	
 	if contextType, ok := params["contextType"]; ok && contextType != "" {
 		hasContextFilter = true
 	}
-
 	if name, ok := params["name"]; ok && name != "" {
 		hasNameFilter = true
 	}
-
 	if publicStr, ok := params["public"]; ok && publicStr != "" {
 		hasPublicFilter = true
 	}
 	
-	// Build filter description with all possible combinations
-	if hasTypeFilter && hasContextFilter && hasNameFilter && hasPublicFilter {
-		filterDesc = fmt.Sprintf(" of type '%s', context '%s', name containing '%s', and %s", params["type"], params["contextType"], params["name"], GetPublicDescription(params["public"]))
-	} else if hasTypeFilter && hasContextFilter && hasNameFilter {
-		filterDesc = fmt.Sprintf(" of type '%s', context '%s', and name containing '%s'", params["type"], params["contextType"], params["name"])
-	} else if hasTypeFilter && hasContextFilter && hasPublicFilter {
-		filterDesc = fmt.Sprintf(" of type '%s', context '%s', and %s", params["type"], params["contextType"], GetPublicDescription(params["public"]))
-	} else if hasTypeFilter && hasNameFilter && hasPublicFilter {
-		filterDesc = fmt.Sprintf(" of type '%s', name containing '%s', and %s", params["type"], params["name"], GetPublicDescription(params["public"]))
-	} else if hasContextFilter && hasNameFilter && hasPublicFilter {
-		filterDesc = fmt.Sprintf(" with context '%s', name containing '%s', and %s", params["contextType"], params["name"], GetPublicDescription(params["public"]))
-	} else if hasTypeFilter && hasContextFilter {
-		filterDesc = fmt.Sprintf(" of type '%s' and context '%s'", params["type"], params["contextType"])
-	} else if hasTypeFilter && hasNameFilter {
-		filterDesc = fmt.Sprintf(" of type '%s' and name containing '%s'", params["type"], params["name"])
-	} else if hasTypeFilter && hasPublicFilter {
-		filterDesc = fmt.Sprintf(" of type '%s' and %s", params["type"], GetPublicDescription(params["public"]))
-	} else if hasContextFilter && hasNameFilter {
-		filterDesc = fmt.Sprintf(" with context '%s' and name containing '%s'", params["contextType"], params["name"])
-	} else if hasContextFilter && hasPublicFilter {
-		filterDesc = fmt.Sprintf(" with context '%s' and %s", params["contextType"], GetPublicDescription(params["public"]))
-	} else if hasNameFilter && hasPublicFilter {
-		filterDesc = fmt.Sprintf(" with name containing '%s' and %s", params["name"], GetPublicDescription(params["public"]))
-	} else if hasTypeFilter {
-		filterDesc = fmt.Sprintf(" of type '%s'", params["type"])
-	} else if hasContextFilter {
-		filterDesc = fmt.Sprintf(" with context '%s'", params["contextType"])
-	} else if hasNameFilter {
-		filterDesc = fmt.Sprintf(" with name containing '%s'", params["name"])
-	} else if hasPublicFilter {
-		filterDesc = fmt.Sprintf(" that are %s", GetPublicDescription(params["public"]))
+	var count int
+	var err error
+	
+	if hasTypeFilter || hasContextFilter || hasNameFilter || hasPublicFilter {
+		// If any filter is specified, use CountTags with params
+		count, err = store.TagStore().CountTags(ctx, params)
 	} else {
-		filterDesc = " in total"
+		// Get total count without any filters
+		count, err = store.TagStore().CountTags(ctx, params)
 	}
-
-	return fmt.Sprintf("You have %d tags%s.", count, filterDesc), nil
+	
+	if err != nil {
+		return "", err
+	}
+	
+	// Build the response message
+	var response string
+	if hasTypeFilter && hasContextFilter && hasNameFilter && hasPublicFilter {
+		response = fmt.Sprintf("Found %d tags for type '%s', context '%s', name containing '%s', and %s.", count, params["type"], params["contextType"], params["name"], formatting.GetPublicDescription(params["public"]))
+	} else if hasTypeFilter && hasContextFilter && hasNameFilter {
+		response = fmt.Sprintf("Found %d tags for type '%s', context '%s', and name containing '%s'.", count, params["type"], params["contextType"], params["name"])
+	} else if hasTypeFilter && hasContextFilter && hasPublicFilter {
+		response = fmt.Sprintf("Found %d tags for type '%s', context '%s', and %s.", count, params["type"], params["contextType"], formatting.GetPublicDescription(params["public"]))
+	} else if hasTypeFilter && hasNameFilter && hasPublicFilter {
+		response = fmt.Sprintf("Found %d tags for type '%s', name containing '%s', and %s.", count, params["type"], params["name"], formatting.GetPublicDescription(params["public"]))
+	} else if hasContextFilter && hasNameFilter && hasPublicFilter {
+		response = fmt.Sprintf("Found %d tags for context '%s', name containing '%s', and %s.", count, params["contextType"], params["name"], formatting.GetPublicDescription(params["public"]))
+	} else if hasTypeFilter && hasContextFilter {
+		response = fmt.Sprintf("Found %d tags for type '%s' and context '%s'.", count, params["type"], params["contextType"])
+	} else if hasTypeFilter && hasNameFilter {
+		response = fmt.Sprintf("Found %d tags for type '%s' and name containing '%s'.", count, params["type"], params["name"])
+	} else if hasTypeFilter && hasPublicFilter {
+		response = fmt.Sprintf("Found %d tags for type '%s' and %s.", count, params["type"], formatting.GetPublicDescription(params["public"]))
+	} else if hasContextFilter && hasNameFilter {
+		response = fmt.Sprintf("Found %d tags for context '%s' and name containing '%s'.", count, params["contextType"], params["name"])
+	} else if hasContextFilter && hasPublicFilter {
+		response = fmt.Sprintf("Found %d tags for context '%s' and %s.", count, params["contextType"], formatting.GetPublicDescription(params["public"]))
+	} else if hasNameFilter && hasPublicFilter {
+		response = fmt.Sprintf("Found %d tags with name containing '%s' and %s.", count, params["name"], formatting.GetPublicDescription(params["public"]))
+	} else if hasTypeFilter {
+		response = fmt.Sprintf("Found %d tags for type '%s'.", count, params["type"])
+	} else if hasContextFilter {
+		response = fmt.Sprintf("Found %d tags for context '%s'.", count, params["contextType"])
+	} else if hasNameFilter {
+		response = fmt.Sprintf("Found %d tags with name containing '%s'.", count, params["name"])
+	} else if hasPublicFilter {
+		response = fmt.Sprintf("Found %d tags that are %s.", count, formatting.GetPublicDescription(params["public"]))
+	} else {
+		response = fmt.Sprintf("Found %d tags total.", count)
+	}
+	
+	return response, nil
 } 

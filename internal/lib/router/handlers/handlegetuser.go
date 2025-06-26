@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/studyguides-com/study-guides-api/internal/lib/router/formatting"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 )
 
@@ -24,8 +25,8 @@ func HandleGetUser(ctx context.Context, store store.Store, params map[string]str
 	}
 	
 	// Get the format specified by the AI
-	format := GetFormatFromParams(params)
+	format := formatting.GetFormatFromParams(params)
 	
 	// Format the user details using the formatting function
-	return UserAsFormatted(user, format), nil
+	return formatting.UserAsFormatted(user, format), nil
 } 

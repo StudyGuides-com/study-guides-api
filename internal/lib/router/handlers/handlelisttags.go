@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/studyguides-com/study-guides-api/internal/lib/router/formatting"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 )
 
@@ -12,7 +13,7 @@ func HandleListTags(ctx context.Context, store store.Store, params map[string]st
 	fmt.Printf("DEBUG: handleListTags called with params: %+v\n", params)
 	
 	// Get the format specified by the AI
-	format := GetFormatFromParams(params)
+	format := formatting.GetFormatFromParams(params)
 	
 	// Check if we have any filters (type, contextType, name, or public)
 	hasTypeFilter := false
@@ -76,20 +77,20 @@ func HandleListTags(ctx context.Context, store store.Store, params map[string]st
 		}
 		
 		if len(tags) == 0 {
-			filterDesc := BuildFilterDescription(params, hasTypeFilter, hasContextFilter, hasNameFilter, hasPublicFilter)
+			filterDesc := formatting.BuildFilterDescription(params, hasTypeFilter, hasContextFilter, hasNameFilter, hasPublicFilter)
 			return fmt.Sprintf("No tags found%s.", filterDesc), nil
 		}
 		
 		// Format the response according to the AI-specified format
-		if format == FormatList {
-			filterDesc := BuildFilterDescription(params, hasTypeFilter, hasContextFilter, hasNameFilter, hasPublicFilter)
-			limitMsg := BuildLimitMessage(params)
+		if format == formatting.FormatList {
+			filterDesc := formatting.BuildFilterDescription(params, hasTypeFilter, hasContextFilter, hasNameFilter, hasPublicFilter)
+			limitMsg := formatting.BuildLimitMessage(params)
 			response := fmt.Sprintf("Found %d tags%s%s:\n", len(tags), filterDesc, limitMsg)
-			response += FormatTags(tags, format)
+			response += formatting.FormatTags(tags, format)
 			return response, nil
 		} else {
 			// For other formats, just return the formatted data
-			return FormatTags(tags, format), nil
+			return formatting.FormatTags(tags, format), nil
 		}
 	}
 	
@@ -104,13 +105,13 @@ func HandleListTags(ctx context.Context, store store.Store, params map[string]st
 	}
 	
 	// Format the response according to the AI-specified format
-	if format == FormatList {
-		limitMsg := BuildLimitMessage(params)
+	if format == formatting.FormatList {
+		limitMsg := formatting.BuildLimitMessage(params)
 		response := fmt.Sprintf("Found %d root tags%s:\n", len(tags), limitMsg)
-		response += FormatTags(tags, format)
+		response += formatting.FormatTags(tags, format)
 		return response, nil
 	} else {
 		// For other formats, just return the formatted data
-		return FormatTags(tags, format), nil
+		return formatting.FormatTags(tags, format), nil
 	}
 } 

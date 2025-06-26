@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/studyguides-com/study-guides-api/internal/lib/router/formatting"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 )
 
@@ -24,8 +25,8 @@ func HandleGetTag(ctx context.Context, store store.Store, params map[string]stri
 	}
 	
 	// Get the format specified by the AI
-	format := GetFormatFromParams(params)
+	format := formatting.GetFormatFromParams(params)
 	
 	// Format the tag details using the formatting function
-	return TagAsFormatted(tag, format), nil
+	return formatting.TagAsFormatted(tag, format), nil
 } 
