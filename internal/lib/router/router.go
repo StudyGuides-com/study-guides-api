@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 
+	"github.com/studyguides-com/study-guides-api/internal/lib/router/handlers"
 	"github.com/studyguides-com/study-guides-api/internal/lib/tools"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 )
@@ -21,28 +22,28 @@ func NewRouter(store store.Store) *OperationRouter {
 	return &OperationRouter{
 		Handlers: map[string]OperationHandler{
 			string(tools.ToolNameTagCount): func(ctx context.Context, params map[string]string) (string, error) {
-				return handleTagCount(ctx, store, params)
+				return handlers.HandleTagCount(ctx, store, params)
 			},
 			string(tools.ToolNameListTags): func(ctx context.Context, params map[string]string) (string, error) {
-				return handleListTags(ctx, store, params)
+				return handlers.HandleListTags(ctx, store, params)
 			},
 			string(tools.ToolNameListRootTags): func(ctx context.Context, params map[string]string) (string, error) {
-				return handleListRootTags(ctx, store, params)
+				return handlers.HandleListRootTags(ctx, store, params)
 			},
 			string(tools.ToolNameGetTag): func(ctx context.Context, params map[string]string) (string, error) {
-				return handleGetTag(ctx, store, params)
+				return handlers.HandleGetTag(ctx, store, params)
 			},
 			string(tools.ToolNameUniqueTagTypes): func(ctx context.Context, params map[string]string) (string, error) {
-				return handleUniqueTagTypes(ctx, store, params)
+				return handlers.HandleUniqueTagTypes(ctx, store, params)
 			},
 			string(tools.ToolNameUniqueContextTypes): func(ctx context.Context, params map[string]string) (string, error) {
-				return handleUniqueContextTypes(ctx, store, params)
+				return handlers.HandleUniqueContextTypes(ctx, store, params)
 			},
 			string(tools.ToolNameUserCount): func(ctx context.Context, params map[string]string) (string, error) {
-				return handleUserCount(ctx, store, params)
+				return handlers.HandleUserCount(ctx, store, params)
 			},
 			string(tools.ToolNameUnknown): func(ctx context.Context, params map[string]string) (string, error) {
-				return handleUnknown(ctx, store, params)
+				return handlers.HandleUnknown(ctx, store, params)
 			},
 		},
 	}
