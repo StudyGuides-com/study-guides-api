@@ -78,3 +78,9 @@ var yearProperty = NewProperty(
 	"string",
 	"Count users created in a specific year (e.g. '2023' for year 2023)",
 )
+
+var userEmailProperty = NewProperty(
+	"userEmail",
+	"string",
+	"The email address of the user to retrieve (e.g. 'user@example.com')",
+)

@@ -42,6 +42,9 @@ func NewRouter(store store.Store) *OperationRouter {
 			string(tools.ToolNameUserCount): func(ctx context.Context, params map[string]string) (string, error) {
 				return handlers.HandleUserCount(ctx, store, params)
 			},
+			string(tools.ToolNameGetUser): func(ctx context.Context, params map[string]string) (string, error) {
+				return handlers.HandleGetUser(ctx, store, params)
+			},
 			string(tools.ToolNameUnknown): func(ctx context.Context, params map[string]string) (string, error) {
 				return handlers.HandleUnknown(ctx, store, params)
 			},

@@ -14,6 +14,7 @@ const (
 	ToolNameUniqueTagTypes ToolNames = "UniqueTagTypes"
 	ToolNameUniqueContextTypes ToolNames = "UniqueContextTypes"
 	ToolNameUserCount    ToolNames = "UserCount"
+	ToolNameGetUser      ToolNames = "GetUser"
 	ToolNameUnknown      ToolNames = "Unknown"
 )
 
@@ -53,6 +54,11 @@ var ClassificationToolDefinitions = []ToolDefinition{
 		string(ToolNameUserCount),
 		"Returns the number of users. The system uses intelligent date parsing to handle relative time expressions. For 'this month', 'last year', '3 months ago', etc., extract the appropriate time parameters. The system will automatically correct outdated cached dates. Examples: 'this month' should use current month and year, 'last year' should use previous year, 'last week' should use days=7. Use time-based filters: 'days' for recent users, 'months' for quarterly/annual counts, 'month' and 'year' for specific time periods, or 'since'/'until' for custom date ranges.",
 	).WithParameters(NoRequiredParams, sinceProperty, untilProperty, daysProperty, monthsProperty, yearsProperty, monthProperty, yearProperty),
+	
+	NewToolDefinition(
+		string(ToolNameGetUser),
+		"Returns detailed information about a specific user by their email address. The userEmail parameter must be a valid email address. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
+	).WithParameters([]string{"userEmail"}, userEmailProperty, formatProperty),
 	
 	NewToolDefinition(
 		string(ToolNameUnknown),
