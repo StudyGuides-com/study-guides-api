@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package shared.v1;
+
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+import "google/protobuf/timestamp.proto";
+
+// Bundle represents a study guide bundle in the database
+message Bundle {
+	string id = 1;
+	string short_id = 2;
+	string parser_type = 3;
+	string title = 4;
+	bytes payload = 5;        // Using bytes for jsonb
+	bytes gob_payload = 6;    // Using bytes for gob encoding
+	bool exported_to_dev = 7;
+	bool exported_to_test = 8;
+	bool exported_to_prod = 9;
+	google.protobuf.Timestamp created_at = 10;
+	google.protobuf.Timestamp updated_at = 11;
+	google.protobuf.Timestamp assisted_at = 12;
+}

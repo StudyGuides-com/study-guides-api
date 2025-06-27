@@ -29,7 +29,11 @@ proto:
 		$(PROTO_DIR)/v1/tag/tag.proto \
 		$(PROTO_DIR)/v1/question/question.proto \
 		$(PROTO_DIR)/v1/shared/reporttype.proto \
-		$(PROTO_DIR)/v1/chat/chat.proto
+		$(PROTO_DIR)/v1/chat/chat.proto \
+		$(PROTO_DIR)/v1/shared/bundle.proto \
+		$(PROTO_DIR)/v1/shared/parsertype.proto \
+		$(PROTO_DIR)/v1/shared/exporttype.proto \
+		$(PROTO_DIR)/v1/roland/roland.proto
 
 
 build:

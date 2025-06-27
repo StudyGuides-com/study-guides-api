@@ -1,0 +1,114 @@
+syntax = "proto3";
+
+package roland.v1;
+option go_package = "github.com.studyguides-com/study-guides-api/api/v1/roland;rolandv1";
+
+import "v1/shared/bundle.proto";
+import "v1/shared/exporttype.proto";
+import "v1/shared/parsertype.proto";
+
+// SaveBundleRequest represents a request to save a bundle
+message SaveBundleRequest {
+  shared.v1.Bundle bundle = 1;
+  bool force = 2;
+}
+
+// SaveBundleResponse represents the response from saving a bundle
+message SaveBundleResponse {
+  bool created = 1;
+}
+
+// BundlesRequest represents a request to get all bundles
+message BundlesRequest {}
+
+// BundlesResponse represents the response containing all bundles
+message BundlesResponse {
+  repeated shared.v1.Bundle bundles = 1;
+}
+
+// BundlesByParserTypeRequest represents a request to get bundles by parser type
+message BundlesByParserTypeRequest {
+  shared.v1.ParserType parser_type = 1;
+}
+
+// BundlesByParserTypeResponse represents the response containing bundles by parser type
+message BundlesByParserTypeResponse {
+  repeated shared.v1.Bundle bundles = 1;
+}
+
+// UpdateGobRequest represents a request to update the gob payload for a bundle
+message UpdateGobRequest {
+  string id = 1;
+  bytes gob_payload = 2;
+  bool force = 3;
+}
+
+// UpdateGobResponse represents the response from updating gob payload
+message UpdateGobResponse {
+  bool updated = 1;
+}
+
+// DeleteAllBundlesRequest represents a request to delete all bundles
+message DeleteAllBundlesRequest {}
+
+// DeleteAllBundlesResponse represents the response from deleting all bundles
+message DeleteAllBundlesResponse {
+  bool success = 1;
+}
+
+// DeleteBundleByIDRequest represents a request to delete a bundle by ID
+message DeleteBundleByIDRequest {
+  string id = 1;
+}
+
+// DeleteBundleByIDResponse represents the response from deleting a bundle by ID
+message DeleteBundleByIDResponse {
+  bool success = 1;
+}
+
+// DeleteBundlesByShortIDRequest represents a request to delete bundles by short ID
+message DeleteBundlesByShortIDRequest {
+  string short_id = 1;
+}
+
+// DeleteBundlesByShortIDResponse represents the response from deleting bundles by short ID
+message DeleteBundlesByShortIDResponse {
+  int32 deleted_count = 1;
+}
+
+// MarkBundleExportedRequest represents a request to mark a bundle as exported
+message MarkBundleExportedRequest {
+  string id = 1;
+  shared.v1.ExportType export_type = 2;
+}
+
+// MarkBundleExportedResponse represents the response from marking a bundle as exported
+message MarkBundleExportedResponse {
+  bool updated = 1;
+}
+
+service RolandService {
+  // SaveBundle saves a bundle to the database
+  rpc SaveBundle(SaveBundleRequest) returns (SaveBundleResponse);
+  
+  // Bundles retrieves all bundles from the database
+  rpc Bundles(BundlesRequest) returns (BundlesResponse);
+  
+  // BundlesByParserType retrieves bundles filtered by parser type
+  rpc BundlesByParserType(BundlesByParserTypeRequest) returns (BundlesByParserTypeResponse);
+  
+  // UpdateGob updates the gob payload for a specific bundle
+  rpc UpdateGob(UpdateGobRequest) returns (UpdateGobResponse);
+  
+  // DeleteAllBundles deletes all bundles from the database
+  rpc DeleteAllBundles(DeleteAllBundlesRequest) returns (DeleteAllBundlesResponse);
+  
+  // DeleteBundleByID deletes a bundle by its ID
+  rpc DeleteBundleByID(DeleteBundleByIDRequest) returns (DeleteBundleByIDResponse);
+  
+  // DeleteBundlesByShortID deletes bundles by short ID
+  rpc DeleteBundlesByShortID(DeleteBundlesByShortIDRequest) returns (DeleteBundlesByShortIDResponse);
+  
+  // MarkBundleExported marks a bundle as exported to a specific environment
+  rpc MarkBundleExported(MarkBundleExportedRequest) returns (MarkBundleExportedResponse);
+}

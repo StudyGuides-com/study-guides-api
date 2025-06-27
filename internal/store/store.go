@@ -9,6 +9,7 @@ import (
 	"github.com/studyguides-com/study-guides-api/internal/store/search"
 	"github.com/studyguides-com/study-guides-api/internal/store/tag"
 	"github.com/studyguides-com/study-guides-api/internal/store/user"
+	"github.com/studyguides-com/study-guides-api/internal/store/roland"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -19,6 +20,7 @@ type Store interface {
 	UserStore() user.UserStore
 	QuestionStore() question.QuestionStore
 	InteractionStore() interaction.InteractionStore
+	RolandStore() roland.RolandStore
 }
 
 type store struct {
@@ -27,6 +29,7 @@ type store struct {
 	userStore        user.UserStore
 	questionStore    question.QuestionStore
 	interactionStore interaction.InteractionStore
+	rolandStore      roland.RolandStore
 }
 
 func (s *store) SearchStore() search.SearchStore {
@@ -49,11 +52,16 @@ func (s *store) InteractionStore() interaction.InteractionStore {
 	return s.interactionStore
 }
 
+func (s *store) RolandStore() roland.RolandStore {
+	return s.rolandStore
+}
+
 func NewStore() (Store, error) {
 	ctx := context.Background()
 	algoliaAppID := os.Getenv("ALGOLIA_APP_ID")
 	algoliaAdminAPIKey := os.Getenv("ALGOLIA_ADMIN_API_KEY")
 	dbURL := os.Getenv("DATABASE_URL")
+	rolandDBURL := os.Getenv("ROLAND_DATABASE_URL")
 
 	if algoliaAppID == "" || algoliaAdminAPIKey == "" || dbURL == "" {
 		return nil, status.Error(codes.FailedPrecondition, "missing required environment variables")
@@ -84,11 +92,17 @@ func NewStore() (Store, error) {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	rolandStore, err := roland.NewSqlRolandStore(ctx, rolandDBURL)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	return &store{
 		searchStore:      searchStore,
 		tagStore:         tagStore,
 		userStore:        userStore,
 		questionStore:    questionStore,
 		interactionStore: interactionStore,
+		rolandStore:      rolandStore,
 	}, nil
 }

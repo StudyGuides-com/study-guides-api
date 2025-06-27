@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package shared.v1;
+
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+
+
+enum ExportType {
+	EXPORT_TYPE_UNSPECIFIED = 0;
+	EXPORT_TYPE_PROD = 1;
+	EXPORT_TYPE_TEST = 2;
+	EXPORT_TYPE_DEV = 3;
+}

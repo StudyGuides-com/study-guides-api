@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package shared.v1;
+
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+// ParserType represents different types of parsers
+enum ParserType {
+	// Default value, should not be used
+	PARSER_TYPE_UNSPECIFIED = 0;
+	
+	// Parser types
+	PARSER_TYPE_COLLEGES = 1;
+	PARSER_TYPE_CERTIFICATIONS = 2;
+	PARSER_TYPE_ENTRANCE_EXAMS = 3;
+	PARSER_TYPE_AP_EXAMS = 4;
+	PARSER_TYPE_DOD = 5;
+}
