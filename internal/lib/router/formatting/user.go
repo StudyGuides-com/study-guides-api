@@ -166,30 +166,30 @@ func UserAsTable(user *sharedpb.User) string {
 func UserAsDetailedText(user *sharedpb.User) string {
 	var response string
 	response += fmt.Sprintf("**User Details for ID: %s**\n\n", user.Id)
-	
+
 	if user.Name != nil && *user.Name != "" {
 		response += fmt.Sprintf("**Name:** %s\n", *user.Name)
 	}
-	
+
 	if user.GamerTag != nil && *user.GamerTag != "" {
 		response += fmt.Sprintf("**Gamer Tag:** %s\n", *user.GamerTag)
 	}
-	
+
 	if user.Email != nil && *user.Email != "" {
 		response += fmt.Sprintf("**Email:** %s\n", *user.Email)
 	}
-	
+
 	if user.EmailVerified != nil {
 		response += fmt.Sprintf("**Email Verified:** %s\n", user.EmailVerified.AsTime().Format("2006-01-02 15:04:05"))
 	}
-	
+
 	if user.Image != nil && *user.Image != "" {
 		response += fmt.Sprintf("**Image:** %s\n", *user.Image)
 	}
-	
+
 	if user.ContentTagId != nil && *user.ContentTagId != "" {
 		response += fmt.Sprintf("**Content Tag ID:** %s\n", *user.ContentTagId)
 	}
-	
+
 	return response
-} 
+}

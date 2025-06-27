@@ -20,25 +20,25 @@ type SqlTagStore struct {
 }
 
 type tagRow struct {
-	ID                 string            `db:"id"`
-	BatchID            *string           `db:"batchId"`
-	Hash               string            `db:"hash"`
-	Name               string            `db:"name"`
-	Description        *string           `db:"description"`
-	Type               string            `db:"type"`
-	Context            string            `db:"context"`
-	ParentTagID        *string           `db:"parentTagId"`
-	ContentRating      string            `db:"contentRating"`
-	ContentDescriptors []string          `db:"contentDescriptors"`
-	MetaTags           []string          `db:"metaTags"`
-	Public             bool              `db:"public"`
-	AccessCount        int64             `db:"accessCount"`
-	Metadata           json.RawMessage   `db:"metadata"`
-	CreatedAt          time.Time         `db:"createdAt"`
-	UpdatedAt          time.Time         `db:"updatedAt"`
-	OwnerID            *string           `db:"ownerId"`
-	HasQuestions       bool              `db:"hasQuestions"`
-	HasChildren        bool              `db:"hasChildren"`
+	ID                 string          `db:"id"`
+	BatchID            *string         `db:"batchId"`
+	Hash               string          `db:"hash"`
+	Name               string          `db:"name"`
+	Description        *string         `db:"description"`
+	Type               string          `db:"type"`
+	Context            string          `db:"context"`
+	ParentTagID        *string         `db:"parentTagId"`
+	ContentRating      string          `db:"contentRating"`
+	ContentDescriptors []string        `db:"contentDescriptors"`
+	MetaTags           []string        `db:"metaTags"`
+	Public             bool            `db:"public"`
+	AccessCount        int64           `db:"accessCount"`
+	Metadata           json.RawMessage `db:"metadata"`
+	CreatedAt          time.Time       `db:"createdAt"`
+	UpdatedAt          time.Time       `db:"updatedAt"`
+	OwnerID            *string         `db:"ownerId"`
+	HasQuestions       bool            `db:"hasQuestions"`
+	HasChildren        bool            `db:"hasChildren"`
 }
 
 func (s *SqlTagStore) GetTagByID(ctx context.Context, id string) (*sharedpb.Tag, error) {

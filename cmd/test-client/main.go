@@ -44,12 +44,12 @@ func (r *Runner) runREPL(ctx context.Context, cmd *cobra.Command, systemPrompt s
 		}
 
 		input := strings.TrimSpace(scanner.Text())
-		
+
 		// Check for exit commands
 		if input == "" {
 			continue
 		}
-		
+
 		lowerInput := strings.ToLower(input)
 		if lowerInput == "exit" || lowerInput == "quit" || lowerInput == "bye" {
 			fmt.Println("👋 Goodbye!")
@@ -95,4 +95,4 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-} 
+}

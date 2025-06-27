@@ -19,4 +19,4 @@ func BuildParameterSchema(properties Properties, required []string) ParameterSch
 // BuildParameterSchemaFromProps creates a ParameterSchema directly from Property structs and required fields
 func BuildParameterSchemaFromProps(required []string, props ...Property) ParameterSchema {
 	return BuildParameterSchema(BuildProperties(props...), required)
-} 
+}

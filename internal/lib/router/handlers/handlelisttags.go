@@ -11,21 +11,21 @@ import (
 func HandleListTags(ctx context.Context, store store.Store, params map[string]string) (string, error) {
 	// Debug: Print all parameters
 	fmt.Printf("DEBUG: handleListTags called with params: %+v\n", params)
-	
+
 	// Get the format specified by the AI
 	format := formatting.GetFormatFromParams(params)
-	
+
 	// Check if we have any filters (type, contextType, name, or public)
 	hasTypeFilter := false
 	hasContextFilter := false
 	hasNameFilter := false
 	hasPublicFilter := false
-	
+
 	if tagType, ok := params["type"]; ok && tagType != "" {
 		hasTypeFilter = true
 		fmt.Printf("DEBUG: Type parameter found: '%s'\n", tagType)
 	}
-	
+
 	if contextType, ok := params["contextType"]; ok && contextType != "" {
 		hasContextFilter = true
 		fmt.Printf("DEBUG: ContextType parameter found: '%s'\n", contextType)
@@ -40,7 +40,7 @@ func HandleListTags(ctx context.Context, store store.Store, params map[string]st
 		hasPublicFilter = true
 		fmt.Printf("DEBUG: Public parameter found: '%s'\n", publicStr)
 	}
-	
+
 	// If we have any filters, use the new ListTagsWithFilters method
 	if hasTypeFilter || hasContextFilter || hasNameFilter || hasPublicFilter {
 		// Get the actual unique tag types from the database to validate type parameter
@@ -49,7 +49,7 @@ func HandleListTags(ctx context.Context, store store.Store, params map[string]st
 			if err != nil {
 				return "", err
 			}
-			
+
 			// Check if the requested tag type exists in the database
 			tagType := params["type"]
 			var found bool
@@ -59,7 +59,7 @@ func HandleListTags(ctx context.Context, store store.Store, params map[string]st
 					break
 				}
 			}
-			
+
 			if !found {
 				// Build a list of available tag types for the error message
 				var availableTypes []string
@@ -69,18 +69,18 @@ func HandleListTags(ctx context.Context, store store.Store, params map[string]st
 				return fmt.Sprintf("Invalid tag type '%s'. Available types: %v", tagType, availableTypes), nil
 			}
 		}
-		
+
 		// Use ListTagsWithFilters for filtered queries
 		tags, err := store.TagStore().ListTagsWithFilters(ctx, params)
 		if err != nil {
 			return "", err
 		}
-		
+
 		if len(tags) == 0 {
 			filterDesc := formatting.BuildFilterDescription(params, hasTypeFilter, hasContextFilter, hasNameFilter, hasPublicFilter)
 			return fmt.Sprintf("No tags found%s.", filterDesc), nil
 		}
-		
+
 		// Format the response according to the AI-specified format
 		if format == formatting.FormatList {
 			filterDesc := formatting.BuildFilterDescription(params, hasTypeFilter, hasContextFilter, hasNameFilter, hasPublicFilter)
@@ -93,17 +93,17 @@ func HandleListTags(ctx context.Context, store store.Store, params map[string]st
 			return formatting.FormatTags(tags, format), nil
 		}
 	}
-	
+
 	// Default to listing root tags if no filters specified
 	tags, err := store.TagStore().ListRootTags(ctx, params)
 	if err != nil {
 		return "", err
 	}
-	
+
 	if len(tags) == 0 {
 		return "No root tags found.", nil
 	}
-	
+
 	// Format the response according to the AI-specified format
 	if format == formatting.FormatList {
 		limitMsg := formatting.BuildLimitMessage(params)
@@ -114,4 +114,4 @@ func HandleListTags(ctx context.Context, store store.Store, params map[string]st
 		// For other formats, just return the formatted data
 		return formatting.FormatTags(tags, format), nil
 	}
-} 
+}

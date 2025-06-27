@@ -137,7 +137,7 @@ func (c *OpenAiClient) ChatCompletionWithHistory(ctx context.Context, systemProm
 			Content: systemPrompt,
 		},
 	}
-	
+
 	// Add conversation history
 	allMessages = append(allMessages, messages...)
 

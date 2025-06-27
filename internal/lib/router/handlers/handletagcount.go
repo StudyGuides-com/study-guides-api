@@ -14,7 +14,7 @@ func HandleTagCount(ctx context.Context, store store.Store, params map[string]st
 	hasContextFilter := false
 	hasNameFilter := false
 	hasPublicFilter := false
-	
+
 	if typeStr, ok := params["type"]; ok && typeStr != "" {
 		hasTypeFilter = true
 	}
@@ -27,10 +27,10 @@ func HandleTagCount(ctx context.Context, store store.Store, params map[string]st
 	if publicStr, ok := params["public"]; ok && publicStr != "" {
 		hasPublicFilter = true
 	}
-	
+
 	var count int
 	var err error
-	
+
 	if hasTypeFilter || hasContextFilter || hasNameFilter || hasPublicFilter {
 		// If any filter is specified, use CountTags with params
 		count, err = store.TagStore().CountTags(ctx, params)
@@ -38,11 +38,11 @@ func HandleTagCount(ctx context.Context, store store.Store, params map[string]st
 		// Get total count without any filters
 		count, err = store.TagStore().CountTags(ctx, params)
 	}
-	
+
 	if err != nil {
 		return "", err
 	}
-	
+
 	// Build the response message
 	var response string
 	if hasTypeFilter && hasContextFilter && hasNameFilter && hasPublicFilter {
@@ -78,6 +78,6 @@ func HandleTagCount(ctx context.Context, store store.Store, params map[string]st
 	} else {
 		response = fmt.Sprintf("Found %d tags total.", count)
 	}
-	
+
 	return response, nil
-} 
+}

@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package admin.v1;
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/admin;adminv1";
+
+import "v1/shared/tagtype.proto";
+import "v1/shared/contentrating.proto";
+import "v1/shared/contentdescriptortype.proto";
+import "v1/shared/parsertype.proto";
+import "v1/shared/tag.proto";
+
+message NewTagAdminRequest {
+  string name = 1;
+  string hash = 2;
+  shared.v1.TagType type = 3;
+  string parent_id = 4;
+  shared.v1.ContentRating rating = 5;
+  repeated shared.v1.ContentDescriptorType descriptors = 6;
+  repeated string meta_tags = 7;
+  shared.v1.ParserType parser_type = 8;
+  map<string, string> metadata = 9;
+}
+
+message NewTagAdminResponse {
+  shared.v1.Tag tag = 1;
+}
+
+service AdminService {
+  rpc NewTag(NewTagAdminRequest) returns (NewTagAdminResponse) {}
+}
+  

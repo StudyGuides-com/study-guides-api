@@ -6,10 +6,10 @@ import (
 
 	"github.com/studyguides-com/study-guides-api/internal/store/interaction"
 	"github.com/studyguides-com/study-guides-api/internal/store/question"
+	"github.com/studyguides-com/study-guides-api/internal/store/roland"
 	"github.com/studyguides-com/study-guides-api/internal/store/search"
 	"github.com/studyguides-com/study-guides-api/internal/store/tag"
 	"github.com/studyguides-com/study-guides-api/internal/store/user"
-	"github.com/studyguides-com/study-guides-api/internal/store/roland"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

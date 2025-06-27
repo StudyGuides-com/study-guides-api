@@ -18,7 +18,7 @@ import (
 const (
 	ToolChoiceTypeAuto = "auto"
 	// Conversation management constants
-	MaxConversationMessages = 10  // Maximum number of messages to keep in history
+	MaxConversationMessages = 10   // Maximum number of messages to keep in history
 	MaxMessageLength        = 1000 // Maximum characters per message to store
 )
 
@@ -37,27 +37,27 @@ func NewConversationHistory() *ConversationHistory {
 // FromContextMetadata loads conversation history from context metadata
 func FromContextMetadata(metadata map[string]string) *ConversationHistory {
 	history := NewConversationHistory()
-	
+
 	if historyJSON, exists := metadata["conversation_history"]; exists && historyJSON != "" {
 		var messages []openai.ChatCompletionMessage
 		if err := json.Unmarshal([]byte(historyJSON), &messages); err == nil {
 			history.Messages = messages
 		}
 	}
-	
+
 	return history
 }
 
 // ToContextMetadata saves conversation history to context metadata
 func (ch *ConversationHistory) ToContextMetadata() map[string]string {
 	metadata := make(map[string]string)
-	
+
 	if len(ch.Messages) > 0 {
 		if historyJSON, err := json.Marshal(ch.Messages); err == nil {
 			metadata["conversation_history"] = string(historyJSON)
 		}
 	}
-	
+
 	return metadata
 }
 
@@ -67,7 +67,7 @@ func createResponseSummary(answer string, operation string, params map[string]st
 	if len(answer) <= MaxMessageLength {
 		return answer
 	}
-	
+
 	// For long responses, create a summary based on the operation
 	switch operation {
 	case "ListTags":
@@ -79,26 +79,26 @@ func createResponseSummary(answer string, operation string, params map[string]st
 				itemCount++
 			}
 		}
-		
+
 		format := "list"
 		if f, ok := params["format"]; ok {
 			format = f
 		}
-		
+
 		tagType := ""
 		if t, ok := params["type"]; ok {
 			tagType = t
 		}
-		
+
 		if tagType != "" {
 			return fmt.Sprintf("Retrieved %d %s tags in %s format", itemCount, tagType, format)
 		} else {
 			return fmt.Sprintf("Retrieved %d root tags in %s format", itemCount, format)
 		}
-		
+
 	case "TagCount":
 		return "Retrieved tag count information"
-		
+
 	case "UniqueTagTypes":
 		// Count the number of tag types
 		lines := strings.Split(answer, "\n")
@@ -109,7 +109,7 @@ func createResponseSummary(answer string, operation string, params map[string]st
 			}
 		}
 		return fmt.Sprintf("Retrieved %d unique tag types", typeCount)
-		
+
 	default:
 		// For unknown operations, truncate and add ellipsis
 		if len(answer) > MaxMessageLength {
@@ -125,9 +125,9 @@ func (ch *ConversationHistory) AddMessage(message openai.ChatCompletionMessage) 
 	if len(message.Content) > MaxMessageLength {
 		message.Content = message.Content[:MaxMessageLength] + "..."
 	}
-	
+
 	ch.Messages = append(ch.Messages, message)
-	
+
 	// Keep only the most recent messages
 	if len(ch.Messages) > MaxConversationMessages {
 		// Remove oldest messages, keeping the most recent ones
@@ -139,12 +139,12 @@ func (ch *ConversationHistory) AddMessage(message openai.ChatCompletionMessage) 
 func (ch *ConversationHistory) AddAssistantResponse(answer string, operation string, params map[string]string) {
 	// Create a summary for conversation history
 	summary := createResponseSummary(answer, operation, params)
-	
+
 	assistantMessage := openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleAssistant,
 		Content: summary,
 	}
-	
+
 	ch.AddMessage(assistantMessage)
 }
 
@@ -161,12 +161,12 @@ func (ch *ConversationHistory) GetMessagesForAI() []openai.ChatCompletionMessage
 	// Create a copy and truncate if needed
 	messages := make([]openai.ChatCompletionMessage, len(ch.Messages))
 	copy(messages, ch.Messages)
-	
+
 	// If we have too many messages, keep only the most recent ones
 	if len(messages) > MaxConversationMessages {
 		messages = messages[len(messages)-MaxConversationMessages:]
 	}
-	
+
 	return messages
 }
 
@@ -186,30 +186,30 @@ func NewChatService(router router.Router, ai ai.AiClient) *ChatService {
 // buildSystemPrompt dynamically creates a system prompt based on available tools
 func buildSystemPrompt() string {
 	toolDefinitions := tools.GetClassificationDefinitions()
-	
+
 	var operations []string
 	var operationDetails []string
-	
+
 	for _, toolDef := range toolDefinitions {
 		operationName := toolDef.Name
 		operations = append(operations, operationName)
-		
+
 		// Build parameter list for this operation
 		var params []string
 		for _, param := range toolDef.Parameters {
 			params = append(params, param.Name)
 		}
-		
+
 		if len(params) > 0 {
 			operationDetails = append(operationDetails, fmt.Sprintf("For %s, allowed parameters: %s.", operationName, strings.Join(params, ", ")))
 		} else {
 			operationDetails = append(operationDetails, fmt.Sprintf("For %s, no parameters required.", operationName))
 		}
 	}
-	
+
 	operationsList := strings.Join(operations, ", ")
 	detailsList := strings.Join(operationDetails, "\n")
-	
+
 	// Add tag type guidance
 	tagTypeGuidance := `
 	When using ListTags with a type parameter, use the exact tag types that exist in the system.
@@ -218,7 +218,7 @@ func buildSystemPrompt() string {
 	
 	Use the exact type name as it appears in the system. Do NOT use synonyms or variations.
 	`
-	
+
 	// Add format selection guidance
 	formatGuidance := `
 	When using ListTags or TagCount, choose the appropriate format based on user intent:
@@ -228,7 +228,7 @@ func buildSystemPrompt() string {
 	- Use 'table' when user specifically asks for table format or markdown
 	- If unsure, default to 'list' for human interaction
 	`
-	
+
 	return fmt.Sprintf(`
 	You are an intent router. Allowed operations: %s.
 	%s
@@ -247,7 +247,7 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 	fmt.Printf("DEBUG: Session ID: %s\n", req.Context.GetSessionId())
 	fmt.Printf("DEBUG: Message: %s\n", req.Message)
 	fmt.Printf("DEBUG: Context Metadata: %+v\n", req.Context.GetMetadata())
-	
+
 	resp, err := PublicBaseHandler(ctx, func(ctx context.Context) (interface{}, error) {
 
 		systemPrompt := buildSystemPrompt()
@@ -259,16 +259,16 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 		}
 		// Get conversation history from context metadata
 		conversationHistory := FromContextMetadata(req.Context.GetMetadata())
-		
+
 		// Debug: Print conversation history
 		fmt.Printf("DEBUG: === CONVERSATION HISTORY ===\n")
 		fmt.Printf("DEBUG: History length: %d messages\n", len(conversationHistory.Messages))
 		for i, msg := range conversationHistory.Messages {
 			fmt.Printf("DEBUG: Message %d - Role: %s, Content: %s\n", i+1, msg.Role, msg.Content)
 		}
-		
+
 		conversationHistory.AddMessage(currentUserMessage)
-		
+
 		// Debug: Print updated history
 		fmt.Printf("DEBUG: === UPDATED HISTORY ===\n")
 		fmt.Printf("DEBUG: Updated history length: %d messages\n", len(conversationHistory.Messages))
@@ -300,13 +300,13 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 		}
 		toolCall := chatResp.Choices[0].Message.ToolCalls[0]
 		plan.Operation = toolCall.Function.Name
-		
+
 		// First unmarshal to map[string]interface{} to handle mixed types
 		var rawParams map[string]interface{}
 		if err := json.Unmarshal([]byte(toolCall.Function.Arguments), &rawParams); err != nil {
 			return nil, err
 		}
-		
+
 		// Convert all values to strings
 		plan.Parameters = make(map[string]string)
 		for k, v := range rawParams {
@@ -326,7 +326,7 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 				}
 			}
 		}
-		
+
 		// Debug: Print AI response and plan
 		fmt.Printf("DEBUG: === AI RESPONSE ===\n")
 		fmt.Printf("DEBUG: Operation: %s\n", plan.Operation)
@@ -336,14 +336,14 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 		if err != nil {
 			return nil, err
 		}
-		
+
 		// Debug: Print router answer
 		fmt.Printf("DEBUG: === ROUTER ANSWER ===\n")
 		fmt.Printf("DEBUG: Answer: %s\n", answer)
 
 		// Add assistant response to conversation history
 		conversationHistory.AddAssistantResponse(answer, plan.Operation, plan.Parameters)
-		
+
 		// Debug: Print final history
 		fmt.Printf("DEBUG: === FINAL HISTORY ===\n")
 		fmt.Printf("DEBUG: Final history length: %d messages\n", len(conversationHistory.Messages))
@@ -357,7 +357,7 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 			SessionId: req.Context.GetSessionId(),
 			Metadata:  conversationHistory.ToContextMetadata(),
 		}
-		
+
 		// Debug: Print updated context
 		fmt.Printf("DEBUG: === UPDATED CONTEXT ===\n")
 		fmt.Printf("DEBUG: Updated Context Metadata: %+v\n", updatedContext.GetMetadata())

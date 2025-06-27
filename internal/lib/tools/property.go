@@ -12,7 +12,7 @@ func NewPropertyValue(propertyType, description string) PropertyValue {
 		Type:        propertyType,
 		Description: description,
 	}
-} 
+}
 
 // Property defines a single parameter property
 type Property struct {
@@ -31,7 +31,7 @@ func NewProperty(name, propertyType, description string) Property {
 // ToMapEntry returns the property as a map entry for easy use in Properties maps
 func (p Property) ToMapEntry() (string, PropertyValue) {
 	return p.Name, p.Value
-} 
+}
 
 type Properties map[string]PropertyValue
 
@@ -42,4 +42,4 @@ func BuildProperties(props ...Property) Properties {
 		result[prop.Name] = prop.Value
 	}
 	return result
-} 
+}

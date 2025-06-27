@@ -12,31 +12,31 @@ import (
 func HandleUserCount(ctx context.Context, store store.Store, params map[string]string) (string, error) {
 	// Debug: Log the incoming parameters
 	fmt.Printf("DEBUG: handleUserCount called with params: %+v\n", params)
-	
+
 	// Use standard time package for date handling
 	now := time.Now()
-	
+
 	// Handle relative date expressions more intelligently
 	if month, hasMonth := params["month"]; hasMonth && month != "" {
 		var monthInt int
 		if _, err := fmt.Sscanf(month, "%d", &monthInt); err == nil {
 			// Check if this looks like a relative date (current month should be close)
 			currentMonth := int(now.Month())
-			if math.Abs(float64(currentMonth - monthInt)) > 1 {
+			if math.Abs(float64(currentMonth-monthInt)) > 1 {
 				// Month is significantly off, likely cached data - use current month
 				params["month"] = fmt.Sprintf("%d", currentMonth)
 				fmt.Printf("DEBUG: Correcting month from %s to current month %d\n", month, currentMonth)
 			}
 		}
 	}
-	
+
 	// Handle year more intelligently
 	if year, hasYear := params["year"]; hasYear {
 		var yearInt int
 		if _, err := fmt.Sscanf(year, "%d", &yearInt); err == nil {
 			currentYear := now.Year()
 			// If year is more than 1 year old, it's probably cached data
-			if currentYear - yearInt > 1 {
+			if currentYear-yearInt > 1 {
 				params["year"] = fmt.Sprintf("%d", currentYear)
 				fmt.Printf("DEBUG: Overriding outdated year %d to current year %d\n", yearInt, currentYear)
 			}
@@ -48,7 +48,7 @@ func HandleUserCount(ctx context.Context, store store.Store, params map[string]s
 	}
 
 	fmt.Printf("DEBUG: Final params after processing: %+v\n", params)
-	
+
 	count, err := store.UserStore().UserCount(ctx, params)
 	if err != nil {
 		return "", err
@@ -56,7 +56,7 @@ func HandleUserCount(ctx context.Context, store store.Store, params map[string]s
 
 	// Build a descriptive message based on the filters used
 	var filterDesc string
-	
+
 	hasSinceFilter := false
 	hasUntilFilter := false
 	hasDaysFilter := false
@@ -64,11 +64,11 @@ func HandleUserCount(ctx context.Context, store store.Store, params map[string]s
 	hasYearsFilter := false
 	hasMonthFilter := false
 	hasYearFilter := false
-	
+
 	if since, ok := params["since"]; ok && since != "" {
 		hasSinceFilter = true
 	}
-	
+
 	if until, ok := params["until"]; ok && until != "" {
 		hasUntilFilter = true
 	}
@@ -92,7 +92,7 @@ func HandleUserCount(ctx context.Context, store store.Store, params map[string]s
 	if year, ok := params["year"]; ok && year != "" {
 		hasYearFilter = true
 	}
-	
+
 	// Build filter description with all possible combinations
 	if hasSinceFilter && hasUntilFilter {
 		filterDesc = fmt.Sprintf(" created between %s and %s", params["since"], params["until"])
@@ -137,4 +137,4 @@ func HandleUserCount(ctx context.Context, store store.Store, params map[string]s
 	result := fmt.Sprintf("You have %d users%s.", count, filterDesc)
 	fmt.Printf("DEBUG: Returning result: %s\n", result)
 	return result, nil
-} 
+}

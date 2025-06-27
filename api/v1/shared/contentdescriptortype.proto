@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package shared.v1;
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+enum ContentDescriptorType {
+	CONTENT_DESCRIPTOR_TYPE_UNSPECIFIED = 0;
+	CONTENT_DESCRIPTOR_TYPE_ALCOHOL_REFERENCE = 1;
+	CONTENT_DESCRIPTOR_TYPE_DRUG_REFERENCE = 2;
+	CONTENT_DESCRIPTOR_TYPE_LANGUAGE = 3;
+	CONTENT_DESCRIPTOR_TYPE_SEXUAL_CONTENT = 4;
+	CONTENT_DESCRIPTOR_TYPE_MEDICAL_TERMINOLOGY = 5;
+}

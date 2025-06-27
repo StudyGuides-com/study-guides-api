@@ -33,7 +33,9 @@ proto:
 		$(PROTO_DIR)/v1/shared/bundle.proto \
 		$(PROTO_DIR)/v1/shared/parsertype.proto \
 		$(PROTO_DIR)/v1/shared/exporttype.proto \
-		$(PROTO_DIR)/v1/roland/roland.proto
+		$(PROTO_DIR)/v1/shared/contentdescriptortype.proto \
+		$(PROTO_DIR)/v1/roland/roland.proto \
+		$(PROTO_DIR)/v1/admin/admin.proto
 
 
 build:

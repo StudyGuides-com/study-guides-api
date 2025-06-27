@@ -76,4 +76,4 @@ func BuildLimitMessage(params map[string]string) string {
 		return fmt.Sprintf(" (limited to first %s results)", limitStr)
 	}
 	return ""
-} 
+}

@@ -133,25 +133,25 @@ func TagAsFormatted(tag *sharedpb.Tag, format FormatType) string {
 func TagAsJSON(tag *sharedpb.Tag) string {
 	// Create a comprehensive structure for JSON output
 	type TagDetailOutput struct {
-		ID                string            `json:"id"`
-		Name              string            `json:"name"`
-		Description       string            `json:"description,omitempty"`
-		Type              string            `json:"type"`
-		Context           string            `json:"context"`
-		ParentTagID       string            `json:"parent_tag_id,omitempty"`
-		ContentRating     string            `json:"content_rating"`
-		ContentDescriptors []string         `json:"content_descriptors,omitempty"`
-		MetaTags          []string          `json:"meta_tags,omitempty"`
-		Public            bool              `json:"public"`
-		AccessCount       int32             `json:"access_count"`
-		Metadata          map[string]string `json:"metadata,omitempty"`
-		BatchID           string            `json:"batch_id,omitempty"`
-		Hash              string            `json:"hash"`
-		HasQuestions      bool              `json:"has_questions"`
-		HasChildren       bool              `json:"has_children"`
-		OwnerID           string            `json:"owner_id,omitempty"`
-		CreatedAt         string            `json:"created_at"`
-		UpdatedAt         string            `json:"updated_at"`
+		ID                 string            `json:"id"`
+		Name               string            `json:"name"`
+		Description        string            `json:"description,omitempty"`
+		Type               string            `json:"type"`
+		Context            string            `json:"context"`
+		ParentTagID        string            `json:"parent_tag_id,omitempty"`
+		ContentRating      string            `json:"content_rating"`
+		ContentDescriptors []string          `json:"content_descriptors,omitempty"`
+		MetaTags           []string          `json:"meta_tags,omitempty"`
+		Public             bool              `json:"public"`
+		AccessCount        int32             `json:"access_count"`
+		Metadata           map[string]string `json:"metadata,omitempty"`
+		BatchID            string            `json:"batch_id,omitempty"`
+		Hash               string            `json:"hash"`
+		HasQuestions       bool              `json:"has_questions"`
+		HasChildren        bool              `json:"has_children"`
+		OwnerID            string            `json:"owner_id,omitempty"`
+		CreatedAt          string            `json:"created_at"`
+		UpdatedAt          string            `json:"updated_at"`
 	}
 
 	output := TagDetailOutput{
@@ -334,52 +334,52 @@ func TagAsDetailedText(tag *sharedpb.Tag) string {
 	var response string
 	response += fmt.Sprintf("**Tag Details for ID: %s**\n\n", tag.Id)
 	response += fmt.Sprintf("**Name:** %s\n", tag.Name)
-	
+
 	if tag.Description != nil && *tag.Description != "" {
 		response += fmt.Sprintf("**Description:** %s\n", *tag.Description)
 	}
-	
+
 	response += fmt.Sprintf("**Type:** %s\n", tag.Type.String())
 	response += fmt.Sprintf("**Context:** %s\n", tag.Context)
-	
+
 	if tag.ParentTagId != nil && *tag.ParentTagId != "" {
 		response += fmt.Sprintf("**Parent Tag ID:** %s\n", *tag.ParentTagId)
 	}
-	
+
 	response += fmt.Sprintf("**Content Rating:** %s\n", tag.ContentRating.String())
-	
+
 	if len(tag.ContentDescriptors) > 0 {
 		response += fmt.Sprintf("**Content Descriptors:** %s\n", strings.Join(tag.ContentDescriptors, ", "))
 	}
-	
+
 	if len(tag.MetaTags) > 0 {
 		response += fmt.Sprintf("**Meta Tags:** %s\n", strings.Join(tag.MetaTags, ", "))
 	}
-	
+
 	response += fmt.Sprintf("**Public:** %t\n", tag.Public)
 	response += fmt.Sprintf("**Access Count:** %d\n", tag.AccessCount)
-	
+
 	if len(tag.Metadata) > 0 {
 		response += "**Metadata:**\n"
 		for key, value := range tag.Metadata {
 			response += fmt.Sprintf("  - %s: %s\n", key, value)
 		}
 	}
-	
+
 	if tag.BatchId != nil && *tag.BatchId != "" {
 		response += fmt.Sprintf("**Batch ID:** %s\n", *tag.BatchId)
 	}
-	
+
 	response += fmt.Sprintf("**Hash:** %s\n", tag.Hash)
 	response += fmt.Sprintf("**Has Questions:** %t\n", tag.HasQuestions)
 	response += fmt.Sprintf("**Has Children:** %t\n", tag.HasChildren)
-	
+
 	if tag.OwnerId != nil && *tag.OwnerId != "" {
 		response += fmt.Sprintf("**Owner ID:** %s\n", *tag.OwnerId)
 	}
-	
+
 	response += fmt.Sprintf("**Created:** %s\n", tag.CreatedAt.AsTime().Format("2006-01-02 15:04:05"))
 	response += fmt.Sprintf("**Updated:** %s\n", tag.UpdatedAt.AsTime().Format("2006-01-02 15:04:05"))
-	
+
 	return response
-} 
+}

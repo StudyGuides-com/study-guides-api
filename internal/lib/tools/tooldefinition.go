@@ -39,4 +39,4 @@ func (td ToolDefinition) AsTool() openai.Tool {
 			Parameters:  BuildParameterSchemaFromProps(td.Required, td.Parameters...),
 		},
 	}
-} 
+}

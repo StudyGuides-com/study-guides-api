@@ -12,15 +12,15 @@ func HandleUniqueTagTypes(ctx context.Context, store store.Store, params map[str
 	if err != nil {
 		return "", err
 	}
-	
+
 	if len(tagTypes) == 0 {
 		return "No tag types found in the system.", nil
 	}
-	
+
 	// For now, tag types only support list format since they're simple strings
 	response := fmt.Sprintf("Found %d unique tag types:\n", len(tagTypes))
 	for i, tagType := range tagTypes {
 		response += fmt.Sprintf("%d. %s\n", i+1, tagType.String())
 	}
 	return response, nil
-} 
+}

@@ -23,4 +23,4 @@ func HandleUniqueContextTypes(ctx context.Context, store store.Store, params map
 	}
 
 	return response, nil
-} 
+}
