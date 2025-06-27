@@ -137,11 +137,11 @@ func main() {
 	// Wait for graceful shutdown or timeout
 	select {
 	case <-done:
-		log.Println("✅ Server gracefully stopped")
+		log.Println("✅ server gracefully stopped")
 	case <-ctx.Done():
-		log.Println("❌ Graceful shutdown timeout, forcing stop")
+		log.Println("❌ graceful shutdown timeout, forcing stop")
 		grpcServer.Stop()
 	}
 
-	log.Println("🙌 Server shutdown complete")
+	log.Println("🙌 server shutdown complete")
 }
