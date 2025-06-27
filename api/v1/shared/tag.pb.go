@@ -30,7 +30,7 @@ type Tag struct {
 	Name               string                  `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 	Description        *string                 `protobuf:"bytes,5,opt,name=description,proto3,oneof" json:"description,omitempty"`
 	Type               TagType                 `protobuf:"varint,6,opt,name=type,proto3,enum=shared.v1.TagType" json:"type,omitempty"`
-	Context            string                  `protobuf:"bytes,7,opt,name=context,proto3" json:"context,omitempty"`
+	Context            ContextType             `protobuf:"varint,7,opt,name=context,proto3,enum=shared.v1.ContextType" json:"context,omitempty"`
 	ParentTagId        *string                 `protobuf:"bytes,8,opt,name=parent_tag_id,json=parentTagId,proto3,oneof" json:"parent_tag_id,omitempty"`
 	ContentRating      ContentRating           `protobuf:"varint,9,opt,name=content_rating,json=contentRating,proto3,enum=shared.v1.ContentRating" json:"content_rating,omitempty"`
 	ContentDescriptors []ContentDescriptorType `protobuf:"varint,10,rep,packed,name=content_descriptors,json=contentDescriptors,proto3,enum=shared.v1.ContentDescriptorType" json:"content_descriptors,omitempty"`
@@ -119,11 +119,11 @@ func (x *Tag) GetType() TagType {
 	return TagType_Category
 }
 
-func (x *Tag) GetContext() string {
+func (x *Tag) GetContext() ContextType {
 	if x != nil {
 		return x.Context
 	}
-	return ""
+	return ContextType_Colleges
 }
 
 func (x *Tag) GetParentTagId() string {
@@ -214,15 +214,15 @@ var File_v1_shared_tag_proto protoreflect.FileDescriptor
 
 const file_v1_shared_tag_proto_rawDesc = "" +
 	"\n" +
-	"\x13v1/shared/tag.proto\x12\tshared.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17v1/shared/tagtype.proto\x1a\x1dv1/shared/contentrating.proto\x1a%v1/shared/contentdescriptortype.proto\x1a\x18v1/shared/metadata.proto\"\xa6\x06\n" +
+	"\x13v1/shared/tag.proto\x12\tshared.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17v1/shared/tagtype.proto\x1a\x1dv1/shared/contentrating.proto\x1a%v1/shared/contentdescriptortype.proto\x1a\x18v1/shared/metadata.proto\x1a\x1bv1/shared/contexttype.proto\"\xbe\x06\n" +
 	"\x03Tag\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1e\n" +
 	"\bbatch_id\x18\x02 \x01(\tH\x00R\abatchId\x88\x01\x01\x12\x12\n" +
 	"\x04hash\x18\x03 \x01(\tR\x04hash\x12\x12\n" +
 	"\x04name\x18\x04 \x01(\tR\x04name\x12%\n" +
 	"\vdescription\x18\x05 \x01(\tH\x01R\vdescription\x88\x01\x01\x12&\n" +
-	"\x04type\x18\x06 \x01(\x0e2\x12.shared.v1.TagTypeR\x04type\x12\x18\n" +
-	"\acontext\x18\a \x01(\tR\acontext\x12'\n" +
+	"\x04type\x18\x06 \x01(\x0e2\x12.shared.v1.TagTypeR\x04type\x120\n" +
+	"\acontext\x18\a \x01(\x0e2\x16.shared.v1.ContextTypeR\acontext\x12'\n" +
 	"\rparent_tag_id\x18\b \x01(\tH\x02R\vparentTagId\x88\x01\x01\x12?\n" +
 	"\x0econtent_rating\x18\t \x01(\x0e2\x18.shared.v1.ContentRatingR\rcontentRating\x12Q\n" +
 	"\x13content_descriptors\x18\n" +
@@ -259,23 +259,25 @@ var file_v1_shared_tag_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_v1_shared_tag_proto_goTypes = []any{
 	(*Tag)(nil),                   // 0: shared.v1.Tag
 	(TagType)(0),                  // 1: shared.v1.TagType
-	(ContentRating)(0),            // 2: shared.v1.ContentRating
-	(ContentDescriptorType)(0),    // 3: shared.v1.ContentDescriptorType
-	(*Metadata)(nil),              // 4: shared.v1.Metadata
-	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
+	(ContextType)(0),              // 2: shared.v1.ContextType
+	(ContentRating)(0),            // 3: shared.v1.ContentRating
+	(ContentDescriptorType)(0),    // 4: shared.v1.ContentDescriptorType
+	(*Metadata)(nil),              // 5: shared.v1.Metadata
+	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
 }
 var file_v1_shared_tag_proto_depIdxs = []int32{
 	1, // 0: shared.v1.Tag.type:type_name -> shared.v1.TagType
-	2, // 1: shared.v1.Tag.content_rating:type_name -> shared.v1.ContentRating
-	3, // 2: shared.v1.Tag.content_descriptors:type_name -> shared.v1.ContentDescriptorType
-	4, // 3: shared.v1.Tag.metadata:type_name -> shared.v1.Metadata
-	5, // 4: shared.v1.Tag.created_at:type_name -> google.protobuf.Timestamp
-	5, // 5: shared.v1.Tag.updated_at:type_name -> google.protobuf.Timestamp
-	6, // [6:6] is the sub-list for method output_type
-	6, // [6:6] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	2, // 1: shared.v1.Tag.context:type_name -> shared.v1.ContextType
+	3, // 2: shared.v1.Tag.content_rating:type_name -> shared.v1.ContentRating
+	4, // 3: shared.v1.Tag.content_descriptors:type_name -> shared.v1.ContentDescriptorType
+	5, // 4: shared.v1.Tag.metadata:type_name -> shared.v1.Metadata
+	6, // 5: shared.v1.Tag.created_at:type_name -> google.protobuf.Timestamp
+	6, // 6: shared.v1.Tag.updated_at:type_name -> google.protobuf.Timestamp
+	7, // [7:7] is the sub-list for method output_type
+	7, // [7:7] is the sub-list for method input_type
+	7, // [7:7] is the sub-list for extension type_name
+	7, // [7:7] is the sub-list for extension extendee
+	0, // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_v1_shared_tag_proto_init() }
@@ -287,6 +289,7 @@ func file_v1_shared_tag_proto_init() {
 	file_v1_shared_contentrating_proto_init()
 	file_v1_shared_contentdescriptortype_proto_init()
 	file_v1_shared_metadata_proto_init()
+	file_v1_shared_contexttype_proto_init()
 	file_v1_shared_tag_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

@@ -44,7 +44,10 @@ proto:
 		$(PROTO_DIR)/v1/shared/prompt.proto \
 		$(PROTO_DIR)/v1/shared/questiontag.proto \
 		$(PROTO_DIR)/v1/shared/tagrow.proto \
-		$(PROTO_DIR)/v1/shared/tagnode.proto
+		$(PROTO_DIR)/v1/shared/tagnode.proto \
+		$(PROTO_DIR)/v1/shared/ancestor.proto \
+		$(PROTO_DIR)/v1/shared/section.proto \
+		$(PROTO_DIR)/v1/shared/guide.proto \
 
 
 build:

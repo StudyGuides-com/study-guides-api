@@ -122,11 +122,79 @@ func (x *Passage) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+type PassageData struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	Content       string                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
+	Hash          string                 `protobuf:"bytes,3,opt,name=hash,proto3" json:"hash,omitempty"`
+	Prompts       []*PromptData          `protobuf:"bytes,4,rep,name=prompts,proto3" json:"prompts,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PassageData) Reset() {
+	*x = PassageData{}
+	mi := &file_v1_shared_passage_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PassageData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PassageData) ProtoMessage() {}
+
+func (x *PassageData) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_shared_passage_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PassageData.ProtoReflect.Descriptor instead.
+func (*PassageData) Descriptor() ([]byte, []int) {
+	return file_v1_shared_passage_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *PassageData) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *PassageData) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+func (x *PassageData) GetHash() string {
+	if x != nil {
+		return x.Hash
+	}
+	return ""
+}
+
+func (x *PassageData) GetPrompts() []*PromptData {
+	if x != nil {
+		return x.Prompts
+	}
+	return nil
+}
+
 var File_v1_shared_passage_proto protoreflect.FileDescriptor
 
 const file_v1_shared_passage_proto_rawDesc = "" +
 	"\n" +
-	"\x17v1/shared/passage.proto\x12\tshared.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x18v1/shared/metadata.proto\"\x95\x02\n" +
+	"\x17v1/shared/passage.proto\x12\tshared.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x18v1/shared/metadata.proto\x1a\x16v1/shared/prompt.proto\"\x95\x02\n" +
 	"\aPassage\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x12\n" +
@@ -137,7 +205,12 @@ const file_v1_shared_passage_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAtBDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
+	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x82\x01\n" +
+	"\vPassageData\x12\x14\n" +
+	"\x05title\x18\x01 \x01(\tR\x05title\x12\x18\n" +
+	"\acontent\x18\x02 \x01(\tR\acontent\x12\x12\n" +
+	"\x04hash\x18\x03 \x01(\tR\x04hash\x12/\n" +
+	"\aprompts\x18\x04 \x03(\v2\x15.shared.v1.PromptDataR\apromptsBDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
 
 var (
 	file_v1_shared_passage_proto_rawDescOnce sync.Once
@@ -151,21 +224,24 @@ func file_v1_shared_passage_proto_rawDescGZIP() []byte {
 	return file_v1_shared_passage_proto_rawDescData
 }
 
-var file_v1_shared_passage_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_v1_shared_passage_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_v1_shared_passage_proto_goTypes = []any{
 	(*Passage)(nil),               // 0: shared.v1.Passage
-	(*Metadata)(nil),              // 1: shared.v1.Metadata
-	(*timestamppb.Timestamp)(nil), // 2: google.protobuf.Timestamp
+	(*PassageData)(nil),           // 1: shared.v1.PassageData
+	(*Metadata)(nil),              // 2: shared.v1.Metadata
+	(*timestamppb.Timestamp)(nil), // 3: google.protobuf.Timestamp
+	(*PromptData)(nil),            // 4: shared.v1.PromptData
 }
 var file_v1_shared_passage_proto_depIdxs = []int32{
-	1, // 0: shared.v1.Passage.metadata:type_name -> shared.v1.Metadata
-	2, // 1: shared.v1.Passage.created_at:type_name -> google.protobuf.Timestamp
-	2, // 2: shared.v1.Passage.updated_at:type_name -> google.protobuf.Timestamp
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	2, // 0: shared.v1.Passage.metadata:type_name -> shared.v1.Metadata
+	3, // 1: shared.v1.Passage.created_at:type_name -> google.protobuf.Timestamp
+	3, // 2: shared.v1.Passage.updated_at:type_name -> google.protobuf.Timestamp
+	4, // 3: shared.v1.PassageData.prompts:type_name -> shared.v1.PromptData
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_v1_shared_passage_proto_init() }
@@ -174,13 +250,14 @@ func file_v1_shared_passage_proto_init() {
 		return
 	}
 	file_v1_shared_metadata_proto_init()
+	file_v1_shared_prompt_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_shared_passage_proto_rawDesc), len(file_v1_shared_passage_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

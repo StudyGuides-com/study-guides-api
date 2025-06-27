@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package shared.v1;
+
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+import "v1/shared/section.proto";
+import "v1/shared/parsertype.proto";
+
+
+message GuideData {
+	string title = 1;
+	string description = 2;
+	ParserType parser_type = 3;
+	repeated SectionData sections = 4;
+}

@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package shared.v1;
+
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+import "v1/shared/prompt.proto";
+import "v1/shared/passage.proto";
+import "v1/shared/ancestor.proto";
+import "v1/shared/contentrating.proto";
+import "v1/shared/contentdescriptortype.proto";
+
+message SectionData {
+	string title = 1;
+	ContentRating content_rating = 2;
+	repeated ContentDescriptorType content_descriptors = 3;
+	repeated string meta_tags = 4;
+	repeated PromptData prompts = 5;
+	repeated PassageData passages = 6;
+	Ancestor ancestor = 7;
+}

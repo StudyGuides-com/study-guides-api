@@ -24,10 +24,11 @@ const (
 type Prompt struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	LearnMore     string                 `protobuf:"bytes,2,opt,name=learn_more,json=learnMore,proto3" json:"learn_more,omitempty"`
-	AnswerText    string                 `protobuf:"bytes,3,opt,name=answer_text,json=answerText,proto3" json:"answer_text,omitempty"`
-	Distractors   []string               `protobuf:"bytes,4,rep,name=distractors,proto3" json:"distractors,omitempty"`
-	QuestionText  string                 `protobuf:"bytes,5,opt,name=question_text,json=questionText,proto3" json:"question_text,omitempty"`
+	Question      string                 `protobuf:"bytes,2,opt,name=question,proto3" json:"question,omitempty"`
+	Answer        string                 `protobuf:"bytes,3,opt,name=answer,proto3" json:"answer,omitempty"`
+	Hash          string                 `protobuf:"bytes,4,opt,name=hash,proto3" json:"hash,omitempty"`
+	LearnMore     string                 `protobuf:"bytes,5,opt,name=learn_more,json=learnMore,proto3" json:"learn_more,omitempty"`
+	Distractors   []string               `protobuf:"bytes,6,rep,name=distractors,proto3" json:"distractors,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -69,16 +70,30 @@ func (x *Prompt) GetId() string {
 	return ""
 }
 
-func (x *Prompt) GetLearnMore() string {
+func (x *Prompt) GetQuestion() string {
 	if x != nil {
-		return x.LearnMore
+		return x.Question
 	}
 	return ""
 }
 
-func (x *Prompt) GetAnswerText() string {
+func (x *Prompt) GetAnswer() string {
 	if x != nil {
-		return x.AnswerText
+		return x.Answer
+	}
+	return ""
+}
+
+func (x *Prompt) GetHash() string {
+	if x != nil {
+		return x.Hash
+	}
+	return ""
+}
+
+func (x *Prompt) GetLearnMore() string {
+	if x != nil {
+		return x.LearnMore
 	}
 	return ""
 }
@@ -90,26 +105,103 @@ func (x *Prompt) GetDistractors() []string {
 	return nil
 }
 
-func (x *Prompt) GetQuestionText() string {
+type PromptData struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Question      string                 `protobuf:"bytes,1,opt,name=question,proto3" json:"question,omitempty"`
+	Answer        string                 `protobuf:"bytes,2,opt,name=answer,proto3" json:"answer,omitempty"`
+	Hash          string                 `protobuf:"bytes,3,opt,name=hash,proto3" json:"hash,omitempty"`
+	LearnMore     string                 `protobuf:"bytes,4,opt,name=learn_more,json=learnMore,proto3" json:"learn_more,omitempty"`
+	Distractors   []string               `protobuf:"bytes,5,rep,name=distractors,proto3" json:"distractors,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PromptData) Reset() {
+	*x = PromptData{}
+	mi := &file_v1_shared_prompt_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PromptData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PromptData) ProtoMessage() {}
+
+func (x *PromptData) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_shared_prompt_proto_msgTypes[1]
 	if x != nil {
-		return x.QuestionText
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PromptData.ProtoReflect.Descriptor instead.
+func (*PromptData) Descriptor() ([]byte, []int) {
+	return file_v1_shared_prompt_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *PromptData) GetQuestion() string {
+	if x != nil {
+		return x.Question
 	}
 	return ""
+}
+
+func (x *PromptData) GetAnswer() string {
+	if x != nil {
+		return x.Answer
+	}
+	return ""
+}
+
+func (x *PromptData) GetHash() string {
+	if x != nil {
+		return x.Hash
+	}
+	return ""
+}
+
+func (x *PromptData) GetLearnMore() string {
+	if x != nil {
+		return x.LearnMore
+	}
+	return ""
+}
+
+func (x *PromptData) GetDistractors() []string {
+	if x != nil {
+		return x.Distractors
+	}
+	return nil
 }
 
 var File_v1_shared_prompt_proto protoreflect.FileDescriptor
 
 const file_v1_shared_prompt_proto_rawDesc = "" +
 	"\n" +
-	"\x16v1/shared/prompt.proto\x12\tshared.v1\"\x9f\x01\n" +
+	"\x16v1/shared/prompt.proto\x12\tshared.v1\"\xa1\x01\n" +
 	"\x06Prompt\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
+	"\bquestion\x18\x02 \x01(\tR\bquestion\x12\x16\n" +
+	"\x06answer\x18\x03 \x01(\tR\x06answer\x12\x12\n" +
+	"\x04hash\x18\x04 \x01(\tR\x04hash\x12\x1d\n" +
 	"\n" +
-	"learn_more\x18\x02 \x01(\tR\tlearnMore\x12\x1f\n" +
-	"\vanswer_text\x18\x03 \x01(\tR\n" +
-	"answerText\x12 \n" +
-	"\vdistractors\x18\x04 \x03(\tR\vdistractors\x12#\n" +
-	"\rquestion_text\x18\x05 \x01(\tR\fquestionTextBDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
+	"learn_more\x18\x05 \x01(\tR\tlearnMore\x12 \n" +
+	"\vdistractors\x18\x06 \x03(\tR\vdistractors\"\x95\x01\n" +
+	"\n" +
+	"PromptData\x12\x1a\n" +
+	"\bquestion\x18\x01 \x01(\tR\bquestion\x12\x16\n" +
+	"\x06answer\x18\x02 \x01(\tR\x06answer\x12\x12\n" +
+	"\x04hash\x18\x03 \x01(\tR\x04hash\x12\x1d\n" +
+	"\n" +
+	"learn_more\x18\x04 \x01(\tR\tlearnMore\x12 \n" +
+	"\vdistractors\x18\x05 \x03(\tR\vdistractorsBDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
 
 var (
 	file_v1_shared_prompt_proto_rawDescOnce sync.Once
@@ -123,9 +215,10 @@ func file_v1_shared_prompt_proto_rawDescGZIP() []byte {
 	return file_v1_shared_prompt_proto_rawDescData
 }
 
-var file_v1_shared_prompt_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_v1_shared_prompt_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_v1_shared_prompt_proto_goTypes = []any{
-	(*Prompt)(nil), // 0: shared.v1.Prompt
+	(*Prompt)(nil),     // 0: shared.v1.Prompt
+	(*PromptData)(nil), // 1: shared.v1.PromptData
 }
 var file_v1_shared_prompt_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -146,7 +239,7 @@ func file_v1_shared_prompt_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_shared_prompt_proto_rawDesc), len(file_v1_shared_prompt_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

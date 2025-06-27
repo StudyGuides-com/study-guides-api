@@ -158,7 +158,7 @@ func TagAsJSON(tag *sharedpb.Tag) string {
 		ID:            tag.Id,
 		Name:          tag.Name,
 		Type:          tag.Type.String(),
-		Context:       tag.Context,
+		Context:       tag.Context.String(),
 		ContentRating: tag.ContentRating.String(),
 		Public:        tag.Public,
 		AccessCount:   tag.AccessCount,
@@ -176,13 +176,18 @@ func TagAsJSON(tag *sharedpb.Tag) string {
 		output.ParentTagID = *tag.ParentTagId
 	}
 	if len(tag.ContentDescriptors) > 0 {
-		output.ContentDescriptors = tag.ContentDescriptors
+		// Convert ContentDescriptorType enums to strings
+		var contentDescriptorStrings []string
+		for _, descriptor := range tag.ContentDescriptors {
+			contentDescriptorStrings = append(contentDescriptorStrings, descriptor.String())
+		}
+		output.ContentDescriptors = contentDescriptorStrings
 	}
 	if len(tag.MetaTags) > 0 {
 		output.MetaTags = tag.MetaTags
 	}
-	if len(tag.Metadata) > 0 {
-		output.Metadata = tag.Metadata
+	if tag.Metadata != nil && len(tag.Metadata.Metadata) > 0 {
+		output.Metadata = tag.Metadata.Metadata
 	}
 	if tag.BatchId != nil && *tag.BatchId != "" {
 		output.BatchID = *tag.BatchId
@@ -212,7 +217,12 @@ func TagAsCSV(tag *sharedpb.Tag) string {
 
 	contentDescriptors := ""
 	if len(tag.ContentDescriptors) > 0 {
-		contentDescriptors = strings.Join(tag.ContentDescriptors, ";")
+		// Convert ContentDescriptorType enums to strings
+		var contentDescriptorStrings []string
+		for _, descriptor := range tag.ContentDescriptors {
+			contentDescriptorStrings = append(contentDescriptorStrings, descriptor.String())
+		}
+		contentDescriptors = strings.Join(contentDescriptorStrings, ";")
 	}
 
 	metaTags := ""
@@ -221,9 +231,9 @@ func TagAsCSV(tag *sharedpb.Tag) string {
 	}
 
 	metadata := ""
-	if len(tag.Metadata) > 0 {
+	if tag.Metadata != nil && len(tag.Metadata.Metadata) > 0 {
 		var metadataPairs []string
-		for key, value := range tag.Metadata {
+		for key, value := range tag.Metadata.Metadata {
 			metadataPairs = append(metadataPairs, fmt.Sprintf("%s:%s", key, value))
 		}
 		metadata = strings.Join(metadataPairs, ";")
@@ -263,7 +273,12 @@ func TagAsTable(tag *sharedpb.Tag) string {
 
 	contentDescriptors := ""
 	if len(tag.ContentDescriptors) > 0 {
-		contentDescriptors = strings.Join(tag.ContentDescriptors, ", ")
+		// Convert ContentDescriptorType enums to strings
+		var contentDescriptorStrings []string
+		for _, descriptor := range tag.ContentDescriptors {
+			contentDescriptorStrings = append(contentDescriptorStrings, descriptor.String())
+		}
+		contentDescriptors = strings.Join(contentDescriptorStrings, ", ")
 	}
 
 	metaTags := ""
@@ -272,9 +287,9 @@ func TagAsTable(tag *sharedpb.Tag) string {
 	}
 
 	metadata := ""
-	if len(tag.Metadata) > 0 {
+	if tag.Metadata != nil && len(tag.Metadata.Metadata) > 0 {
 		var metadataPairs []string
-		for key, value := range tag.Metadata {
+		for key, value := range tag.Metadata.Metadata {
 			metadataPairs = append(metadataPairs, fmt.Sprintf("%s: %s", key, value))
 		}
 		metadata = strings.Join(metadataPairs, "; ")
@@ -349,7 +364,12 @@ func TagAsDetailedText(tag *sharedpb.Tag) string {
 	response += fmt.Sprintf("**Content Rating:** %s\n", tag.ContentRating.String())
 
 	if len(tag.ContentDescriptors) > 0 {
-		response += fmt.Sprintf("**Content Descriptors:** %s\n", strings.Join(tag.ContentDescriptors, ", "))
+		// Convert ContentDescriptorType enums to strings
+		var contentDescriptorStrings []string
+		for _, descriptor := range tag.ContentDescriptors {
+			contentDescriptorStrings = append(contentDescriptorStrings, descriptor.String())
+		}
+		response += fmt.Sprintf("**Content Descriptors:** %s\n", strings.Join(contentDescriptorStrings, ", "))
 	}
 
 	if len(tag.MetaTags) > 0 {
@@ -359,9 +379,9 @@ func TagAsDetailedText(tag *sharedpb.Tag) string {
 	response += fmt.Sprintf("**Public:** %t\n", tag.Public)
 	response += fmt.Sprintf("**Access Count:** %d\n", tag.AccessCount)
 
-	if len(tag.Metadata) > 0 {
+	if tag.Metadata != nil && len(tag.Metadata.Metadata) > 0 {
 		response += "**Metadata:**\n"
-		for key, value := range tag.Metadata {
+		for key, value := range tag.Metadata.Metadata {
 			response += fmt.Sprintf("  - %s: %s\n", key, value)
 		}
 	}

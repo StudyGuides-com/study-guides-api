@@ -93,14 +93,14 @@ func (s *SqlTagStore) GetTagByID(ctx context.Context, id string) (*sharedpb.Tag,
 		Name:               row.Name,
 		Description:        row.Description,
 		Type:               sharedpb.TagType(sharedpb.TagType_value[row.Type]),
-		Context:            row.Context,
+		Context:            sharedpb.ContextType(sharedpb.ContextType_value[row.Context]),
 		ParentTagId:        row.ParentTagID,
 		ContentRating:      sharedpb.ContentRating(sharedpb.ContentRating_value[row.ContentRating]),
-		ContentDescriptors: row.ContentDescriptors,
+		ContentDescriptors: convertToContentDescriptorTypes(row.ContentDescriptors),
 		MetaTags:           row.MetaTags,
 		Public:             row.Public,
 		AccessCount:        int32(row.AccessCount),
-		Metadata:           metadata,
+		Metadata:           &sharedpb.Metadata{Metadata: metadata},
 		CreatedAt:          timestamppb.New(row.CreatedAt),
 		UpdatedAt:          timestamppb.New(row.UpdatedAt),
 		OwnerId:            row.OwnerID,
@@ -239,6 +239,16 @@ func (s *SqlTagStore) ListRootTags(ctx context.Context, params map[string]string
 	return mapRowsToTags(rows), nil
 }
 
+func convertToContentDescriptorTypes(descriptors []string) []sharedpb.ContentDescriptorType {
+	var result []sharedpb.ContentDescriptorType
+	for _, desc := range descriptors {
+		if contentDescType, exists := sharedpb.ContentDescriptorType_value[desc]; exists {
+			result = append(result, sharedpb.ContentDescriptorType(contentDescType))
+		}
+	}
+	return result
+}
+
 func mapRowsToTags(rows []tagRow) []*sharedpb.Tag {
 	var tags []*sharedpb.Tag
 	for _, row := range rows {
@@ -281,14 +291,14 @@ func mapRowsToTags(rows []tagRow) []*sharedpb.Tag {
 			Name:               row.Name,
 			Description:        row.Description,
 			Type:               sharedpb.TagType(sharedpb.TagType_value[row.Type]),
-			Context:            row.Context,
+			Context:            sharedpb.ContextType(sharedpb.ContextType_value[row.Context]),
 			ParentTagId:        row.ParentTagID,
 			ContentRating:      sharedpb.ContentRating(sharedpb.ContentRating_value[row.ContentRating]),
-			ContentDescriptors: row.ContentDescriptors,
+			ContentDescriptors: convertToContentDescriptorTypes(row.ContentDescriptors),
 			MetaTags:           row.MetaTags,
 			Public:             row.Public,
 			AccessCount:        int32(row.AccessCount),
-			Metadata:           metadata,
+			Metadata:           &sharedpb.Metadata{Metadata: metadata},
 			CreatedAt:          timestamppb.New(row.CreatedAt),
 			UpdatedAt:          timestamppb.New(row.UpdatedAt),
 			OwnerId:            row.OwnerID,

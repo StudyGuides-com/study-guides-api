@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package shared.v1;
+
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+import "v1/shared/contentrating.proto";
+import "v1/shared/tagtype.proto";
+
+
+message Ancestor {
+	string name = 1;
+	string description = 2;
+	string hash = 3;
+	TagType tag_type = 4;
+	Ancestor next_ancestor = 5;
+	ContentRating content_rating = 6;
+	repeated string content_descriptors = 7;
+	repeated string meta_tags = 8;
+}

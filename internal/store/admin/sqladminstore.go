@@ -24,6 +24,8 @@ type SqlAdminStore struct {
 	db *pgxpool.Pool
 }
 
+const maxTagDepth = 5 // Maximum depth for tag hierarchy traversal
+
 // NewTag creates a new tag
 func NewTag(id string, name string, hash string, tagType sharedpb.TagType, parentTagId *string, contentRating sharedpb.ContentRating, contentDescriptors []sharedpb.ContentDescriptorType, metaTags []string, parserType sharedpb.ParserType, metadata *sharedpb.Metadata) *sharedpb.Tag {
 	if contentRating == sharedpb.ContentRating_Unspecified {
@@ -31,7 +33,7 @@ func NewTag(id string, name string, hash string, tagType sharedpb.TagType, paren
 	}
 
 	// Convert ParserType to ContextType
-	contextType, _ := types.GetContextTypeForParser(parserType)
+	contextType, _ := store.GetContextTypeForParser(parserType)
 
 	return &sharedpb.Tag{
 		Id:                 id,
@@ -93,10 +95,10 @@ func (s *SqlAdminStore) UpsertTag(ctx context.Context, tag *sharedpb.Tag) (*shar
 	tag.UpdatedAt = timestamppb.New(now)
 
 	if tag.ContentDescriptors == nil {
-		tag.ContentDescriptors = &[]types.ContentDescriptorType{}
+		tag.ContentDescriptors = []sharedpb.ContentDescriptorType{}
 	}
 	if tag.MetaTags == nil {
-		tag.MetaTags = &[]string{}
+		tag.MetaTags = []string{}
 	}
 
 	query := `
@@ -274,7 +276,7 @@ func (s *SqlAdminStore) UpsertQuestionTag(ctx context.Context, questionTag *shar
 }
 
 // TagsByContextType retrieves tags by context type
-func (s *SqlAdminStore) TagsByContextType(ctx context.Context, contextType types.ContextType) ([]*sharedpb.Tag, error) {
+func (s *SqlAdminStore) TagsByContextType(ctx context.Context, contextType sharedpb.ContextType) ([]*sharedpb.Tag, error) {
 	query := `
 		SELECT *  
 		FROM public."Tag" 
@@ -629,7 +631,7 @@ func (s *SqlAdminStore) Tree(ctx context.Context, id string) (*sharedpb.TagNode,
 	// First pass: Create all nodes
 	for _, row := range tagRows {
 		node := &sharedpb.TagNode{
-			TagRow:   *row,
+			TagRow:   row,
 			Children: []*sharedpb.TagNode{},
 		}
 		nodeMap[row.Id] = node
@@ -640,8 +642,8 @@ func (s *SqlAdminStore) Tree(ctx context.Context, id string) (*sharedpb.TagNode,
 
 	// Second pass: Build parent-child relationships
 	for _, row := range tagRows {
-		if row.ParentTagId != nil {
-			if parentNode, exists := nodeMap[*row.ParentTagId]; exists {
+		if row.ParentTagId != "" {
+			if parentNode, exists := nodeMap[row.ParentTagId]; exists {
 				parentNode.Children = append(parentNode.Children, nodeMap[row.Id])
 			}
 		}
@@ -664,7 +666,7 @@ func (s *SqlAdminStore) KillTree(ctx context.Context, id string) ([]string, erro
 	ids := collectNodeIDs(tree)
 
 	// Recursively delete the tree starting from leaf nodes
-	if err := r.deleteTreeRecursively(ctx, tree); err != nil {
+	if err := s.deleteTreeRecursively(ctx, tree); err != nil {
 		return nil, status.Error(codes.Internal, "failed to delete tree")
 	}
 
@@ -839,15 +841,15 @@ func (s *SqlAdminStore) ImportGob(ctx context.Context, gobPayload []byte) (bool,
 	}
 
 	for _, section := range guideData.Sections {
-		topicId, err := s.ImportAncestry(ctx, section.Ancestor, guideData.ParserType, guideData.Title, section)
+		topicId, err := s.ImportAncestry(ctx, section.Ancestor, guideData.ParserType, guideData.Title, *section)
 		if err != nil {
 			return false, status.Error(codes.Internal, fmt.Sprintf("failed to import ancestry for section %s", section.Title))
 		}
 
 		for _, passage := range section.Passages {
-			metadata := &map[string]interface{}{
-				"import": map[string]interface{}{
-					"parserType":   guideData.ParserType,
+			metadata := &sharedpb.Metadata{
+				Metadata: map[string]string{
+					"parserType":   guideData.ParserType.String(),
 					"ts":           time.Now().UTC().Format(time.RFC3339),
 					"guideTitle":   guideData.Title,
 					"sectionTitle": section.Title,
@@ -860,15 +862,15 @@ func (s *SqlAdminStore) ImportGob(ctx context.Context, gobPayload []byte) (bool,
 			}
 
 			for _, prompt := range passage.Prompts {
-				metadata := &map[string]interface{}{
-					"import": map[string]interface{}{
-						"parserType":   guideData.ParserType,
+				metadata := &sharedpb.Metadata{
+					Metadata: map[string]string{
+						"parserType":   guideData.ParserType.String(),
 						"ts":           time.Now().UTC().Format(time.RFC3339),
 						"guideTitle":   guideData.Title,
 						"sectionTitle": section.Title,
 					},
 				}
-				question := NewQuestion(store.GetCUID(), &p.Id, prompt.Hash, prompt.Question, prompt.Answer, prompt.LearnMore, prompt.Distractors, metadata)
+				question := NewQuestion(store.GetCUID(), &p.Id, prompt.Hash, prompt.Question, prompt.Answer, &prompt.LearnMore, &prompt.Distractors, metadata)
 				updatedQuestion, err := s.UpsertQuestion(ctx, question)
 				if err != nil {
 					return false, status.Error(codes.Internal, fmt.Sprintf("failed to upsert question for section %s", section.Title))
@@ -883,15 +885,15 @@ func (s *SqlAdminStore) ImportGob(ctx context.Context, gobPayload []byte) (bool,
 		}
 
 		for _, prompt := range section.Prompts {
-			metadata := &map[string]interface{}{
-				"import": map[string]interface{}{
-					"parserType":   guideData.ParserType,
+			metadata := &sharedpb.Metadata{
+				Metadata: map[string]string{
+					"parserType":   guideData.ParserType.String(),
 					"ts":           time.Now().UTC().Format(time.RFC3339),
 					"guideTitle":   guideData.Title,
 					"sectionTitle": section.Title,
 				},
 			}
-			question := NewQuestion(store.GetCUID(), nil, prompt.Hash, prompt.Question, prompt.Answer, prompt.LearnMore, prompt.Distractors, metadata)
+			question := NewQuestion(store.GetCUID(), nil, prompt.Hash, prompt.Question, prompt.Answer, &prompt.LearnMore, &prompt.Distractors, metadata)
 			updatedQuestion, err := s.UpsertQuestion(ctx, question)
 			if err != nil {
 				return false, status.Error(codes.Internal, fmt.Sprintf("failed to upsert question for section %s", section.Title))
@@ -908,13 +910,13 @@ func (s *SqlAdminStore) ImportGob(ctx context.Context, gobPayload []byte) (bool,
 	return true, nil
 }
 
-func (s *SqlAdminStore) ancestorList(ancestor *types.Ancestor) ([]*types.Ancestor, error) {
+func (s *SqlAdminStore) ancestorList(ancestor *sharedpb.Ancestor) ([]*sharedpb.Ancestor, error) {
 	if ancestor == nil {
 		return nil, nil
 	}
 
 	// Step 1: Collect all ancestors into a slice, starting from the youngest
-	var ancestors []*types.Ancestor
+	var ancestors []*sharedpb.Ancestor
 	current := ancestor
 	for current != nil {
 		ancestors = append(ancestors, current)
@@ -924,13 +926,13 @@ func (s *SqlAdminStore) ancestorList(ancestor *types.Ancestor) ([]*types.Ancesto
 	return ancestors, nil
 }
 
-func (s *SqlAdminStore) ImportAncestry(ctx context.Context, ancestor *types.Ancestor, parserType types.ParserType, guideTitle string, section types.SectionData) (string, error) {
+func (s *SqlAdminStore) ImportAncestry(ctx context.Context, ancestor *sharedpb.Ancestor, parserType sharedpb.ParserType, guideTitle string, section sharedpb.SectionData) (string, error) {
 	if ancestor == nil {
 		return "", status.Error(codes.Internal, "ancestor is nil")
 	}
 
 	// Step 1: Collect all ancestors into a slice, starting from the youngest
-	ancestors, err := r.ancestorList(ancestor)
+	ancestors, err := s.ancestorList(ancestor)
 	if err != nil {
 		return "", status.Error(codes.Internal, "failed to get ancestors")
 	}
@@ -940,9 +942,9 @@ func (s *SqlAdminStore) ImportAncestry(ctx context.Context, ancestor *types.Ance
 		ancestors[i], ancestors[j] = ancestors[j], ancestors[i]
 	}
 
-	metadata := &map[string]interface{}{
-		"import": map[string]interface{}{
-			"parserType":   parserType,
+	metadata := &sharedpb.Metadata{
+		Metadata: map[string]string{
+			"parserType":   parserType.String(),
 			"ts":           time.Now().UTC().Format(time.RFC3339),
 			"guideTitle":   guideTitle,
 			"sectionTitle": section.Title,
@@ -961,9 +963,9 @@ func (s *SqlAdminStore) ImportAncestry(ctx context.Context, ancestor *types.Ance
 				anc.Hash,
 				anc.TagType,
 				parentID,
-				*section.ContentRating,
-				&section.ContentDescriptors,
-				&section.MetaTags,
+				section.ContentRating,
+				section.ContentDescriptors,
+				section.MetaTags,
 				parserType,
 				metadata,
 			)
@@ -974,7 +976,7 @@ func (s *SqlAdminStore) ImportAncestry(ctx context.Context, ancestor *types.Ance
 				anc.Hash,
 				anc.TagType,
 				parentID,
-				types.ContentRatingTypeRatingPending,
+				anc.ContentRating,
 				nil,
 				nil,
 				parserType,
@@ -983,13 +985,13 @@ func (s *SqlAdminStore) ImportAncestry(ctx context.Context, ancestor *types.Ance
 		}
 
 		// Upsert the tag and get the result
-		updatedTag, err := r.UpsertTag(ctx, tag)
+		updatedTag, err := s.UpsertTag(ctx, tag)
 		if err != nil {
 			return "", status.Error(codes.Internal, fmt.Sprintf("failed to upsert tag for ancestor %s", anc.Name))
 		}
 
 		// Set this tag's ID as the parent ID for the next iteration
-		parentID = &updatedTag.ID
+		parentID = &updatedTag.Id
 	}
 
 	return *parentID, nil

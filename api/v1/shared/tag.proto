@@ -8,6 +8,7 @@ import "v1/shared/tagtype.proto";
 import "v1/shared/contentrating.proto";
 import "v1/shared/contentdescriptortype.proto";
 import "v1/shared/metadata.proto";
+import "v1/shared/contexttype.proto";
 
 message Tag {
 	string id = 1;
@@ -16,7 +17,7 @@ message Tag {
 	string name = 4;
 	optional string description = 5;
 	TagType type = 6;
-	string context = 7;
+	ContextType context = 7;
 	optional string parent_tag_id = 8;
 	ContentRating content_rating = 9;
 	repeated ContentDescriptorType content_descriptors = 10;

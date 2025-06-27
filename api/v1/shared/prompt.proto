@@ -6,8 +6,17 @@ option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;s
 
 message Prompt {
 	string id = 1;
-	string learn_more = 2;
-	string answer_text = 3;
-	repeated string distractors = 4;
-	string question_text = 5;
+	string question = 2;
+	string answer = 3;
+	string hash = 4;
+	string learn_more = 5;
+	repeated string distractors = 6;
+}
+
+message PromptData {
+	string question = 1;
+	string answer = 2;
+	string hash = 3;
+	string learn_more = 4;
+	repeated string distractors = 5;
 }
