@@ -121,7 +121,7 @@ func main() {
 	// Wait for shutdown signal
 	<-sigChan
 	fmt.Printf("\n")
-	log.Println("‼️ shutdown signal, starting shutdown...")
+	log.Println("‼️ detected shutdown signal, starting shutdown...")
 
 	// Create a context with timeout for graceful shutdown
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
