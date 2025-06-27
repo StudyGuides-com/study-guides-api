@@ -1,10 +1,15 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"net"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
+	"time"
 
 	chatpb "github.com/studyguides-com/study-guides-api/api/v1/chat"
 	healthpb "github.com/studyguides-com/study-guides-api/api/v1/health"
@@ -101,8 +106,42 @@ func main() {
 	// Enable gRPC reflection
 	reflection.Register(grpcServer)
 
-	log.Printf("gRPC server listening on %s", address)
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	// Create a channel to receive shutdown signals
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	// Start the server in a goroutine
+	go func() {
+		log.Printf("gRPC server listening on %s", address)
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Printf("failed to serve: %v", err)
+		}
+	}()
+
+	// Wait for shutdown signal
+	<-sigChan
+	fmt.Printf("\n")
+	log.Println("‼️ shutdown signal, starting shutdown...")
+
+	// Create a context with timeout for graceful shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Gracefully stop the server
+	done := make(chan struct{})
+	go func() {
+		grpcServer.GracefulStop()
+		close(done)
+	}()
+
+	// Wait for graceful shutdown or timeout
+	select {
+	case <-done:
+		log.Println("✅ Server gracefully stopped")
+	case <-ctx.Done():
+		log.Println("❌ Graceful shutdown timeout, forcing stop")
+		grpcServer.Stop()
 	}
+
+	log.Println("🙌 Server shutdown complete")
 }
