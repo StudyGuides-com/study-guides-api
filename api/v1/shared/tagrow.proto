@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package shared.v1;
+
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+import "v1/shared/tagtype.proto";
+import "v1/shared/contexttype.proto";
+
+message TagRow {
+	string id = 1;
+	string parent_tag_id = 2;
+	string name = 3;
+	TagType type = 4;
+	bool public = 5;
+	ContextType context = 6;
+	string description = 7;
+	bool has_children = 8;
+	bool has_questions = 10;
+	int32 level = 11;
+}

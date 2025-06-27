@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package shared.v1;
+
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+import "v1/shared/tagtype.proto";
+
+message TagInfo {
+	string id = 1;
+	string name = 2;
+	TagType type = 3;
+	string parent_tag_id = 4;
+	bool has_questions = 5;
+	bool has_children = 6;
+	bool private = 7;
+}

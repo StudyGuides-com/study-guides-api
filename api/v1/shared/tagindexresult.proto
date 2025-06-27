@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package shared.v1;
+
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+import "v1/shared/tag.proto";
+import "v1/shared/taginfo.proto";
+
+message TagIndexResult {
+	Tag tag = 1;
+	repeated TagInfo tag_infos = 2;
+}

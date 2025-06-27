@@ -35,7 +35,16 @@ proto:
 		$(PROTO_DIR)/v1/shared/exporttype.proto \
 		$(PROTO_DIR)/v1/shared/contentdescriptortype.proto \
 		$(PROTO_DIR)/v1/roland/roland.proto \
-		$(PROTO_DIR)/v1/admin/admin.proto
+		$(PROTO_DIR)/v1/admin/admin.proto \
+		$(PROTO_DIR)/v1/shared/metadata.proto \
+		$(PROTO_DIR)/v1/shared/passage.proto \
+		$(PROTO_DIR)/v1/shared/taginfo.proto \
+		$(PROTO_DIR)/v1/shared/tagindexresult.proto \
+		$(PROTO_DIR)/v1/shared/node.proto \
+		$(PROTO_DIR)/v1/shared/prompt.proto \
+		$(PROTO_DIR)/v1/shared/questiontag.proto \
+		$(PROTO_DIR)/v1/shared/tagrow.proto \
+		$(PROTO_DIR)/v1/shared/tagnode.proto
 
 
 build:

@@ -36,7 +36,7 @@ type Question struct {
 	ImageUrl        *string                `protobuf:"bytes,9,opt,name=image_url,json=imageUrl,proto3,oneof" json:"image_url,omitempty"`
 	Version         int32                  `protobuf:"varint,10,opt,name=version,proto3" json:"version,omitempty"`
 	Public          bool                   `protobuf:"varint,11,opt,name=public,proto3" json:"public,omitempty"`
-	Metadata        map[string]string      `protobuf:"bytes,12,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Metadata        *Metadata              `protobuf:"bytes,12,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	CreatedAt       *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt       *timestamppb.Timestamp `protobuf:"bytes,14,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	CorrectCount    *int32                 `protobuf:"varint,15,opt,name=correct_count,json=correctCount,proto3,oneof" json:"correct_count,omitempty"`
@@ -155,7 +155,7 @@ func (x *Question) GetPublic() bool {
 	return false
 }
 
-func (x *Question) GetMetadata() map[string]string {
+func (x *Question) GetMetadata() *Metadata {
 	if x != nil {
 		return x.Metadata
 	}
@@ -215,7 +215,7 @@ var File_v1_shared_question_proto protoreflect.FileDescriptor
 
 const file_v1_shared_question_proto_rawDesc = "" +
 	"\n" +
-	"\x18v1/shared/question.proto\x12\tshared.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9d\a\n" +
+	"\x18v1/shared/question.proto\x12\tshared.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x18v1/shared/metadata.proto\"\xd2\x06\n" +
 	"\bQuestion\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1e\n" +
 	"\bbatch_id\x18\x02 \x01(\tH\x00R\abatchId\x88\x01\x01\x12#\n" +
@@ -230,8 +230,8 @@ const file_v1_shared_question_proto_rawDesc = "" +
 	"\timage_url\x18\t \x01(\tH\x03R\bimageUrl\x88\x01\x01\x12\x18\n" +
 	"\aversion\x18\n" +
 	" \x01(\x05R\aversion\x12\x16\n" +
-	"\x06public\x18\v \x01(\bR\x06public\x12=\n" +
-	"\bmetadata\x18\f \x03(\v2!.shared.v1.Question.MetadataEntryR\bmetadata\x129\n" +
+	"\x06public\x18\v \x01(\bR\x06public\x12/\n" +
+	"\bmetadata\x18\f \x01(\v2\x13.shared.v1.MetadataR\bmetadata\x129\n" +
 	"\n" +
 	"created_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
@@ -241,10 +241,7 @@ const file_v1_shared_question_proto_rawDesc = "" +
 	"\x0fincorrect_count\x18\x11 \x01(\x05H\x06R\x0eincorrectCount\x88\x01\x01\x12\x1e\n" +
 	"\bowner_id\x18\x12 \x01(\tH\aR\aownerId\x88\x01\x01\x12\"\n" +
 	"\n" +
-	"passage_id\x18\x13 \x01(\tH\bR\tpassageId\x88\x01\x01\x1a;\n" +
-	"\rMetadataEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\v\n" +
+	"passage_id\x18\x13 \x01(\tH\bR\tpassageId\x88\x01\x01B\v\n" +
 	"\t_batch_idB\r\n" +
 	"\v_learn_moreB\f\n" +
 	"\n" +
@@ -269,14 +266,14 @@ func file_v1_shared_question_proto_rawDescGZIP() []byte {
 	return file_v1_shared_question_proto_rawDescData
 }
 
-var file_v1_shared_question_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_v1_shared_question_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_v1_shared_question_proto_goTypes = []any{
 	(*Question)(nil),              // 0: shared.v1.Question
-	nil,                           // 1: shared.v1.Question.MetadataEntry
+	(*Metadata)(nil),              // 1: shared.v1.Metadata
 	(*timestamppb.Timestamp)(nil), // 2: google.protobuf.Timestamp
 }
 var file_v1_shared_question_proto_depIdxs = []int32{
-	1, // 0: shared.v1.Question.metadata:type_name -> shared.v1.Question.MetadataEntry
+	1, // 0: shared.v1.Question.metadata:type_name -> shared.v1.Metadata
 	2, // 1: shared.v1.Question.created_at:type_name -> google.protobuf.Timestamp
 	2, // 2: shared.v1.Question.updated_at:type_name -> google.protobuf.Timestamp
 	3, // [3:3] is the sub-list for method output_type
@@ -291,6 +288,7 @@ func file_v1_shared_question_proto_init() {
 	if File_v1_shared_question_proto != nil {
 		return
 	}
+	file_v1_shared_metadata_proto_init()
 	file_v1_shared_question_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -298,7 +296,7 @@ func file_v1_shared_question_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_shared_question_proto_rawDesc), len(file_v1_shared_question_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   1,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

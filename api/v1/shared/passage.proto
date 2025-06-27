@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package shared.v1;
+
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+import "google/protobuf/timestamp.proto";
+import "v1/shared/metadata.proto";
+
+message Passage {
+	string id = 1;
+	string title = 2;
+	string body = 3;
+	string hash = 4;
+	string tag_id = 5;
+	Metadata metadata = 6;
+	google.protobuf.Timestamp created_at = 7;
+	google.protobuf.Timestamp updated_at = 8;
+}

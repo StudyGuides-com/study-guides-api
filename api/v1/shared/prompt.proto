@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package shared.v1;
+
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+message Prompt {
+	string id = 1;
+	string learn_more = 2;
+	string answer_text = 3;
+	repeated string distractors = 4;
+	string question_text = 5;
+}

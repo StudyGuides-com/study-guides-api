@@ -54,7 +54,7 @@ func mapRowsToQuestions(rows []questionRow) []*sharedpb.Question {
 			ImageUrl:        row.ImageURL,
 			Version:         row.Version,
 			Public:          row.Public,
-			Metadata:        row.Metadata,
+			Metadata:        &sharedpb.Metadata{Metadata: row.Metadata},
 			CreatedAt:       timestamppb.New(row.CreatedAt),
 			UpdatedAt:       timestamppb.New(row.UpdatedAt),
 			CorrectCount:    row.CorrectCount,

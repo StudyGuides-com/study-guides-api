@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package shared.v1;
+
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+
+message Metadata {
+	map<string, string> metadata = 1;
+}

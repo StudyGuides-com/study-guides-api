@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package shared.v1;
+
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
+
+import "v1/shared/tagrow.proto";
+
+
+
+
+message TagNode {
+	TagRow tag_row = 1;
+	repeated TagNode children = 2;
+}

@@ -5,6 +5,7 @@ package shared.v1;
 option go_package = "github.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1";
 
 import "google/protobuf/timestamp.proto";
+import "v1/shared/metadata.proto";
 
 // Question represents a question in the system
 message Question {
@@ -19,7 +20,7 @@ message Question {
   optional string image_url = 9;
   int32 version = 10;
   bool public = 11;
-  map<string, string> metadata = 12;
+  Metadata metadata = 12;
   google.protobuf.Timestamp created_at = 13;
   google.protobuf.Timestamp updated_at = 14;
   optional int32 correct_count = 15;
