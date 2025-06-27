@@ -28,4 +28,6 @@ message NewTagAdminResponse {
 service AdminService {
   rpc NewTag(NewTagAdminRequest) returns (NewTagAdminResponse) {}
 }
+
+// TODO: add all the other admin endpoints the map from the store.
   
