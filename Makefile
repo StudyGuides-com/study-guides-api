@@ -6,6 +6,61 @@ CMD_DIR=cmd/server
 
 PROTO_DIR=api
 
+
+# Create a new version tag
+.PHONY: tag
+tag:
+	@echo "Current version: $$(make get-version)"
+	@read -p "Enter new version (e.g., 0.2.4): " new_version; \
+	git tag -a "v$$new_version" -m "Release v$$new_version"; \
+	echo "Created tag v$$new_version"
+
+# Get current version or default to 0.0.0
+get-version:
+	@latest_tag=$$(git tag --sort=-v:refname | head -n1 | sed 's/^v//'); \
+	if [ -z "$$latest_tag" ]; then \
+		echo "0.0.0"; \
+	else \
+		echo "$$latest_tag"; \
+	fi
+
+# Increment patch version
+.PHONY: bump-patch
+bump-patch:
+	@echo "Bumping patch version..."
+	@current=$$(make get-version); \
+	major=$$(echo $$current | cut -d. -f1); \
+	minor=$$(echo $$current | cut -d. -f2); \
+	patch=$$(echo $$current | cut -d. -f3); \
+	new_patch=$$((patch + 1)); \
+	new_version="v$$major.$$minor.$$new_patch"; \
+	git tag -a "$$new_version" -m "Release $$new_version"; \
+	echo "Created tag $$new_version"
+
+# Increment minor version
+.PHONY: bump-minor
+bump-minor:
+	@echo "Bumping minor version..."
+	@current=$$(make get-version); \
+	major=$$(echo $$current | cut -d. -f1); \
+	minor=$$(echo $$current | cut -d. -f2); \
+	new_minor=$$((minor + 1)); \
+	new_version="v$$major.$$new_minor.0"; \
+	git tag -a "$$new_version" -m "Release $$new_version"; \
+	echo "Created tag $$new_version"
+
+# Increment major version
+.PHONY: bump-major
+bump-major:
+	@echo "Bumping major version..."
+	@current=$$(make get-version); \
+	major=$$(echo $$current | cut -d. -f1); \
+	new_major=$$((major + 1)); \
+	new_version="v$$new_major.0.0"; \
+	git tag -a "$$new_version" -m "Release $$new_version"; \
+	echo "Created tag $$new_version"
+
+
 proto:
 	protoc \
 		--proto_path=$(PROTO_DIR) \
