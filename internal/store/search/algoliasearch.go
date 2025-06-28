@@ -10,7 +10,6 @@ import (
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	searchpb "github.com/studyguides-com/study-guides-api/api/v1/search"
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
-	"github.com/studyguides-com/study-guides-api/internal/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -46,7 +45,7 @@ func (c *AlgoliaStore) buildTagFilters(opts *SearchOptions) []interface{} {
 	var filters []string
 
 	// Add context filter if not "all"
-	if opts.ContextType != "" && opts.ContextType != types.ContextTypeAll {
+	if opts.ContextType != sharedpb.ContextType_All {
 		filters = append(filters, fmt.Sprintf("context:%s", opts.ContextType))
 	}
 
@@ -56,7 +55,7 @@ func (c *AlgoliaStore) buildTagFilters(opts *SearchOptions) []interface{} {
 	}
 
 	// Handle public/private content based on context and user ID
-	if opts.ContextType == types.ContextTypeUserGeneratedContent {
+	if opts.ContextType == sharedpb.ContextType_UserGeneratedContent {
 		if opts.UserID != nil && *opts.UserID != "" {
 			filters = append(filters, fmt.Sprintf("public:false AND ownerId:%s", *opts.UserID))
 		}

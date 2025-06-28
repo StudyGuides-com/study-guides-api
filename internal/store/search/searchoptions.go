@@ -6,7 +6,6 @@ import (
 	searchpb "github.com/studyguides-com/study-guides-api/api/v1/search"
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 	"github.com/studyguides-com/study-guides-api/internal/middleware"
-	"github.com/studyguides-com/study-guides-api/internal/types"
 )
 
 // SearchOptions contains all options for performing a search
@@ -14,7 +13,7 @@ type SearchOptions struct {
 	// UserID is the ID of the user performing the search, can be nil for anonymous users
 	UserID *string
 	// ContextType is the type of context to filter by, can be empty for no context filter
-	ContextType types.ContextType
+	ContextType sharedpb.ContextType
 	// UserRoles is the roles of the user performing the search, can be nil for anonymous users
 	UserRoles *[]sharedpb.UserRole
 	// Type is the type of tag to filter by
@@ -38,7 +37,7 @@ func WithUserID(userID *string) func(*SearchOptions) {
 }
 
 // WithContextType sets the ContextType field
-func WithContextType(contextType types.ContextType) func(*SearchOptions) {
+func WithContextType(contextType sharedpb.ContextType) func(*SearchOptions) {
 	return func(o *SearchOptions) {
 		o.ContextType = contextType
 	}
@@ -59,20 +58,20 @@ func WithType(tagType sharedpb.TagType) func(*SearchOptions) {
 }
 
 // FromProtoContextType converts a proto ContextType to our internal types.ContextType
-func FromProtoContextType(ct sharedpb.ContextType) types.ContextType {
+func FromProtoContextType(ct sharedpb.ContextType) sharedpb.ContextType {
 	switch ct {
 	case sharedpb.ContextType_Colleges:
-		return types.ContextTypeColleges
+		return sharedpb.ContextType_Colleges
 	case sharedpb.ContextType_Certifications:
-		return types.ContextTypeCertifications
+		return sharedpb.ContextType_Certifications
 	case sharedpb.ContextType_EntranceExams:
-		return types.ContextTypeEntranceExams
+		return sharedpb.ContextType_EntranceExams
 	case sharedpb.ContextType_APExams:
-		return types.ContextTypeAPExams
+		return sharedpb.ContextType_APExams
 	case sharedpb.ContextType_DoD:
-		return types.ContextTypeDoD
+		return sharedpb.ContextType_DoD
 	default:
-		return types.ContextTypeAll
+		return sharedpb.ContextType_All
 	}
 }
 
