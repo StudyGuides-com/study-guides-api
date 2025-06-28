@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	chatpb "github.com/studyguides-com/study-guides-api/api/v1/chat"
-	"github.com/studyguides-com/study-guides-api/internal/errors"
 	"github.com/studyguides-com/study-guides-api/internal/lib/ai"
 	"github.com/studyguides-com/study-guides-api/internal/lib/router"
 	"github.com/studyguides-com/study-guides-api/internal/lib/tools"
@@ -230,13 +229,32 @@ func buildSystemPrompt() string {
 	`
 
 	return fmt.Sprintf(`
-	You are an intent router. Allowed operations: %s.
+	You are an intent router for a study guides API. You MUST respond using exactly one of the available tools.
+
+	AVAILABLE TOOLS: %s
+
+	TOOL DETAILS:
+	%s
+
 	%s
 	%s
-	%s
-	If none apply, call Unknown.
-	Always pick exactly one.
-	Please respond using the provided tool to return your response in JSON format.
+
+	IMPORTANT RULES:
+	1. You MUST call exactly one tool for every user request
+	2. If the user's request doesn't match any specific tool, use the "Unknown" tool
+	3. For tag-related requests, use ListTags, TagCount, GetTag, or ListRootTags as appropriate
+	4. For user-related requests, use UserCount or GetUser
+	5. For metadata requests, use UniqueTagTypes or UniqueContextTypes
+	6. Always respond using the provided tool to return your response in JSON format
+
+	EXAMPLES:
+	- "list the tags" → ListTags
+	- "how many tags are there" → TagCount  
+	- "show me root tags" → ListRootTags
+	- "get tag details" → GetTag (requires tagId)
+	- "how many users" → UserCount
+	- "what tag types exist" → UniqueTagTypes
+	- "I don't understand" → Unknown
 	`, operationsList, detailsList, tagTypeGuidance, formatGuidance)
 }
 
@@ -293,11 +311,36 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 		// parse from tool call JSON:
 		var chatResp openai.ChatCompletionResponse
 		if err := json.Unmarshal([]byte(raw), &chatResp); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to parse AI response: %w", err)
 		}
-		if len(chatResp.Choices) == 0 || len(chatResp.Choices[0].Message.ToolCalls) == 0 {
-			return nil, errors.ErrToolNotFound
+		
+		// Debug: Print the raw AI response for troubleshooting
+		fmt.Printf("DEBUG: === RAW AI RESPONSE ===\n")
+		fmt.Printf("DEBUG: Raw response: %s\n", raw)
+		fmt.Printf("DEBUG: Choices count: %d\n", len(chatResp.Choices))
+		if len(chatResp.Choices) > 0 {
+			fmt.Printf("DEBUG: First choice message: %+v\n", chatResp.Choices[0].Message)
+			fmt.Printf("DEBUG: Tool calls count: %d\n", len(chatResp.Choices[0].Message.ToolCalls))
 		}
+		
+		if len(chatResp.Choices) == 0 {
+			return nil, fmt.Errorf("AI returned no choices for request: %s", req.Message)
+		}
+		
+		if len(chatResp.Choices[0].Message.ToolCalls) == 0 {
+			return nil, fmt.Errorf("AI did not call any tools for request: %s. Available tools: %s", req.Message, strings.Join([]string{
+				"ListTags",
+				"TagCount", 
+				"ListRootTags",
+				"GetTag",
+				"UniqueTagTypes",
+				"UniqueContextTypes",
+				"UserCount",
+				"GetUser",
+				"Unknown",
+			}, ", "))
+		}
+		
 		toolCall := chatResp.Choices[0].Message.ToolCalls[0]
 		plan.Operation = toolCall.Function.Name
 

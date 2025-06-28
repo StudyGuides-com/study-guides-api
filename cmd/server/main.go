@@ -70,6 +70,7 @@ func main() {
 
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
+			middleware.ErrorUnaryInterceptor(),
 			middleware.AuthUnaryInterceptor(os.Getenv("JWT_SECRET")),
 			middleware.RateLimitUnaryInterceptor(
 				parseEnvAsRate("RATE_LIMIT_USER_PER_SECOND", 1.0),
