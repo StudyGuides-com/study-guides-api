@@ -7,8 +7,9 @@ services:
       branch: test
     build_command: |
       go mod download
-      go build -o bin/server ./cmd/server
-    run_command: ./bin/server
+      go mod tidy
+      go build -o server ./cmd/server/main.go
+    run_command: ./server
     environment_slug: go
     instance_count: 1
     instance_size_slug: basic-xxs
