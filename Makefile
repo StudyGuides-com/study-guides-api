@@ -102,22 +102,22 @@ proto:
 		$(PROTO_DIR)/v1/shared/guide.proto \
 
 build:
-	go build -o server ./cmd/server/main.go
+	go build -o ./bin/server ./cmd/server
 
 run: build
-	./server
+	./bin/server
 
 run-dev: build
 	cp .env.dev .env
-	./server
+	./bin/server
 
 run-test: build
 	cp .env.test .env
-	./server
+	./bin/server
 
 run-prod: build
 	cp .env.prod .env
-	./server
+	./bin/server
 
 clean:
 	@echo "Cleaning generated files..."
