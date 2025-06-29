@@ -45,6 +45,7 @@ func (w *responseLoggingWriter) WriteHeader(statusCode int) {
 
 func (w *responseLoggingWriter) Write(data []byte) (int, error) {
 	w.logger("*** RESPONSE DATA LENGTH: %d ***", len(data))
+	w.logger("*** RESPONSE DATA: %s ***", string(data))
 	return w.ResponseWriter.Write(data)
 }
 
