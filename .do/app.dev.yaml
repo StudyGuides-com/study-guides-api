@@ -15,22 +15,3 @@ services:
     instance_size_slug: basic-xxs
     health_check:
       http_path: /health
-    envs:
-      - key: JWT_SECRET
-        value: ${JWT_SECRET_DEV}
-      - key: OPENAI_API_KEY
-        value: ${OPENAI_API_KEY}
-      - key: OPENAI_MODEL
-        value: ${OPENAI_MODEL}
-      - key: ALGOLIA_APP_ID
-        value: ${ALGOLIA_APP_ID}
-      - key: ALGOLIA_ADMIN_API_KEY
-        value: ${ALGOLIA_ADMIN_API_KEY}
-      - key: DATABASE_URL
-        value: ${DATABASE_URL_DEV}
-      - key: ROLAND_DATABASE_URL
-        value: ${ROLAND_DATABASE_URL_DEV}
-      - key: RATE_LIMIT_USER_PER_SECOND
-        value: "1.0"
-      - key: RATE_LIMIT_USER_BURST
-        value: "5"
