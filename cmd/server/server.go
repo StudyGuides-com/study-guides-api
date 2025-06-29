@@ -31,6 +31,22 @@ type Server struct {
 	httpServer *http.Server
 }
 
+// responseLoggingWriter wraps http.ResponseWriter to log response details
+type responseLoggingWriter struct {
+	http.ResponseWriter
+	logger func(format string, args ...interface{})
+}
+
+func (w *responseLoggingWriter) WriteHeader(statusCode int) {
+	w.logger("*** RESPONSE STATUS: %d ***", statusCode)
+	w.ResponseWriter.WriteHeader(statusCode)
+}
+
+func (w *responseLoggingWriter) Write(data []byte) (int, error) {
+	w.logger("*** RESPONSE DATA LENGTH: %d ***", len(data))
+	return w.ResponseWriter.Write(data)
+}
+
 // NewServer creates a new server instance
 func NewServer() *Server {
 	return &Server{}
@@ -81,7 +97,14 @@ func (s *Server) Start(appStore store.Store) {
 		// Handle gRPC requests (both HTTP/1.1 and HTTP/2)
 		if strings.HasPrefix(r.Header.Get("Content-Type"), "application/grpc") {
 			log.Printf("*** ROUTING TO GRPC: %s ***", r.URL.Path)
-			s.grpcServer.ServeHTTP(w, r)
+			
+			// Create a response writer that logs the response
+			loggingWriter := &responseLoggingWriter{
+				ResponseWriter: w,
+				logger:         log.Printf,
+			}
+			
+			s.grpcServer.ServeHTTP(loggingWriter, r)
 			log.Printf("*** GRPC HANDLER COMPLETED ***")
 			return
 		}
