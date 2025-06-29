@@ -20,6 +20,7 @@ import (
 	"github.com/studyguides-com/study-guides-api/internal/lib/router"
 	"github.com/studyguides-com/study-guides-api/internal/middleware"
 	"github.com/studyguides-com/study-guides-api/internal/services"
+	"golang.org/x/net/http2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -60,6 +61,8 @@ func (s *Server) Start(appStore store.Store) {
 
 	// Create unified handler for both HTTP and gRPC
 	handler := func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Request: %s %s, Proto: %d, Content-Type: %s", r.Method, r.URL.Path, r.ProtoMajor, r.Header.Get("Content-Type"))
+		
 		// Handle health check endpoint
 		if r.URL.Path == "/health" {
 			w.WriteHeader(http.StatusOK)
@@ -80,6 +83,11 @@ func (s *Server) Start(appStore store.Store) {
 	s.httpServer = &http.Server{
 		Addr:    address,
 		Handler: http.HandlerFunc(handler),
+	}
+
+	// Enable HTTP/2 support
+	if err := http2.ConfigureServer(s.httpServer, &http2.Server{}); err != nil {
+		log.Printf("Failed to configure HTTP/2: %v", err)
 	}
 
 	log.Printf("Server listening on %s (HTTP/1.1, HTTP/2, and gRPC)", address)
