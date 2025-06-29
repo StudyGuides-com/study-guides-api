@@ -18,7 +18,6 @@ import (
 	"github.com/studyguides-com/study-guides-api/internal/store"
 
 	"github.com/studyguides-com/study-guides-api/internal/lib/router"
-	"github.com/studyguides-com/study-guides-api/internal/middleware"
 	"github.com/studyguides-com/study-guides-api/internal/services"
 	"golang.org/x/net/http2"
 	"google.golang.org/grpc"
@@ -41,16 +40,16 @@ func (s *Server) Start(appStore store.Store) {
 	port := getPort()
 	address := ":" + port
 
-	// Create gRPC server with middleware
+	// Create gRPC server without middleware temporarily
 	s.grpcServer = grpc.NewServer(
-		grpc.ChainUnaryInterceptor(
-			middleware.ErrorUnaryInterceptor(),
-			middleware.AuthUnaryInterceptor(os.Getenv("JWT_SECRET")),
-			middleware.RateLimitUnaryInterceptor(
-				parseEnvAsRate("RATE_LIMIT_USER_PER_SECOND", 1.0),
-				parseEnvAsInt("RATE_LIMIT_USER_BURST", 5),
-			),
-		),
+		// grpc.ChainUnaryInterceptor(
+		// 	middleware.ErrorUnaryInterceptor(),
+		// 	middleware.AuthUnaryInterceptor(os.Getenv("JWT_SECRET")),
+		// 	middleware.RateLimitUnaryInterceptor(
+		// 		parseEnvAsRate("RATE_LIMIT_USER_PER_SECOND", 1.0),
+		// 		parseEnvAsInt("RATE_LIMIT_USER_BURST", 5),
+		// 	),
+		// ),
 	)
 
 	// Register services
@@ -72,6 +71,7 @@ func (s *Server) Start(appStore store.Store) {
 
 		// Handle gRPC requests (both HTTP/1.1 and HTTP/2)
 		if strings.HasPrefix(r.Header.Get("Content-Type"), "application/grpc") {
+			log.Printf("Routing to gRPC: %s", r.URL.Path)
 			s.grpcServer.ServeHTTP(w, r)
 			return
 		}
@@ -85,8 +85,9 @@ func (s *Server) Start(appStore store.Store) {
 		Handler: http.HandlerFunc(handler),
 	}
 
-	// Enable HTTP/2 support
-	if err := http2.ConfigureServer(s.httpServer, &http2.Server{}); err != nil {
+	// Enable HTTP/2 support with proper configuration
+	http2Server := &http2.Server{}
+	if err := http2.ConfigureServer(s.httpServer, http2Server); err != nil {
 		log.Printf("Failed to configure HTTP/2: %v", err)
 	}
 
