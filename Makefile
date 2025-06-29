@@ -1,11 +1,9 @@
-.PHONY: proto clean build run all run-dev run-test run-prod deploy-dev deploy-test deploy-prod
+.PHONY: proto clean build run all run-dev run-test run-prod
 
-PROTO_DIR=api/study
+# Directory configuration
+PROTO_DIR=api
 BIN_DIR=bin
 CMD_DIR=cmd/server
-
-PROTO_DIR=api
-
 
 # Create a new version tag
 .PHONY: tag
@@ -60,7 +58,6 @@ bump-major:
 	git tag -a "$$new_version" -m "Release $$new_version"; \
 	echo "Created tag $$new_version"
 
-
 proto:
 	protoc \
 		--proto_path=$(PROTO_DIR) \
@@ -104,7 +101,6 @@ proto:
 		$(PROTO_DIR)/v1/shared/section.proto \
 		$(PROTO_DIR)/v1/shared/guide.proto \
 
-
 build:
 	go build -o $(BIN_DIR)/study-server ./$(CMD_DIR)
 
@@ -130,13 +126,11 @@ clean:
 	rm -f .env
 	@echo "Done."
 
-
 fmt:
 	find . -type f -name '*.go' ! -name '*.pb.go' -exec gofmt -s -w {} +
 
 lint:
 	golangci-lint run --timeout=2m --skip-dirs-use-default --skip-files='.*\.pb\.go'
-
 
 auth-evans-dev:
 	cp .env.dev .env
@@ -168,21 +162,3 @@ generate-tokens:
 	node scripts/generate_jwt.js > .jwt.prod
 
 all: proto build
-
-deploy-dev:
-	@echo "Deploying to Heroku Dev..."
-	heroku container:push web --app studyguides-api-dev --arg ENV=dev
-	heroku container:release web --app studyguides-api-dev
-	@echo "Dev deployment complete!"
-
-deploy-test:
-	@echo "Deploying to Heroku Test..."
-	heroku container:push web --app studyguides-api-test --arg ENV=test
-	heroku container:release web --app studyguides-api-test
-	@echo "Test deployment complete!"
-
-deploy-prod:
-	@echo "Deploying to Heroku Prod..."
-	heroku container:push web --app studyguides-api-prod --arg ENV=prod
-	heroku container:release web --app studyguides-api-prod
-	@echo "Prod deployment complete!"

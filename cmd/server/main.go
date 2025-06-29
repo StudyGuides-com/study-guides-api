@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
@@ -24,6 +24,8 @@ import (
 	"github.com/studyguides-com/study-guides-api/internal/lib/router"
 	"github.com/studyguides-com/study-guides-api/internal/middleware"
 	"github.com/studyguides-com/study-guides-api/internal/services"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -59,14 +61,9 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "50051"
+		port = "8080"
 	}
-
 	address := ":" + port
-	lis, err := net.Listen("tcp", address)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
 
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
@@ -107,14 +104,37 @@ func main() {
 	// Enable gRPC reflection
 	reflection.Register(grpcServer)
 
+	// Start a separate HTTP health check server
+	go func() {
+		httpPort := "8080"
+		http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("ok"))
+		})
+		log.Printf("HTTP health server listening on :%s", httpPort)
+		if err := http.ListenAndServe(":"+httpPort, nil); err != nil {
+			log.Printf("HTTP health server error: %v", err)
+		}
+	}()
+
+	// h2c handler for gRPC
+	h2cHandler := h2c.NewHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		grpcServer.ServeHTTP(w, r)
+	}), &http2.Server{})
+
+	server := &http.Server{
+		Addr:    address,
+		Handler: h2cHandler,
+	}
+
 	// Create a channel to receive shutdown signals
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-	// Start the server in a goroutine
+	// Start the h2c gRPC server in a goroutine
 	go func() {
-		log.Printf("gRPC server listening on %s", address)
-		if err := grpcServer.Serve(lis); err != nil {
+		log.Printf("gRPC (h2c) server listening on %s", address)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Printf("failed to serve: %v", err)
 		}
 	}()
