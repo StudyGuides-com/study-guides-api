@@ -5,6 +5,7 @@ services:
     github:
       repo: StudyGuides-com/study-guides-api
       branch: test
+    protocol: HTTP2
     build_command: |
       go mod download
       go mod tidy
