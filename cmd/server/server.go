@@ -21,6 +21,7 @@ import (
 	"github.com/studyguides-com/study-guides-api/internal/middleware"
 	"github.com/studyguides-com/study-guides-api/internal/services"
 	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -96,7 +97,7 @@ func (s *Server) Start(appStore store.Store) {
 
 		// Handle gRPC requests (both HTTP/1.1 and HTTP/2)
 		if strings.HasPrefix(r.Header.Get("Content-Type"), "application/grpc") {
-			log.Printf("*** ROUTING TO GRPC: %s ***", r.URL.Path)
+			log.Printf("*** ROUTING TO GRPC: %s (Protocol: %s) ***", r.URL.Path, r.Proto)
 			
 			// Create a response writer that logs the response
 			loggingWriter := &responseLoggingWriter{
@@ -117,13 +118,7 @@ func (s *Server) Start(appStore store.Store) {
 
 	s.httpServer = &http.Server{
 		Addr:    address,
-		Handler: http.HandlerFunc(handler),
-	}
-
-	// Enable HTTP/2 support with proper configuration
-	http2Server := &http2.Server{}
-	if err := http2.ConfigureServer(s.httpServer, http2Server); err != nil {
-		log.Printf("Failed to configure HTTP/2: %v", err)
+		Handler: h2c.NewHandler(http.HandlerFunc(handler), &http2.Server{}),
 	}
 
 	log.Printf("Server listening on %s (HTTP/1.1, HTTP/2, and gRPC)", address)
