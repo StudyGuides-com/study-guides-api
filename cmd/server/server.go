@@ -20,8 +20,6 @@ import (
 	"github.com/studyguides-com/study-guides-api/internal/lib/router"
 	"github.com/studyguides-com/study-guides-api/internal/middleware"
 	"github.com/studyguides-com/study-guides-api/internal/services"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -69,25 +67,19 @@ func (s *Server) Start(appStore store.Store) {
 			return
 		}
 
-		// Handle gRPC requests
-		if r.ProtoMajor == 2 && strings.HasPrefix(r.Header.Get("Content-Type"), "application/grpc") {
+		// Handle gRPC requests (both HTTP/1.1 and HTTP/2)
+		if strings.HasPrefix(r.Header.Get("Content-Type"), "application/grpc") {
 			s.grpcServer.ServeHTTP(w, r)
 			return
 		}
 
-		// Handle other HTTP/2 requests
-		if r.ProtoMajor == 2 {
-			io.WriteString(w, "Hello HTTP/2")
-			return
-		}
-
-		// Handle HTTP/1.1 requests
-		io.WriteString(w, "Hello HTTP/1.1")
+		// Handle other requests
+		io.WriteString(w, "Hello from API")
 	}
 
 	s.httpServer = &http.Server{
 		Addr:    address,
-		Handler: h2c.NewHandler(http.HandlerFunc(handler), &http2.Server{}),
+		Handler: http.HandlerFunc(handler),
 	}
 
 	log.Printf("Server listening on %s (HTTP/1.1, HTTP/2, and gRPC)", address)
