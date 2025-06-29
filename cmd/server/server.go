@@ -18,6 +18,7 @@ import (
 	"github.com/studyguides-com/study-guides-api/internal/store"
 
 	"github.com/studyguides-com/study-guides-api/internal/lib/router"
+	"github.com/studyguides-com/study-guides-api/internal/middleware"
 	"github.com/studyguides-com/study-guides-api/internal/services"
 	"golang.org/x/net/http2"
 	"google.golang.org/grpc"
@@ -40,16 +41,16 @@ func (s *Server) Start(appStore store.Store) {
 	port := getPort()
 	address := ":" + port
 
-	// Create gRPC server without middleware temporarily
+	// Create gRPC server with middleware
 	s.grpcServer = grpc.NewServer(
-		// grpc.ChainUnaryInterceptor(
-		// 	middleware.ErrorUnaryInterceptor(),
-		// 	middleware.AuthUnaryInterceptor(os.Getenv("JWT_SECRET")),
-		// 	middleware.RateLimitUnaryInterceptor(
-		// 		parseEnvAsRate("RATE_LIMIT_USER_PER_SECOND", 1.0),
-		// 		parseEnvAsInt("RATE_LIMIT_USER_BURST", 5),
-		// 	),
-		// ),
+		grpc.ChainUnaryInterceptor(
+			middleware.ErrorUnaryInterceptor(),
+			middleware.AuthUnaryInterceptor(os.Getenv("JWT_SECRET")),
+			middleware.RateLimitUnaryInterceptor(
+				parseEnvAsRate("RATE_LIMIT_USER_PER_SECOND", 1.0),
+				parseEnvAsInt("RATE_LIMIT_USER_BURST", 5),
+			),
+		),
 	)
 
 	// Register services
@@ -60,10 +61,18 @@ func (s *Server) Start(appStore store.Store) {
 
 	// Create unified handler for both HTTP and gRPC
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("Request: %s %s, Proto: %d, Content-Type: %s", r.Method, r.URL.Path, r.ProtoMajor, r.Header.Get("Content-Type"))
+		log.Printf("=== REQUEST START ===")
+		log.Printf("Method: %s", r.Method)
+		log.Printf("Path: %s", r.URL.Path)
+		log.Printf("Protocol: %s", r.Proto)
+		log.Printf("ProtoMajor: %d", r.ProtoMajor)
+		log.Printf("Content-Type: %s", r.Header.Get("Content-Type"))
+		log.Printf("User-Agent: %s", r.Header.Get("User-Agent"))
+		log.Printf("All Headers: %v", r.Header)
 		
 		// Handle health check endpoint
 		if r.URL.Path == "/health" {
+			log.Printf("Handling health check")
 			w.WriteHeader(http.StatusOK)
 			io.WriteString(w, "ok")
 			return
@@ -71,13 +80,16 @@ func (s *Server) Start(appStore store.Store) {
 
 		// Handle gRPC requests (both HTTP/1.1 and HTTP/2)
 		if strings.HasPrefix(r.Header.Get("Content-Type"), "application/grpc") {
-			log.Printf("Routing to gRPC: %s", r.URL.Path)
+			log.Printf("*** ROUTING TO GRPC: %s ***", r.URL.Path)
 			s.grpcServer.ServeHTTP(w, r)
+			log.Printf("*** GRPC HANDLER COMPLETED ***")
 			return
 		}
 
 		// Handle other requests
+		log.Printf("Handling regular HTTP request")
 		io.WriteString(w, "Hello from API")
+		log.Printf("=== REQUEST END ===")
 	}
 
 	s.httpServer = &http.Server{
