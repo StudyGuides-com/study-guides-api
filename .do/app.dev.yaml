@@ -4,20 +4,12 @@ services:
     source_dir: .
     github:
       repo: StudyGuides-com/study-guides-api
-      branch: develop
+      branch: dev
     build_command: |
-      echo "Starting build process..."
-      pwd
-      ls -la
-      go version
+      mkdir -p bin
       go mod download
       go mod tidy
-      echo "Building server..."
-      go build -v -o server ./cmd/server/main.go
-      echo "Build complete. Checking for server executable..."
-      ls -la server
-      echo "Server executable details:"
-      file server
+      go build -o bin/server ./cmd/server/main.go
     run_command: ./bin/server
     environment_slug: go
     instance_count: 1
