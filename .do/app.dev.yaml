@@ -13,8 +13,6 @@ services:
     health_check:
       http_path: /health
     envs:
-      - key: PORT
-        value: "8080"
       - key: JWT_SECRET
         value: ${JWT_SECRET_DEV}
       - key: OPENAI_API_KEY
