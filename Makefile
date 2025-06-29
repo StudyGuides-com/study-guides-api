@@ -102,27 +102,27 @@ proto:
 		$(PROTO_DIR)/v1/shared/guide.proto \
 
 build:
-	go build -o $(BIN_DIR)/study-server ./$(CMD_DIR)
+	go build -o server ./cmd/server/main.go
 
 run: build
-	./$(BIN_DIR)/study-server
+	./server
 
 run-dev: build
 	cp .env.dev .env
-	./$(BIN_DIR)/study-server
+	./server
 
 run-test: build
 	cp .env.test .env
-	./$(BIN_DIR)/study-server
+	./server
 
 run-prod: build
 	cp .env.prod .env
-	./$(BIN_DIR)/study-server
+	./server
 
 clean:
 	@echo "Cleaning generated files..."
-	find $(PROTO_DIR) -type f \( -name '*.pb.go' -o -name '*_grpc.pb.go' \) -delete
-	rm -rf $(BIN_DIR)
+	find api -type f \( -name '*.pb.go' -o -name '*_grpc.pb.go' \) -delete
+	rm -f server
 	rm -f .env
 	@echo "Done."
 

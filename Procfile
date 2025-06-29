@@ -1,1 +1,1 @@
-web: bin/study-server 
+web: ./server 
