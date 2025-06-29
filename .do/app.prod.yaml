@@ -5,8 +5,10 @@ services:
     github:
       repo: StudyGuides-com/study-guides-api
       branch: main
-    build_command: go build -o server ./cmd/server/main.go
-    run_command: ./server
+    build_command: |
+      go mod download
+      go build -o bin/server ./cmd/server
+    run_command: ./bin/server
     environment_slug: go
     instance_count: 2
     instance_size_slug: basic-s
