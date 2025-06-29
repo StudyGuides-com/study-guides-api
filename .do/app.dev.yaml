@@ -6,9 +6,19 @@ services:
       repo: StudyGuides-com/study-guides-api
       branch: develop
     build_command: |
+      echo "Starting build process..."
+      pwd
+      ls -la
+      go version
       go mod download
-      go build -o bin/server ./cmd/server
-    run_command: ./bin/server
+      go mod tidy
+      echo "Building server..."
+      go build -v -o server ./cmd/server/main.go
+      echo "Build complete. Checking for server executable..."
+      ls -la server
+      echo "Server executable details:"
+      file server
+    run_command: ./server
     environment_slug: go
     instance_count: 1
     instance_size_slug: basic-xxs
