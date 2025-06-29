@@ -1,11 +1,11 @@
 name: study-guides-api-test
 services:
   - name: api
-    source_dir: /
+    source_dir: .
     github:
       repo: StudyGuides-com/study-guides-api
       branch: test
-    run_command: ./server
+    run_command: ls -al && ./server
     build_command: go build -o server cmd/server/main.go
     environment_slug: go
     instance_count: 1
