@@ -1,8 +1,6 @@
 module github.com/studyguides-com/study-guides-api
 
-go 1.23.0
-
-toolchain go1.23.4
+go 1.23
 
 require (
 	github.com/algolia/algoliasearch-client-go/v3 v3.31.4

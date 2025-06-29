@@ -5,8 +5,8 @@ services:
     github:
       repo: StudyGuides-com/study-guides-api
       branch: main
-    run_command: go run cmd/server/main.go
-    build_command: go build -o server cmd/server/main.go
+    run_command: bin/study-server
+    build_command: go install -v github.com/studyguides-com/study-guides-api/cmd/server
     environment_slug: go
     instance_count: 2
     instance_size_slug: basic-s
