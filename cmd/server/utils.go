@@ -40,4 +40,4 @@ func getPort() string {
 		port = "8080"
 	}
 	return port
-} 
+}

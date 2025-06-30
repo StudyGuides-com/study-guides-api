@@ -313,7 +313,7 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 		if err := json.Unmarshal([]byte(raw), &chatResp); err != nil {
 			return nil, fmt.Errorf("failed to parse AI response: %w", err)
 		}
-		
+
 		// Debug: Print the raw AI response for troubleshooting
 		fmt.Printf("DEBUG: === RAW AI RESPONSE ===\n")
 		fmt.Printf("DEBUG: Raw response: %s\n", raw)
@@ -322,15 +322,15 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 			fmt.Printf("DEBUG: First choice message: %+v\n", chatResp.Choices[0].Message)
 			fmt.Printf("DEBUG: Tool calls count: %d\n", len(chatResp.Choices[0].Message.ToolCalls))
 		}
-		
+
 		if len(chatResp.Choices) == 0 {
 			return nil, fmt.Errorf("AI returned no choices for request: %s", req.Message)
 		}
-		
+
 		if len(chatResp.Choices[0].Message.ToolCalls) == 0 {
 			return nil, fmt.Errorf("AI did not call any tools for request: %s. Available tools: %s", req.Message, strings.Join([]string{
 				"ListTags",
-				"TagCount", 
+				"TagCount",
 				"ListRootTags",
 				"GetTag",
 				"UniqueTagTypes",
@@ -340,7 +340,7 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 				"Unknown",
 			}, ", "))
 		}
-		
+
 		toolCall := chatResp.Choices[0].Message.ToolCalls[0]
 		plan.Operation = toolCall.Function.Name
 

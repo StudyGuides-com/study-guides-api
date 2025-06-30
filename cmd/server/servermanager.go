@@ -69,4 +69,4 @@ func (sm *ServerManager) waitForShutdown() {
 	}
 
 	log.Println("🙌 server shutdown complete")
-} 
+}

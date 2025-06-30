@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"log"
 	"net/http"
@@ -70,19 +71,19 @@ func (s *Server) Start(appStore store.Store) {
 		log.Printf("Content-Type: %s", r.Header.Get("Content-Type"))
 		log.Printf("User-Agent: %s", r.Header.Get("User-Agent"))
 		log.Printf("All Headers: %v", r.Header)
-		
+
 		// Handle health check endpoint
 		if r.URL.Path == "/health" {
-			log.Printf("Handling health check")
+			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			io.WriteString(w, "ok")
+			json.NewEncoder(w).Encode(map[string]string{"status": "healthy"})
 			return
 		}
 
 		// Handle gRPC requests (both HTTP/1.1 and HTTP/2)
 		if strings.HasPrefix(r.Header.Get("Content-Type"), "application/grpc") {
 			log.Printf("*** ROUTING TO GRPC: %s (Protocol: %s) ***", r.URL.Path, r.Proto)
-			
+
 			s.grpcServer.ServeHTTP(w, r)
 			log.Printf("*** GRPC HANDLER COMPLETED ***")
 			return
@@ -151,4 +152,4 @@ func (s *Server) ForceStop() {
 	if s.grpcServer != nil {
 		s.grpcServer.Stop()
 	}
-} 
+}

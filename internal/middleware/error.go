@@ -19,7 +19,7 @@ func ErrorUnaryInterceptor() grpc.UnaryServerInterceptor {
 		handler grpc.UnaryHandler,
 	) (interface{}, error) {
 		resp, err := handler(ctx, req)
-		
+
 		if err != nil {
 			// Convert specific application errors to friendly gRPC status errors
 			switch err {
@@ -51,7 +51,7 @@ func ErrorUnaryInterceptor() grpc.UnaryServerInterceptor {
 				return nil, err
 			}
 		}
-		
+
 		return resp, nil
 	}
-} 
+}
