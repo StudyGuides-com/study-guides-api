@@ -374,6 +374,13 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 		fmt.Printf("DEBUG: === AI RESPONSE ===\n")
 		fmt.Printf("DEBUG: Operation: %s\n", plan.Operation)
 		fmt.Printf("DEBUG: Parameters: %+v\n", plan.Parameters)
+		
+		// Debug: Print format information for Slack bot
+		if format, ok := plan.Parameters["format"]; ok {
+			fmt.Printf("DEBUG: Determined format for Slack bot: %s\n", format)
+		} else {
+			fmt.Printf("DEBUG: No format specified, using default (list)\n")
+		}
 
 		answer, err := s.router.Route(ctx, plan.Operation, plan.Parameters)
 		if err != nil {
@@ -405,9 +412,19 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 		fmt.Printf("DEBUG: === UPDATED CONTEXT ===\n")
 		fmt.Printf("DEBUG: Updated Context Metadata: %+v\n", updatedContext.GetMetadata())
 
+		// Debug: Print response details for Slack bot
+		fmt.Printf("DEBUG: === RESPONSE FOR SLACK BOT ===\n")
+		fmt.Printf("DEBUG: Operation: %s\n", plan.Operation)
+		fmt.Printf("DEBUG: Parameters: %+v\n", plan.Parameters)
+		if format, ok := plan.Parameters["format"]; ok {
+			fmt.Printf("DEBUG: Format for Slack formatting: %s\n", format)
+		}
+
 		return &chatpb.ChatResponse{
-			Answer:  answer,
-			Context: updatedContext,
+			Answer:     answer,
+			Context:    updatedContext,
+			Operation:  plan.Operation,
+			Parameters: plan.Parameters,
 		}, nil
 	})
 	if err != nil {
@@ -417,7 +434,4 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 	return resp.(*chatpb.ChatResponse), nil
 }
 
-func mustJson(v any) string {
-	b, _ := json.Marshal(v)
-	return string(b)
-}
+
