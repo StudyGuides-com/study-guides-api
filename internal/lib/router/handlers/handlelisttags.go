@@ -106,8 +106,25 @@ func HandleListTags(ctx context.Context, store store.Store, params map[string]st
 		message = fmt.Sprintf("Found %d root tags%s", len(tags), limitMsg)
 	}
 
-	// Create response
-	response := formatting.NewListResponse(data, message, filters, nil)
+	// Determine content type based on format
+	var contentType string
+	if format == formatting.FormatJSON {
+		contentType = "application/json"
+	} else if format == formatting.FormatCSV {
+		contentType = "text/csv"
+	} else {
+		contentType = "text/plain"
+	}
+
+	// Create response with correct content type
+	response := &formatting.APIResponse{
+		Type:        formatting.ResponseTypeList,
+		Data:        data,
+		Message:     message,
+		ContentType: contentType,
+		Filters:     filters,
+	}
+	
 	return response.ToJSON(), nil
 }
 

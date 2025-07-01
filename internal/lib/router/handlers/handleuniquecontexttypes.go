@@ -46,9 +46,23 @@ func HandleUniqueContextTypes(ctx context.Context, store store.Store, params map
 
 	message := fmt.Sprintf("Found %d unique context types", len(contextTypes))
 
-	// Debug print
-	fmt.Printf("DEBUG: format=%s, contextTypes=%#v, data=%#v\n", format, contextTypes, data)
+	// Determine content type based on format
+	var contentType string
+	if format == formatting.FormatJSON {
+		contentType = "application/json"
+	} else if format == formatting.FormatCSV {
+		contentType = "text/csv"
+	} else {
+		contentType = "text/plain"
+	}
 
-	response := formatting.NewListResponse(data, message, nil, nil)
+	// Create response with correct content type
+	response := &formatting.APIResponse{
+		Type:        formatting.ResponseTypeList,
+		Data:        data,
+		Message:     message,
+		ContentType: contentType,
+	}
+	
 	return response.ToJSON(), nil
 }
