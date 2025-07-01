@@ -164,6 +164,76 @@ func TagAsFormatted(tag *sharedpb.Tag, format FormatType) string {
 	}
 }
 
+// TagAsJSONObject returns a single tag as a JSON object (not string)
+func TagAsJSONObject(tag *sharedpb.Tag) interface{} {
+	// Create a comprehensive structure for JSON output
+	type TagDetailOutput struct {
+		ID                 string            `json:"id"`
+		Name               string            `json:"name"`
+		Description        string            `json:"description,omitempty"`
+		Type               string            `json:"type"`
+		Context            string            `json:"context"`
+		ParentTagID        string            `json:"parent_tag_id,omitempty"`
+		ContentRating      string            `json:"content_rating"`
+		ContentDescriptors []string          `json:"content_descriptors,omitempty"`
+		MetaTags           []string          `json:"meta_tags,omitempty"`
+		Public             bool              `json:"public"`
+		AccessCount        int32             `json:"access_count"`
+		Metadata           map[string]string `json:"metadata,omitempty"`
+		BatchID            string            `json:"batch_id,omitempty"`
+		Hash               string            `json:"hash"`
+		HasQuestions       bool              `json:"has_questions"`
+		HasChildren        bool              `json:"has_children"`
+		OwnerID            string            `json:"owner_id,omitempty"`
+		CreatedAt          string            `json:"created_at"`
+		UpdatedAt          string            `json:"updated_at"`
+	}
+
+	output := TagDetailOutput{
+		ID:            tag.Id,
+		Name:          tag.Name,
+		Type:          tag.Type.String(),
+		Context:       tag.Context.String(),
+		ContentRating: tag.ContentRating.String(),
+		Public:        tag.Public,
+		AccessCount:   tag.AccessCount,
+		Hash:          tag.Hash,
+		HasQuestions:  tag.HasQuestions,
+		HasChildren:   tag.HasChildren,
+		CreatedAt:     tag.CreatedAt.AsTime().Format("2006-01-02 15:04:05"),
+		UpdatedAt:     tag.UpdatedAt.AsTime().Format("2006-01-02 15:04:05"),
+	}
+
+	if tag.Description != nil && *tag.Description != "" {
+		output.Description = *tag.Description
+	}
+	if tag.ParentTagId != nil && *tag.ParentTagId != "" {
+		output.ParentTagID = *tag.ParentTagId
+	}
+	if len(tag.ContentDescriptors) > 0 {
+		// Convert ContentDescriptorType enums to strings
+		var contentDescriptorStrings []string
+		for _, descriptor := range tag.ContentDescriptors {
+			contentDescriptorStrings = append(contentDescriptorStrings, descriptor.String())
+		}
+		output.ContentDescriptors = contentDescriptorStrings
+	}
+	if len(tag.MetaTags) > 0 {
+		output.MetaTags = tag.MetaTags
+	}
+	if tag.Metadata != nil && len(tag.Metadata.Metadata) > 0 {
+		output.Metadata = tag.Metadata.Metadata
+	}
+	if tag.BatchId != nil && *tag.BatchId != "" {
+		output.BatchID = *tag.BatchId
+	}
+	if tag.OwnerId != nil && *tag.OwnerId != "" {
+		output.OwnerID = *tag.OwnerId
+	}
+
+	return output
+}
+
 // TagAsJSON formats a single tag as JSON
 func TagAsJSON(tag *sharedpb.Tag) string {
 	// Create a comprehensive structure for JSON output

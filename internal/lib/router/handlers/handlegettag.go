@@ -36,13 +36,14 @@ func HandleGetTag(ctx context.Context, store store.Store, params map[string]stri
 	var data interface{}
 	var contentType string
 	
-	if format == formatting.FormatJSON {
-		data = tag
+	switch format {
+	case formatting.FormatJSON:
+		data = formatting.TagAsJSONObject(tag)
 		contentType = "application/json"
-	} else if format == formatting.FormatCSV {
+	case formatting.FormatCSV:
 		data = formatting.TagAsFormatted(tag, format)
 		contentType = "text/csv"
-	} else {
+	default:
 		data = formatting.TagAsFormatted(tag, format)
 		contentType = "text/plain"
 	}
