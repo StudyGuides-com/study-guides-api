@@ -174,6 +174,94 @@ func (x *NewTagAdminResponse) GetTag() *shared.Tag {
 	return nil
 }
 
+type KillUserAdminRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *KillUserAdminRequest) Reset() {
+	*x = KillUserAdminRequest{}
+	mi := &file_v1_admin_admin_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KillUserAdminRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KillUserAdminRequest) ProtoMessage() {}
+
+func (x *KillUserAdminRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_admin_admin_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KillUserAdminRequest.ProtoReflect.Descriptor instead.
+func (*KillUserAdminRequest) Descriptor() ([]byte, []int) {
+	return file_v1_admin_admin_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *KillUserAdminRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+type KillUserAdminResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Ok            bool                   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *KillUserAdminResponse) Reset() {
+	*x = KillUserAdminResponse{}
+	mi := &file_v1_admin_admin_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KillUserAdminResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KillUserAdminResponse) ProtoMessage() {}
+
+func (x *KillUserAdminResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_admin_admin_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KillUserAdminResponse.ProtoReflect.Descriptor instead.
+func (*KillUserAdminResponse) Descriptor() ([]byte, []int) {
+	return file_v1_admin_admin_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *KillUserAdminResponse) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
 var File_v1_admin_admin_proto protoreflect.FileDescriptor
 
 const file_v1_admin_admin_proto_rawDesc = "" +
@@ -194,9 +282,13 @@ const file_v1_admin_admin_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"7\n" +
 	"\x13NewTagAdminResponse\x12 \n" +
-	"\x03tag\x18\x01 \x01(\v2\x0e.shared.v1.TagR\x03tag2W\n" +
-	"\fAdminService\x12G\n" +
-	"\x06NewTag\x12\x1c.admin.v1.NewTagAdminRequest\x1a\x1d.admin.v1.NewTagAdminResponse\"\x00BBZ@github.com/studyguides-com/study-guides-api/api/v1/admin;adminv1b\x06proto3"
+	"\x03tag\x18\x01 \x01(\v2\x0e.shared.v1.TagR\x03tag\",\n" +
+	"\x14KillUserAdminRequest\x12\x14\n" +
+	"\x05email\x18\x01 \x01(\tR\x05email\"'\n" +
+	"\x15KillUserAdminResponse\x12\x0e\n" +
+	"\x02ok\x18\x01 \x01(\bR\x02ok2]\n" +
+	"\fAdminService\x12M\n" +
+	"\bKillUser\x12\x1e.admin.v1.KillUserAdminRequest\x1a\x1f.admin.v1.KillUserAdminResponse\"\x00BBZ@github.com/studyguides-com/study-guides-api/api/v1/admin;adminv1b\x06proto3"
 
 var (
 	file_v1_admin_admin_proto_rawDescOnce sync.Once
@@ -210,26 +302,28 @@ func file_v1_admin_admin_proto_rawDescGZIP() []byte {
 	return file_v1_admin_admin_proto_rawDescData
 }
 
-var file_v1_admin_admin_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_v1_admin_admin_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_v1_admin_admin_proto_goTypes = []any{
 	(*NewTagAdminRequest)(nil),        // 0: admin.v1.NewTagAdminRequest
 	(*NewTagAdminResponse)(nil),       // 1: admin.v1.NewTagAdminResponse
-	nil,                               // 2: admin.v1.NewTagAdminRequest.MetadataEntry
-	(shared.TagType)(0),               // 3: shared.v1.TagType
-	(shared.ContentRating)(0),         // 4: shared.v1.ContentRating
-	(shared.ContentDescriptorType)(0), // 5: shared.v1.ContentDescriptorType
-	(shared.ParserType)(0),            // 6: shared.v1.ParserType
-	(*shared.Tag)(nil),                // 7: shared.v1.Tag
+	(*KillUserAdminRequest)(nil),      // 2: admin.v1.KillUserAdminRequest
+	(*KillUserAdminResponse)(nil),     // 3: admin.v1.KillUserAdminResponse
+	nil,                               // 4: admin.v1.NewTagAdminRequest.MetadataEntry
+	(shared.TagType)(0),               // 5: shared.v1.TagType
+	(shared.ContentRating)(0),         // 6: shared.v1.ContentRating
+	(shared.ContentDescriptorType)(0), // 7: shared.v1.ContentDescriptorType
+	(shared.ParserType)(0),            // 8: shared.v1.ParserType
+	(*shared.Tag)(nil),                // 9: shared.v1.Tag
 }
 var file_v1_admin_admin_proto_depIdxs = []int32{
-	3, // 0: admin.v1.NewTagAdminRequest.type:type_name -> shared.v1.TagType
-	4, // 1: admin.v1.NewTagAdminRequest.rating:type_name -> shared.v1.ContentRating
-	5, // 2: admin.v1.NewTagAdminRequest.descriptors:type_name -> shared.v1.ContentDescriptorType
-	6, // 3: admin.v1.NewTagAdminRequest.parser_type:type_name -> shared.v1.ParserType
-	2, // 4: admin.v1.NewTagAdminRequest.metadata:type_name -> admin.v1.NewTagAdminRequest.MetadataEntry
-	7, // 5: admin.v1.NewTagAdminResponse.tag:type_name -> shared.v1.Tag
-	0, // 6: admin.v1.AdminService.NewTag:input_type -> admin.v1.NewTagAdminRequest
-	1, // 7: admin.v1.AdminService.NewTag:output_type -> admin.v1.NewTagAdminResponse
+	5, // 0: admin.v1.NewTagAdminRequest.type:type_name -> shared.v1.TagType
+	6, // 1: admin.v1.NewTagAdminRequest.rating:type_name -> shared.v1.ContentRating
+	7, // 2: admin.v1.NewTagAdminRequest.descriptors:type_name -> shared.v1.ContentDescriptorType
+	8, // 3: admin.v1.NewTagAdminRequest.parser_type:type_name -> shared.v1.ParserType
+	4, // 4: admin.v1.NewTagAdminRequest.metadata:type_name -> admin.v1.NewTagAdminRequest.MetadataEntry
+	9, // 5: admin.v1.NewTagAdminResponse.tag:type_name -> shared.v1.Tag
+	2, // 6: admin.v1.AdminService.KillUser:input_type -> admin.v1.KillUserAdminRequest
+	3, // 7: admin.v1.AdminService.KillUser:output_type -> admin.v1.KillUserAdminResponse
 	7, // [7:8] is the sub-list for method output_type
 	6, // [6:7] is the sub-list for method input_type
 	6, // [6:6] is the sub-list for extension type_name
@@ -248,7 +342,7 @@ func file_v1_admin_admin_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_admin_admin_proto_rawDesc), len(file_v1_admin_admin_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

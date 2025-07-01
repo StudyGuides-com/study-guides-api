@@ -19,14 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AdminService_NewTag_FullMethodName = "/admin.v1.AdminService/NewTag"
+	AdminService_KillUser_FullMethodName = "/admin.v1.AdminService/KillUser"
 )
 
 // AdminServiceClient is the client API for AdminService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AdminServiceClient interface {
-	NewTag(ctx context.Context, in *NewTagAdminRequest, opts ...grpc.CallOption) (*NewTagAdminResponse, error)
+	KillUser(ctx context.Context, in *KillUserAdminRequest, opts ...grpc.CallOption) (*KillUserAdminResponse, error)
 }
 
 type adminServiceClient struct {
@@ -37,10 +37,10 @@ func NewAdminServiceClient(cc grpc.ClientConnInterface) AdminServiceClient {
 	return &adminServiceClient{cc}
 }
 
-func (c *adminServiceClient) NewTag(ctx context.Context, in *NewTagAdminRequest, opts ...grpc.CallOption) (*NewTagAdminResponse, error) {
+func (c *adminServiceClient) KillUser(ctx context.Context, in *KillUserAdminRequest, opts ...grpc.CallOption) (*KillUserAdminResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(NewTagAdminResponse)
-	err := c.cc.Invoke(ctx, AdminService_NewTag_FullMethodName, in, out, cOpts...)
+	out := new(KillUserAdminResponse)
+	err := c.cc.Invoke(ctx, AdminService_KillUser_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (c *adminServiceClient) NewTag(ctx context.Context, in *NewTagAdminRequest,
 // All implementations must embed UnimplementedAdminServiceServer
 // for forward compatibility.
 type AdminServiceServer interface {
-	NewTag(context.Context, *NewTagAdminRequest) (*NewTagAdminResponse, error)
+	KillUser(context.Context, *KillUserAdminRequest) (*KillUserAdminResponse, error)
 	mustEmbedUnimplementedAdminServiceServer()
 }
 
@@ -62,8 +62,8 @@ type AdminServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedAdminServiceServer struct{}
 
-func (UnimplementedAdminServiceServer) NewTag(context.Context, *NewTagAdminRequest) (*NewTagAdminResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method NewTag not implemented")
+func (UnimplementedAdminServiceServer) KillUser(context.Context, *KillUserAdminRequest) (*KillUserAdminResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method KillUser not implemented")
 }
 func (UnimplementedAdminServiceServer) mustEmbedUnimplementedAdminServiceServer() {}
 func (UnimplementedAdminServiceServer) testEmbeddedByValue()                      {}
@@ -86,20 +86,20 @@ func RegisterAdminServiceServer(s grpc.ServiceRegistrar, srv AdminServiceServer)
 	s.RegisterService(&AdminService_ServiceDesc, srv)
 }
 
-func _AdminService_NewTag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NewTagAdminRequest)
+func _AdminService_KillUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(KillUserAdminRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AdminServiceServer).NewTag(ctx, in)
+		return srv.(AdminServiceServer).KillUser(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AdminService_NewTag_FullMethodName,
+		FullMethod: AdminService_KillUser_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminServiceServer).NewTag(ctx, req.(*NewTagAdminRequest))
+		return srv.(AdminServiceServer).KillUser(ctx, req.(*KillUserAdminRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -112,8 +112,8 @@ var AdminService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AdminServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "NewTag",
-			Handler:    _AdminService_NewTag_Handler,
+			MethodName: "KillUser",
+			Handler:    _AdminService_KillUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

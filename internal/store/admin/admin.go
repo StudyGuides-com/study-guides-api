@@ -53,8 +53,8 @@ type AdminStore interface {
 	// KillTree kills the tree for a given id
 	KillTree(ctx context.Context, id string) ([]string, error)
 
-	// KillUser kills the user for a given id
-	KillUser(ctx context.Context, email string) error
+	// KillUser kills the user for a given email, returns true if deleted, false if not found
+	KillUser(ctx context.Context, email string) (bool, error)
 
 	// TagExistsFor checks if a tag exists for a given objectID
 	TagExistsFor(ctx context.Context, id string) (bool, error)

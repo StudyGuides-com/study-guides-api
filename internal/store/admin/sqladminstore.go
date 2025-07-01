@@ -673,6 +673,24 @@ func (s *SqlAdminStore) KillTree(ctx context.Context, id string) ([]string, erro
 	return ids, nil
 }
 
+func (s *SqlAdminStore) UserByEmail(ctx context.Context, email string) (*sharedpb.User, error) {
+	query := `
+		SELECT id, name, email, image, "emailVerified", "stripeCustomerId", "gamerTag"
+		FROM public."User" WHERE email = $1
+	`
+
+	var user sharedpb.User
+	err := pgxscan.Get(ctx, s.db, &user, query, email)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, status.Error(codes.NotFound, fmt.Sprintf("user not found with email: %s", email))
+		}
+		return nil, status.Error(codes.Internal, "failed to get user")
+	}
+
+	return &user, nil
+}
+
 // collectNodeIDs recursively collects all node IDs from a tree
 func collectNodeIDs(node *sharedpb.TagNode) []string {
 	ids := []string{node.TagRow.Id}
@@ -1096,24 +1114,6 @@ func (s *SqlAdminStore) User(ctx context.Context, id string) (*sharedpb.User, er
 	return &user, nil
 }
 
-func (s *SqlAdminStore) UserByEmail(ctx context.Context, email string) (*sharedpb.User, error) {
-	query := `
-		SELECT id, name, email, image, "emailVerified", "stripeCustomerId", "gamerTag"
-		FROM public."User" WHERE email = $1
-	`
-
-	var user sharedpb.User
-	err := pgxscan.Get(ctx, s.db, &user, query, email)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, status.Error(codes.NotFound, fmt.Sprintf("user not found with email: %s", email))
-		}
-		return nil, status.Error(codes.Internal, "failed to get user")
-	}
-
-	return &user, nil
-}
-
 func (s *SqlAdminStore) UpdateIndexCache(ctx context.Context, id string) error {
 	query := `
 		INSERT INTO public._index_cache (id, ts) 
@@ -1143,15 +1143,15 @@ func (s *SqlAdminStore) ClearIndexCache(ctx context.Context) error {
 	return nil
 }
 
-func (s *SqlAdminStore) KillUser(ctx context.Context, email string) error {
+func (s *SqlAdminStore) KillUser(ctx context.Context, email string) (bool, error) {
 	// First check if the user exists
 	_, err := s.UserByEmail(ctx, email)
 	if err != nil {
-		// If user not found, return the same error
-		if errors.Is(err, pgx.ErrNoRows) {
-			return status.Error(codes.NotFound, fmt.Sprintf("user not found with email: %s", email))
+		// If user not found, return false, nil
+		if errors.Is(err, pgx.ErrNoRows) || (err.Error() == "rpc error: code = NotFound desc = user not found with email: "+email) {
+			return false, nil
 		}
-		return err
+		return false, err
 	}
 
 	// User exists, proceed with deletion
@@ -1161,8 +1161,8 @@ func (s *SqlAdminStore) KillUser(ctx context.Context, email string) error {
 
 	_, err = s.db.Exec(ctx, query, email)
 	if err != nil {
-		return status.Error(codes.Internal, "failed to kill user")
+		return false, status.Error(codes.Internal, "failed to kill user")
 	}
 
-	return nil
+	return true, nil
 }
