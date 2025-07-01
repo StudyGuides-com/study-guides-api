@@ -46,6 +46,7 @@ func (tf *TagFormatter) asList() string {
 		if tag.Description != nil && *tag.Description != "" {
 			response.WriteString(fmt.Sprintf(" - %s", *tag.Description))
 		}
+		response.WriteString(fmt.Sprintf(" (%s)", tag.Context.String()))
 		response.WriteString("\n")
 	}
 	return response.String()
@@ -54,18 +55,18 @@ func (tf *TagFormatter) asList() string {
 // asCSV formats tags as CSV
 func (tf *TagFormatter) asCSV() string {
 	if len(tf.tags) == 0 {
-		return "name,description,type,id\n"
+		return "name,description,type,context,id\n"
 	}
 
 	var response strings.Builder
-	response.WriteString("name,description,type,id\n")
+	response.WriteString("name,description,type,context,id\n")
 	for _, tag := range tf.tags {
 		description := ""
 		if tag.Description != nil && *tag.Description != "" {
 			description = *tag.Description
 		}
-		response.WriteString(fmt.Sprintf("\"%s\",\"%s\",\"%s\",\"%s\"\n",
-			tag.Name, description, tag.Type.String(), tag.Id))
+		response.WriteString(fmt.Sprintf("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n",
+			tag.Name, description, tag.Type.String(), tag.Context.String(), tag.Id))
 	}
 	return response.String()
 }
@@ -77,16 +78,16 @@ func (tf *TagFormatter) asTable() string {
 	}
 
 	var response strings.Builder
-	response.WriteString("| Name | Description | Type | ID |\n")
-	response.WriteString("|------|-------------|------|----|\n")
+	response.WriteString("| Name | Description | Type | Context | ID |\n")
+	response.WriteString("|------|-------------|------|---------|----|\n")
 
 	for _, tag := range tf.tags {
 		description := ""
 		if tag.Description != nil && *tag.Description != "" {
 			description = *tag.Description
 		}
-		response.WriteString(fmt.Sprintf("| %s | %s | %s | %s |\n",
-			tag.Name, description, tag.Type.String(), tag.Id))
+		response.WriteString(fmt.Sprintf("| %s | %s | %s | %s | %s |\n",
+			tag.Name, description, tag.Type.String(), tag.Context.String(), tag.Id))
 	}
 	return response.String()
 }
@@ -105,15 +106,17 @@ func TagsAsJSON(tags []*sharedpb.Tag) string {
 		Name        string `json:"name"`
 		Description string `json:"description,omitempty"`
 		Type        string `json:"type"`
+		Context     string `json:"context"`
 		ID          string `json:"id"`
 	}
 
 	var output []TagOutput
 	for _, tag := range tags {
 		tagOutput := TagOutput{
-			Name: tag.Name,
-			Type: tag.Type.String(),
-			ID:   tag.Id,
+			Name:    tag.Name,
+			Type:    tag.Type.String(),
+			Context: tag.Context.String(),
+			ID:      tag.Id,
 		}
 		if tag.Description != nil && *tag.Description != "" {
 			tagOutput.Description = *tag.Description
