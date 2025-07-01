@@ -6,6 +6,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/studyguides-com/study-guides-api/internal/lib/router/formatting"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 )
 
@@ -52,6 +53,14 @@ func HandleUserCount(ctx context.Context, store store.Store, params map[string]s
 	count, err := store.UserStore().UserCount(ctx, params)
 	if err != nil {
 		return "", err
+	}
+
+	// Build filters map
+	filters := make(map[string]string)
+	for key, value := range params {
+		if value != "" {
+			filters[key] = value
+		}
 	}
 
 	// Build a descriptive message based on the filters used
@@ -134,7 +143,10 @@ func HandleUserCount(ctx context.Context, store store.Store, params map[string]s
 		filterDesc = " in total"
 	}
 
-	result := fmt.Sprintf("You have %d users%s.", count, filterDesc)
-	fmt.Printf("DEBUG: Returning result: %s\n", result)
-	return result, nil
+	message := fmt.Sprintf("You have %d users%s.", count, filterDesc)
+	fmt.Printf("DEBUG: Returning result: %s\n", message)
+
+	// Create response using the universal wrapper
+	response := formatting.NewCountResponse(count, message, filters)
+	return response.ToJSON(), nil
 }

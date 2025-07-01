@@ -220,12 +220,22 @@ func buildSystemPrompt() string {
 
 	// Add format selection guidance
 	formatGuidance := `
-	When using ListTags or TagCount, choose the appropriate format based on user intent:
-	- Use 'list' (default) for human-readable responses, general browsing, or when user asks to "show", "list", or "see" tags
-	- Use 'json' when user mentions "export", "data", "API", "programmatic", "download", or machine-readable needs
-	- Use 'csv' when user mentions "spreadsheet", "Excel", "analysis", "compare", or data import needs
-	- Use 'table' when user specifically asks for table format or markdown
-	- If unsure, default to 'list' for human interaction
+	CRITICAL: Always detect format requests from user's natural language and set the 'format' parameter accordingly:
+	
+	Format Detection Rules:
+	- "as csv", "in csv", "csv format", "spreadsheet", "Excel" → format: "csv"
+	- "as json", "in json", "json format", "data", "API", "programmatic" → format: "json"  
+	- "as table", "in table", "table format", "markdown" → format: "table"
+	- "as list", "in list", "plain text", "human readable" → format: "list"
+	- Default (no format specified) → format: "list"
+	
+	Examples:
+	- "list tag types as csv" → UniqueTagTypes with format: "csv"
+	- "show tags in json" → ListTags with format: "json"
+	- "export users as table" → ListUsers with format: "table"
+	- "get tag count in csv" → TagCount with format: "csv"
+	
+	ALWAYS set the format parameter when the user specifies a format preference!
 	`
 
 	return fmt.Sprintf(`

@@ -42,13 +42,13 @@ var ClassificationToolDefinitions = []ToolDefinition{
 
 	NewToolDefinition(
 		string(ToolNameUniqueTagTypes),
-		"Returns a list of all unique tag types available in the system.",
-	).WithParameters(NoRequiredParams),
+		"Returns a list of all unique tag types available in the system. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
+	).WithParameters(NoRequiredParams, formatProperty),
 
 	NewToolDefinition(
 		string(ToolNameUniqueContextTypes),
-		"Returns a list of all unique context types (organizational contexts) available in the system.",
-	).WithParameters(NoRequiredParams),
+		"Returns a list of all unique context types (organizational contexts) available in the system. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
+	).WithParameters(NoRequiredParams, formatProperty),
 
 	NewToolDefinition(
 		string(ToolNameUserCount),

@@ -3,7 +3,9 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"strings"
 
+	"github.com/studyguides-com/study-guides-api/internal/lib/router/formatting"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 )
 
@@ -14,13 +16,52 @@ func HandleUniqueTagTypes(ctx context.Context, store store.Store, params map[str
 	}
 
 	if len(tagTypes) == 0 {
-		return "No tag types found in the system.", nil
+		response := formatting.NewListResponse([]interface{}{}, "No tag types found in the system.", nil, nil)
+		return response.ToJSON(), nil
 	}
 
-	// For now, tag types only support list format since they're simple strings
-	response := fmt.Sprintf("Found %d unique tag types:\n", len(tagTypes))
-	for i, tagType := range tagTypes {
-		response += fmt.Sprintf("%d. %s\n", i+1, tagType.String())
+	// Convert tag types to strings
+	var tagTypeStrings []string
+	for _, tagType := range tagTypes {
+		tagTypeStrings = append(tagTypeStrings, tagType.String())
 	}
-	return response, nil
+
+	// Get the format specified by the AI
+	format := formatting.GetFormatFromParams(params)
+
+	// Format the data
+	var data interface{}
+	switch format {
+	case formatting.FormatJSON:
+		data = tagTypeStrings
+	case formatting.FormatCSV:
+		data = "tag_type\n" + strings.Join(tagTypeStrings, "\n")
+	case formatting.FormatTable:
+		var table strings.Builder
+		table.WriteString("| Tag Type |\n")
+		table.WriteString("|----------|\n")
+		for _, tagType := range tagTypeStrings {
+			table.WriteString(fmt.Sprintf("| %s |\n", tagType))
+		}
+		data = table.String()
+	case formatting.FormatList:
+		// For list format, return as a string but ensure it's not empty
+		if len(tagTypeStrings) > 0 {
+			data = strings.Join(tagTypeStrings, "\n")
+		} else {
+			data = ""
+		}
+	default:
+		// Default to list format
+		if len(tagTypeStrings) > 0 {
+			data = strings.Join(tagTypeStrings, "\n")
+		} else {
+			data = ""
+		}
+	}
+
+	message := fmt.Sprintf("Found %d unique tag types", len(tagTypes))
+
+	response := formatting.NewListResponse(data, message, nil, nil)
+	return response.ToJSON(), nil
 }

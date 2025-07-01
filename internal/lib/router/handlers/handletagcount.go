@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/studyguides-com/study-guides-api/internal/lib/router/formatting"
 	"github.com/studyguides-com/study-guides-api/internal/store"
@@ -43,41 +42,28 @@ func HandleTagCount(ctx context.Context, store store.Store, params map[string]st
 		return "", err
 	}
 
-	// Build the response message
-	var response string
-	if hasTypeFilter && hasContextFilter && hasNameFilter && hasPublicFilter {
-		response = fmt.Sprintf("Found %d tags for type '%s', context '%s', name containing '%s', and %s.", count, params["type"], params["contextType"], params["name"], formatting.GetPublicDescription(params["public"]))
-	} else if hasTypeFilter && hasContextFilter && hasNameFilter {
-		response = fmt.Sprintf("Found %d tags for type '%s', context '%s', and name containing '%s'.", count, params["type"], params["contextType"], params["name"])
-	} else if hasTypeFilter && hasContextFilter && hasPublicFilter {
-		response = fmt.Sprintf("Found %d tags for type '%s', context '%s', and %s.", count, params["type"], params["contextType"], formatting.GetPublicDescription(params["public"]))
-	} else if hasTypeFilter && hasNameFilter && hasPublicFilter {
-		response = fmt.Sprintf("Found %d tags for type '%s', name containing '%s', and %s.", count, params["type"], params["name"], formatting.GetPublicDescription(params["public"]))
-	} else if hasContextFilter && hasNameFilter && hasPublicFilter {
-		response = fmt.Sprintf("Found %d tags for context '%s', name containing '%s', and %s.", count, params["contextType"], params["name"], formatting.GetPublicDescription(params["public"]))
-	} else if hasTypeFilter && hasContextFilter {
-		response = fmt.Sprintf("Found %d tags for type '%s' and context '%s'.", count, params["type"], params["contextType"])
-	} else if hasTypeFilter && hasNameFilter {
-		response = fmt.Sprintf("Found %d tags for type '%s' and name containing '%s'.", count, params["type"], params["name"])
-	} else if hasTypeFilter && hasPublicFilter {
-		response = fmt.Sprintf("Found %d tags for type '%s' and %s.", count, params["type"], formatting.GetPublicDescription(params["public"]))
-	} else if hasContextFilter && hasNameFilter {
-		response = fmt.Sprintf("Found %d tags for context '%s' and name containing '%s'.", count, params["contextType"], params["name"])
-	} else if hasContextFilter && hasPublicFilter {
-		response = fmt.Sprintf("Found %d tags for context '%s' and %s.", count, params["contextType"], formatting.GetPublicDescription(params["public"]))
-	} else if hasNameFilter && hasPublicFilter {
-		response = fmt.Sprintf("Found %d tags with name containing '%s' and %s.", count, params["name"], formatting.GetPublicDescription(params["public"]))
-	} else if hasTypeFilter {
-		response = fmt.Sprintf("Found %d tags for type '%s'.", count, params["type"])
-	} else if hasContextFilter {
-		response = fmt.Sprintf("Found %d tags for context '%s'.", count, params["contextType"])
-	} else if hasNameFilter {
-		response = fmt.Sprintf("Found %d tags with name containing '%s'.", count, params["name"])
-	} else if hasPublicFilter {
-		response = fmt.Sprintf("Found %d tags that are %s.", count, formatting.GetPublicDescription(params["public"]))
-	} else {
-		response = fmt.Sprintf("Found %d tags total.", count)
+	// Build filters map if any filters are present
+	var filters map[string]string
+	if hasTypeFilter || hasContextFilter || hasNameFilter || hasPublicFilter {
+		filters = make(map[string]string)
+		if hasTypeFilter {
+			filters["type"] = params["type"]
+		}
+		if hasContextFilter {
+			filters["context_type"] = params["contextType"]
+		}
+		if hasNameFilter {
+			filters["name"] = params["name"]
+		}
+		if hasPublicFilter {
+			filters["public"] = params["public"]
+		}
 	}
 
-	return response, nil
+	// Build the message using the helper function
+	message := formatting.BuildCountMessageInt(count, "tags", params, hasTypeFilter, hasContextFilter, hasNameFilter, hasPublicFilter)
+
+	// Create response using the universal wrapper
+	response := formatting.NewCountResponseInt(count, message, filters)
+	return response.ToJSON(), nil
 }

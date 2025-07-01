@@ -8,30 +8,99 @@ import (
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 )
 
-// TagsAsNumberedList formats a slice of tags as a numbered list with descriptions
-func TagsAsNumberedList(tags []*sharedpb.Tag) string {
-	if len(tags) == 0 {
+// TagFormatter implements Formatter for tag data
+type TagFormatter struct {
+	tags []*sharedpb.Tag
+}
+
+// NewTagFormatter creates a new tag formatter
+func NewTagFormatter(tags []*sharedpb.Tag) *TagFormatter {
+	return &TagFormatter{tags: tags}
+}
+
+// Format formats tags according to the specified format
+func (tf *TagFormatter) Format(format FormatType) interface{} {
+	switch format {
+	case FormatJSON:
+		return tf.tags // Return raw data for JSON
+	case FormatCSV:
+		return tf.asCSV()
+	case FormatTable:
+		return tf.asTable()
+	case FormatList:
+		fallthrough
+	default:
+		return tf.asList()
+	}
+}
+
+// asList formats tags as plain text lines
+func (tf *TagFormatter) asList() string {
+	if len(tf.tags) == 0 {
 		return ""
 	}
 
-	var response string
-	for i, tag := range tags {
-		response += fmt.Sprintf("%d. %s (ID: %s)", i+1, tag.Name, tag.Id)
+	var response strings.Builder
+	for _, tag := range tf.tags {
+		response.WriteString(tag.Name)
 		if tag.Description != nil && *tag.Description != "" {
-			response += fmt.Sprintf(" - %s", *tag.Description)
+			response.WriteString(fmt.Sprintf(" - %s", *tag.Description))
 		}
-		response += "\n"
+		response.WriteString("\n")
 	}
-	return response
+	return response.String()
 }
 
-// TagsAsJSON formats a slice of tags as JSON
+// asCSV formats tags as CSV
+func (tf *TagFormatter) asCSV() string {
+	if len(tf.tags) == 0 {
+		return "name,description,type,id\n"
+	}
+
+	var response strings.Builder
+	response.WriteString("name,description,type,id\n")
+	for _, tag := range tf.tags {
+		description := ""
+		if tag.Description != nil && *tag.Description != "" {
+			description = *tag.Description
+		}
+		response.WriteString(fmt.Sprintf("\"%s\",\"%s\",\"%s\",\"%s\"\n",
+			tag.Name, description, tag.Type.String(), tag.Id))
+	}
+	return response.String()
+}
+
+// asTable formats tags as a markdown table
+func (tf *TagFormatter) asTable() string {
+	if len(tf.tags) == 0 {
+		return "No tags found."
+	}
+
+	var response strings.Builder
+	response.WriteString("| Name | Description | Type | ID |\n")
+	response.WriteString("|------|-------------|------|----|\n")
+
+	for _, tag := range tf.tags {
+		description := ""
+		if tag.Description != nil && *tag.Description != "" {
+			description = *tag.Description
+		}
+		response.WriteString(fmt.Sprintf("| %s | %s | %s | %s |\n",
+			tag.Name, description, tag.Type.String(), tag.Id))
+	}
+	return response.String()
+}
+
+// Legacy functions for backward compatibility
+func TagsAsNumberedList(tags []*sharedpb.Tag) string {
+	return NewTagFormatter(tags).asList()
+}
+
 func TagsAsJSON(tags []*sharedpb.Tag) string {
 	if len(tags) == 0 {
 		return "[]"
 	}
 
-	// Create a simplified structure for JSON output
 	type TagOutput struct {
 		Name        string `json:"name"`
 		Description string `json:"description,omitempty"`
@@ -59,58 +128,21 @@ func TagsAsJSON(tags []*sharedpb.Tag) string {
 	return string(jsonBytes)
 }
 
-// TagsAsCSV formats a slice of tags as CSV
 func TagsAsCSV(tags []*sharedpb.Tag) string {
-	if len(tags) == 0 {
-		return "name,description,type,id\n"
-	}
-
-	response := "name,description,type,id\n"
-	for _, tag := range tags {
-		description := ""
-		if tag.Description != nil && *tag.Description != "" {
-			description = *tag.Description
-		}
-		response += fmt.Sprintf("\"%s\",\"%s\",\"%s\",\"%s\"\n",
-			tag.Name, description, tag.Type.String(), tag.Id)
-	}
-	return response
+	return NewTagFormatter(tags).asCSV()
 }
 
-// TagsAsTable formats a slice of tags as a simple table
 func TagsAsTable(tags []*sharedpb.Tag) string {
-	if len(tags) == 0 {
-		return "No tags found."
-	}
-
-	response := "| Name | Description | Type | ID |\n"
-	response += "|------|-------------|------|----|\n"
-
-	for _, tag := range tags {
-		description := ""
-		if tag.Description != nil && *tag.Description != "" {
-			description = *tag.Description
-		}
-		response += fmt.Sprintf("| %s | %s | %s | %s |\n",
-			tag.Name, description, tag.Type.String(), tag.Id)
-	}
-	return response
+	return NewTagFormatter(tags).asTable()
 }
 
-// FormatTags formats tags according to the specified format
 func FormatTags(tags []*sharedpb.Tag, format FormatType) string {
-	switch format {
-	case FormatJSON:
-		return TagsAsJSON(tags)
-	case FormatCSV:
-		return TagsAsCSV(tags)
-	case FormatTable:
-		return TagsAsTable(tags)
-	case FormatList:
-		fallthrough
-	default:
-		return TagsAsNumberedList(tags)
+	formatter := NewTagFormatter(tags)
+	result := formatter.Format(format)
+	if str, ok := result.(string); ok {
+		return str
 	}
+	return ""
 }
 
 // TagAsFormatted formats a single tag according to the specified format
@@ -403,3 +435,5 @@ func TagAsDetailedText(tag *sharedpb.Tag) string {
 
 	return response
 }
+
+
