@@ -3,6 +3,7 @@ services:
   - name: api
     source_dir: .
     github:
+      deploy_on_push: true
       repo: StudyGuides-com/study-guides-api
       branch: dev
     protocol: HTTP2
