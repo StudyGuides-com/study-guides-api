@@ -6,6 +6,8 @@ import (
 
 	"github.com/studyguides-com/study-guides-api/internal/lib/router/formatting"
 	"github.com/studyguides-com/study-guides-api/internal/store"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func HandleGetTag(ctx context.Context, store store.Store, params map[string]string) (string, error) {
@@ -18,12 +20,12 @@ func HandleGetTag(ctx context.Context, store store.Store, params map[string]stri
 	// Get the tag by ID
 	tag, err := store.TagStore().GetTagByID(ctx, tagID)
 	if err != nil {
+		// Check if it's a NotFound error and provide a more user-friendly message
+		if status.Code(err) == codes.NotFound {
+			response := formatting.NewSingleResponse(nil, fmt.Sprintf("Tag with ID '%s' not found.", tagID))
+			return response.ToJSON(), nil
+		}
 		response := formatting.NewSingleResponse(nil, fmt.Sprintf("Error retrieving tag: %v", err))
-		return response.ToJSON(), nil
-	}
-
-	if tag == nil {
-		response := formatting.NewSingleResponse(nil, fmt.Sprintf("Tag with ID '%s' not found.", tagID))
 		return response.ToJSON(), nil
 	}
 
@@ -32,13 +34,25 @@ func HandleGetTag(ctx context.Context, store store.Store, params map[string]stri
 
 	// Format the tag details
 	var data interface{}
+	var contentType string
+	
 	if format == formatting.FormatJSON {
 		data = tag
+		contentType = "application/json"
 	} else {
 		data = formatting.TagAsFormatted(tag, format)
+		contentType = "text/plain"
 	}
 
 	message := fmt.Sprintf("Found tag '%s'", tag.Name)
-	response := formatting.NewSingleResponse(data, message)
+	
+	// Create response with correct content type
+	response := &formatting.APIResponse{
+		Type:        formatting.ResponseTypeSingle,
+		Data:        data,
+		Message:     message,
+		ContentType: contentType,
+	}
+	
 	return response.ToJSON(), nil
 }

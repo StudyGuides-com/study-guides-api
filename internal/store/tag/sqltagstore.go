@@ -52,6 +52,10 @@ func (s *SqlTagStore) GetTagByID(ctx context.Context, id string) (*sharedpb.Tag,
 		WHERE id = $1
 	`, id)
 	if err != nil {
+		// Check if the error is "no rows in result set" and return NotFound
+		if err.Error() == "no rows in result set" {
+			return nil, status.Error(codes.NotFound, fmt.Sprintf("tag not found with id: %s", id))
+		}
 		return nil, status.Error(codes.Internal, "get tag by id: "+err.Error())
 	}
 

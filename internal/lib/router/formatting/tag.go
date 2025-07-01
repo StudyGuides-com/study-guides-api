@@ -379,21 +379,21 @@ func TagAsTable(tag *sharedpb.Tag) string {
 // TagAsDetailedText formats a single tag with comprehensive details
 func TagAsDetailedText(tag *sharedpb.Tag) string {
 	var response string
-	response += fmt.Sprintf("**Tag Details for ID: %s**\n\n", tag.Id)
-	response += fmt.Sprintf("**Name:** %s\n", tag.Name)
+	response += fmt.Sprintf("ID: %s\n", tag.Id)
+	response += fmt.Sprintf("Name: %s\n", tag.Name)
 
 	if tag.Description != nil && *tag.Description != "" {
-		response += fmt.Sprintf("**Description:** %s\n", *tag.Description)
+		response += fmt.Sprintf("Description: %s\n", *tag.Description)
 	}
 
-	response += fmt.Sprintf("**Type:** %s\n", tag.Type.String())
-	response += fmt.Sprintf("**Context:** %s\n", tag.Context)
+	response += fmt.Sprintf("Type: %s\n", tag.Type.String())
+	response += fmt.Sprintf("Context: %s\n", tag.Context)
 
 	if tag.ParentTagId != nil && *tag.ParentTagId != "" {
-		response += fmt.Sprintf("**Parent Tag ID:** %s\n", *tag.ParentTagId)
+		response += fmt.Sprintf("Parent Tag ID: %s\n", *tag.ParentTagId)
 	}
 
-	response += fmt.Sprintf("**Content Rating:** %s\n", tag.ContentRating.String())
+	response += fmt.Sprintf("Content Rating: %s\n", tag.ContentRating.String())
 
 	if len(tag.ContentDescriptors) > 0 {
 		// Convert ContentDescriptorType enums to strings
@@ -401,37 +401,37 @@ func TagAsDetailedText(tag *sharedpb.Tag) string {
 		for _, descriptor := range tag.ContentDescriptors {
 			contentDescriptorStrings = append(contentDescriptorStrings, descriptor.String())
 		}
-		response += fmt.Sprintf("**Content Descriptors:** %s\n", strings.Join(contentDescriptorStrings, ", "))
+		response += fmt.Sprintf("Content Descriptors: %s\n", strings.Join(contentDescriptorStrings, ", "))
 	}
 
 	if len(tag.MetaTags) > 0 {
-		response += fmt.Sprintf("**Meta Tags:** %s\n", strings.Join(tag.MetaTags, ", "))
+		response += fmt.Sprintf("Meta Tags: %s\n", strings.Join(tag.MetaTags, ", "))
 	}
 
-	response += fmt.Sprintf("**Public:** %t\n", tag.Public)
-	response += fmt.Sprintf("**Access Count:** %d\n", tag.AccessCount)
+	response += fmt.Sprintf("Public: %t\n", tag.Public)
+	response += fmt.Sprintf("Access Count: %d\n", tag.AccessCount)
 
 	if tag.Metadata != nil && len(tag.Metadata.Metadata) > 0 {
-		response += "**Metadata:**\n"
+		response += "Metadata:\n"
 		for key, value := range tag.Metadata.Metadata {
-			response += fmt.Sprintf("  - %s: %s\n", key, value)
+			response += fmt.Sprintf("  %s: %s\n", key, value)
 		}
 	}
 
 	if tag.BatchId != nil && *tag.BatchId != "" {
-		response += fmt.Sprintf("**Batch ID:** %s\n", *tag.BatchId)
+		response += fmt.Sprintf("Batch ID: %s\n", *tag.BatchId)
 	}
 
-	response += fmt.Sprintf("**Hash:** %s\n", tag.Hash)
-	response += fmt.Sprintf("**Has Questions:** %t\n", tag.HasQuestions)
-	response += fmt.Sprintf("**Has Children:** %t\n", tag.HasChildren)
+	response += fmt.Sprintf("Hash: %s\n", tag.Hash)
+	response += fmt.Sprintf("Has Questions: %t\n", tag.HasQuestions)
+	response += fmt.Sprintf("Has Children: %t\n", tag.HasChildren)
 
 	if tag.OwnerId != nil && *tag.OwnerId != "" {
-		response += fmt.Sprintf("**Owner ID:** %s\n", *tag.OwnerId)
+		response += fmt.Sprintf("Owner ID: %s\n", *tag.OwnerId)
 	}
 
-	response += fmt.Sprintf("**Created:** %s\n", tag.CreatedAt.AsTime().Format("2006-01-02 15:04:05"))
-	response += fmt.Sprintf("**Updated:** %s\n", tag.UpdatedAt.AsTime().Format("2006-01-02 15:04:05"))
+	response += fmt.Sprintf("Created: %s\n", tag.CreatedAt.AsTime().Format("2006-01-02 15:04:05"))
+	response += fmt.Sprintf("Updated: %s\n", tag.UpdatedAt.AsTime().Format("2006-01-02 15:04:05"))
 
 	return response
 }
