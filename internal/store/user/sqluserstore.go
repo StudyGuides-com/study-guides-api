@@ -165,3 +165,15 @@ func (s *SqlUserStore) UserCount(ctx context.Context, params map[string]string) 
 
 	return count, nil
 }
+
+func (s *SqlUserStore) KillUser(ctx context.Context, email string) (bool, error) {
+	result, err := s.db.Exec(ctx, `
+		DELETE FROM public."User"
+		WHERE email = $1
+	`, email)
+	if err != nil {
+		return false, status.Error(codes.Internal, "kill user: "+err.Error())
+	}
+
+	return result.RowsAffected() > 0, nil
+}

@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	adminpb "github.com/studyguides-com/study-guides-api/api/v1/admin"
 	chatpb "github.com/studyguides-com/study-guides-api/api/v1/chat"
 	healthpb "github.com/studyguides-com/study-guides-api/api/v1/health"
 	questionpb "github.com/studyguides-com/study-guides-api/api/v1/question"
@@ -127,6 +128,9 @@ func (s *Server) registerServices(appStore store.Store) {
 	router := router.NewRouter(appStore)
 	ai := ai.NewClient(os.Getenv("OPENAI_API_KEY"), os.Getenv("OPENAI_MODEL"))
 	chatpb.RegisterChatServiceServer(s.grpcServer, services.NewChatService(router, ai))
+
+	// Register Admin Service
+	adminpb.RegisterAdminServiceServer(s.grpcServer, services.NewAdminService(appStore))
 }
 
 // Shutdown gracefully shuts down the server

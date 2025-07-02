@@ -41,3 +41,29 @@ func (s *AdminService) NewTag(ctx context.Context, req *adminpb.NewTagAdminReque
 	}
 	return resp.(*adminpb.NewTagAdminResponse), nil
 }
+
+func (s *AdminService) KillUser(ctx context.Context, req *adminpb.KillUserAdminRequest) (*adminpb.KillUserAdminResponse, error) {
+	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, session *middleware.SessionDetails) (interface{}, error) {
+		if session.UserID == nil {
+			log.Printf("KillUser request from anonymous user")
+			return nil, status.Error(codes.Unauthenticated, "authentication required")
+		}
+
+		log.Printf("KillUser request from user %s for email %s", *session.UserID, req.Email)
+
+		// Call the store method to kill the user
+		ok, err := s.store.UserStore().KillUser(ctx, req.Email)
+		if err != nil {
+			log.Printf("Error killing user %s: %v", req.Email, err)
+			return nil, status.Error(codes.Internal, "failed to kill user")
+		}
+
+		return &adminpb.KillUserAdminResponse{
+			Ok: ok,
+		}, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*adminpb.KillUserAdminResponse), nil
+}

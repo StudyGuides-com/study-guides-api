@@ -15,6 +15,7 @@ type UserStore interface {
 	UserByEmail(ctx context.Context, email string) (*sharedpb.User, error)
 	Profile(ctx context.Context, userID string) (*sharedpb.User, error)
 	UserCount(ctx context.Context, params map[string]string) (int64, error)
+	KillUser(ctx context.Context, email string) (bool, error)
 }
 
 func NewSqlUserStore(ctx context.Context, dbURL string) (*SqlUserStore, error) {

@@ -17,7 +17,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
-	"github.com/studyguides-com/study-guides-api/internal/store"
+	"github.com/studyguides-com/study-guides-api/internal/utils"
 )
 
 type SqlAdminStore struct {
@@ -33,7 +33,7 @@ func NewTag(id string, name string, hash string, tagType sharedpb.TagType, paren
 	}
 
 	// Convert ParserType to ContextType
-	contextType, _ := store.GetContextTypeForParser(parserType)
+	contextType, _ := utils.GetContextTypeForParser(parserType)
 
 	return &sharedpb.Tag{
 		Id:                 id,
@@ -873,7 +873,7 @@ func (s *SqlAdminStore) ImportGob(ctx context.Context, gobPayload []byte) (bool,
 					"sectionTitle": section.Title,
 				},
 			}
-			p := NewPassage(store.GetCUID(), passage.Title, passage.Content, topicId, metadata)
+			p := NewPassage(utils.GetCUID(), passage.Title, passage.Content, topicId, metadata)
 			_, err := s.UpsertPassage(ctx, p)
 			if err != nil {
 				return false, status.Error(codes.Internal, fmt.Sprintf("failed to upsert passage for section %s", section.Title))
@@ -888,7 +888,7 @@ func (s *SqlAdminStore) ImportGob(ctx context.Context, gobPayload []byte) (bool,
 						"sectionTitle": section.Title,
 					},
 				}
-				question := NewQuestion(store.GetCUID(), &p.Id, prompt.Hash, prompt.Question, prompt.Answer, &prompt.LearnMore, &prompt.Distractors, metadata)
+				question := NewQuestion(utils.GetCUID(), &p.Id, prompt.Hash, prompt.Question, prompt.Answer, &prompt.LearnMore, &prompt.Distractors, metadata)
 				updatedQuestion, err := s.UpsertQuestion(ctx, question)
 				if err != nil {
 					return false, status.Error(codes.Internal, fmt.Sprintf("failed to upsert question for section %s", section.Title))
@@ -911,7 +911,7 @@ func (s *SqlAdminStore) ImportGob(ctx context.Context, gobPayload []byte) (bool,
 					"sectionTitle": section.Title,
 				},
 			}
-			question := NewQuestion(store.GetCUID(), nil, prompt.Hash, prompt.Question, prompt.Answer, &prompt.LearnMore, &prompt.Distractors, metadata)
+			question := NewQuestion(utils.GetCUID(), nil, prompt.Hash, prompt.Question, prompt.Answer, &prompt.LearnMore, &prompt.Distractors, metadata)
 			updatedQuestion, err := s.UpsertQuestion(ctx, question)
 			if err != nil {
 				return false, status.Error(codes.Internal, fmt.Sprintf("failed to upsert question for section %s", section.Title))
@@ -976,7 +976,7 @@ func (s *SqlAdminStore) ImportAncestry(ctx context.Context, ancestor *sharedpb.A
 		var tag *sharedpb.Tag
 		if i == len(ancestors)-1 {
 			tag = NewTag(
-				store.GetCUID(),
+				utils.GetCUID(),
 				anc.Name,
 				anc.Hash,
 				anc.TagType,
@@ -989,7 +989,7 @@ func (s *SqlAdminStore) ImportAncestry(ctx context.Context, ancestor *sharedpb.A
 			)
 		} else {
 			tag = NewTag(
-				store.GetCUID(),
+				utils.GetCUID(),
 				anc.Name,
 				anc.Hash,
 				anc.TagType,
