@@ -46,7 +46,7 @@ func HandleGetUser(ctx context.Context, store store.Store, params map[string]str
 		contentType = "text/plain"
 	}
 
-	message := fmt.Sprintf("Found user '%s'", user.Email)
+	message := fmt.Sprintf("Found user '%s'", user.GetEmail())
 	
 	// Create response with correct content type
 	response := &formatting.APIResponse{
