@@ -58,6 +58,13 @@ bump-major:
 	git tag -a "$$new_version" -m "Release $$new_version"; \
 	echo "Created tag $$new_version"
 
+# Git workflow: merge dev to test, then test to main
+.PHONY: git-workflow
+git-workflow:
+	@echo "Starting git workflow: dev → test → main"
+	git checkout test && git merge dev && git push && git checkout main && git merge test && git push && git checkout dev
+	@echo "Git workflow completed successfully"
+
 proto:
 	protoc \
 		--proto_path=$(PROTO_DIR) \
