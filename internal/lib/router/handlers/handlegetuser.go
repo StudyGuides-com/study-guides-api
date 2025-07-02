@@ -32,13 +32,29 @@ func HandleGetUser(ctx context.Context, store store.Store, params map[string]str
 
 	// Format the user details
 	var data interface{}
-	if format == formatting.FormatJSON {
+	var contentType string
+	
+	switch format {
+	case formatting.FormatJSON:
 		data = user
-	} else {
+		contentType = "application/json"
+	case formatting.FormatCSV:
 		data = formatting.UserAsFormatted(user, format)
+		contentType = "text/csv"
+	default:
+		data = formatting.UserAsFormatted(user, format)
+		contentType = "text/plain"
 	}
 
 	message := fmt.Sprintf("Found user '%s'", user.Email)
-	response := formatting.NewSingleResponse(data, message)
+	
+	// Create response with correct content type
+	response := &formatting.APIResponse{
+		Type:        formatting.ResponseTypeSingle,
+		Data:        data,
+		Message:     message,
+		ContentType: contentType,
+	}
+	
 	return response.ToJSON(), nil
 }

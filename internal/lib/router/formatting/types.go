@@ -98,11 +98,21 @@ func NewListResponse(data interface{}, message string, filters map[string]string
 
 // NewSingleResponse creates a new single item response
 func NewSingleResponse(item interface{}, message string) *APIResponse {
+	contentType := "application/json"
+	if str, ok := item.(string); ok {
+		if len(str) > 0 {
+			contentType = "text/plain"
+		} else {
+			// Empty string should still be JSON
+			contentType = "application/json"
+		}
+	}
+	
 	return &APIResponse{
 		Type:        ResponseTypeSingle,
 		Data:        item,
 		Message:     message,
-		ContentType: "application/json",
+		ContentType: contentType,
 	}
 }
 
