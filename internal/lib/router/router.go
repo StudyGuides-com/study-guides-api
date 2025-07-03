@@ -45,6 +45,18 @@ func NewRouter(store store.Store) *OperationRouter {
 			string(tools.ToolNameGetUser): func(ctx context.Context, params map[string]string) (string, error) {
 				return handlers.HandleGetUser(ctx, store, params)
 			},
+			string(tools.ToolNameDeploy): func(ctx context.Context, params map[string]string) (string, error) {
+				return handlers.HandleDeploy(ctx, store, params)
+			},
+			string(tools.ToolNameRollback): func(ctx context.Context, params map[string]string) (string, error) {
+				return handlers.HandleRollback(ctx, store, params)
+			},
+			string(tools.ToolNameListDeployments): func(ctx context.Context, params map[string]string) (string, error) {
+				return handlers.HandleListDeployments(ctx, store, params)
+			},
+			string(tools.ToolNameGetDeploymentStatus): func(ctx context.Context, params map[string]string) (string, error) {
+				return handlers.HandleGetDeploymentStatus(ctx, store, params)
+			},
 			string(tools.ToolNameUnknown): func(ctx context.Context, params map[string]string) (string, error) {
 				return handlers.HandleUnknown(ctx, store, params)
 			},

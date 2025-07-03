@@ -35,7 +35,7 @@ func HandleGetTag(ctx context.Context, store store.Store, params map[string]stri
 	// Format the tag details
 	var data interface{}
 	var contentType string
-	
+
 	switch format {
 	case formatting.FormatJSON:
 		data = formatting.TagAsJSONObject(tag)
@@ -49,7 +49,7 @@ func HandleGetTag(ctx context.Context, store store.Store, params map[string]stri
 	}
 
 	message := fmt.Sprintf("Found tag '%s'", tag.Name)
-	
+
 	// Create response with correct content type
 	response := &formatting.APIResponse{
 		Type:        formatting.ResponseTypeSingle,
@@ -57,6 +57,6 @@ func HandleGetTag(ctx context.Context, store store.Store, params map[string]stri
 		Message:     message,
 		ContentType: contentType,
 	}
-	
+
 	return response.ToJSON(), nil
 }

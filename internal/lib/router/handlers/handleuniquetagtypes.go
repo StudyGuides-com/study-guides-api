@@ -79,6 +79,6 @@ func HandleUniqueTagTypes(ctx context.Context, store store.Store, params map[str
 		Message:     message,
 		ContentType: contentType,
 	}
-	
+
 	return response.ToJSON(), nil
 }

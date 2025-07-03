@@ -77,6 +77,6 @@ func HandleListRootTags(ctx context.Context, store store.Store, params map[strin
 		ContentType: contentType,
 		Filters:     filters,
 	}
-	
+
 	return response.ToJSON(), nil
 }

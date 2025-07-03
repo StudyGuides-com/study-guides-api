@@ -7,15 +7,19 @@ import (
 type ToolNames string
 
 const (
-	ToolNameTagCount           ToolNames = "TagCount"
-	ToolNameListTags           ToolNames = "ListTags"
-	ToolNameListRootTags       ToolNames = "ListRootTags"
-	ToolNameGetTag             ToolNames = "GetTag"
-	ToolNameUniqueTagTypes     ToolNames = "UniqueTagTypes"
-	ToolNameUniqueContextTypes ToolNames = "UniqueContextTypes"
-	ToolNameUserCount          ToolNames = "UserCount"
-	ToolNameGetUser            ToolNames = "GetUser"
-	ToolNameUnknown            ToolNames = "Unknown"
+	ToolNameTagCount            ToolNames = "TagCount"
+	ToolNameListTags            ToolNames = "ListTags"
+	ToolNameListRootTags        ToolNames = "ListRootTags"
+	ToolNameGetTag              ToolNames = "GetTag"
+	ToolNameUniqueTagTypes      ToolNames = "UniqueTagTypes"
+	ToolNameUniqueContextTypes  ToolNames = "UniqueContextTypes"
+	ToolNameUserCount           ToolNames = "UserCount"
+	ToolNameGetUser             ToolNames = "GetUser"
+	ToolNameDeploy              ToolNames = "Deploy"
+	ToolNameRollback            ToolNames = "Rollback"
+	ToolNameListDeployments     ToolNames = "ListDeployments"
+	ToolNameGetDeploymentStatus ToolNames = "GetDeploymentStatus"
+	ToolNameUnknown             ToolNames = "Unknown"
 )
 
 // ClassificationToolDefinitions contains all available tool definitions for classification
@@ -59,6 +63,26 @@ var ClassificationToolDefinitions = []ToolDefinition{
 		string(ToolNameGetUser),
 		"Returns detailed information about a specific user by their email address. The userEmail parameter must be a valid email address. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
 	).WithParameters([]string{"userEmail"}, userEmailProperty, formatProperty),
+
+	NewToolDefinition(
+		string(ToolNameDeploy),
+		"Deploys an application to the production environment. Use when user wants to deploy, push to production, or release an app. The appId parameter is required and should be the DigitalOcean App Platform app ID. The force parameter is optional and defaults to false - set to true to force a rebuild even if unchanged.",
+	).WithParameters([]string{"appId"}, appIdProperty, forceProperty),
+
+	NewToolDefinition(
+		string(ToolNameRollback),
+		"Rolls back an application to a previous deployment. Use when user wants to rollback, revert, or go back to a previous version. Both appId and deploymentId parameters are required. The deploymentId should be the ID of the deployment to roll back to.",
+	).WithParameters([]string{"appId", "deploymentId"}, appIdProperty, deploymentIdProperty),
+
+	NewToolDefinition(
+		string(ToolNameListDeployments),
+		"Lists all deployments for an application. Use when user wants to see deployment history, list deployments, or check deployment status. The appId parameter is required. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
+	).WithParameters([]string{"appId"}, appIdProperty, formatProperty),
+
+	NewToolDefinition(
+		string(ToolNameGetDeploymentStatus),
+		"Gets the status of a specific deployment. Use when user wants to check deployment status, see if deployment is complete, or get deployment details. Both appId and deploymentId parameters are required. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
+	).WithParameters([]string{"appId", "deploymentId"}, appIdProperty, deploymentIdProperty, formatProperty),
 
 	NewToolDefinition(
 		string(ToolNameUnknown),

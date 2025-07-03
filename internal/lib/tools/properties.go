@@ -84,3 +84,22 @@ var userEmailProperty = NewProperty(
 	"string",
 	"The email address of the user to retrieve (e.g. 'user@example.com')",
 )
+
+// DevOps properties
+var appIdProperty = NewProperty(
+	"appId",
+	"string",
+	"The DigitalOcean App Platform app ID (e.g. 'abc123def456')",
+)
+
+var deploymentIdProperty = NewProperty(
+	"deploymentId",
+	"string",
+	"The deployment ID to reference (e.g. 'def789ghi012')",
+)
+
+var forceProperty = NewProperty(
+	"force",
+	"string",
+	"Force a rebuild even if unchanged: 'true' to force rebuild, 'false' for normal deployment (default: 'false')",
+)

@@ -124,7 +124,6 @@ func HandleListTags(ctx context.Context, store store.Store, params map[string]st
 		ContentType: contentType,
 		Filters:     filters,
 	}
-	
+
 	return response.ToJSON(), nil
 }
-

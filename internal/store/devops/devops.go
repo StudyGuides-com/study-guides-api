@@ -9,14 +9,12 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-
 type DevopsStore interface {
 	Deploy(ctx context.Context, appID string) (string, error)
 	Rollback(ctx context.Context, appID string, deploymentID string) (string, error)
 	ListDeployments(ctx context.Context, appID string) ([]devopspb.Deployment, error)
 	GetDeploymentStatus(ctx context.Context, appID string, deploymentID string) (devopspb.Deployment, error)
 }
-
 
 func NewDevopsStore(ctx context.Context) (*DigitalOceanDevopsStore, error) {
 	token := os.Getenv("DIGITAL_OCEAN_TOKEN")
@@ -25,4 +23,3 @@ func NewDevopsStore(ctx context.Context) (*DigitalOceanDevopsStore, error) {
 	}
 	return &DigitalOceanDevopsStore{token: token}, nil
 }
-

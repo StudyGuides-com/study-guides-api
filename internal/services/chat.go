@@ -109,6 +109,32 @@ func createResponseSummary(answer string, operation string, params map[string]st
 		}
 		return fmt.Sprintf("Retrieved %d unique tag types", typeCount)
 
+	case "Deploy":
+		return "Deployment initiated successfully"
+
+	case "Rollback":
+		return "Rollback initiated successfully"
+
+	case "ListDeployments":
+		// Count lines to estimate number of deployments
+		lines := strings.Split(answer, "\n")
+		deploymentCount := 0
+		for _, line := range lines {
+			if strings.Contains(line, ". ") || strings.Contains(line, "|") || strings.Contains(line, "{") {
+				deploymentCount++
+			}
+		}
+
+		format := "list"
+		if f, ok := params["format"]; ok {
+			format = f
+		}
+
+		return fmt.Sprintf("Retrieved %d deployments in %s format", deploymentCount, format)
+
+	case "GetDeploymentStatus":
+		return "Retrieved deployment status information"
+
 	default:
 		// For unknown operations, truncate and add ellipsis
 		if len(answer) > MaxMessageLength {
@@ -234,6 +260,7 @@ func buildSystemPrompt() string {
 	- "show tags in json" → ListTags with format: "json"
 	- "export users as table" → ListUsers with format: "table"
 	- "get tag count in csv" → TagCount with format: "csv"
+	- "list deployments as table" → ListDeployments with format: "table"
 	
 	ALWAYS set the format parameter when the user specifies a format preference!
 	`
@@ -255,7 +282,8 @@ func buildSystemPrompt() string {
 	3. For tag-related requests, use ListTags, TagCount, GetTag, or ListRootTags as appropriate
 	4. For user-related requests, use UserCount or GetUser
 	5. For metadata requests, use UniqueTagTypes or UniqueContextTypes
-	6. Always respond using the provided tool to return your response in JSON format
+	6. For devops requests, use Deploy, Rollback, ListDeployments, or GetDeploymentStatus as appropriate
+	7. Always respond using the provided tool to return your response in JSON format
 
 	EXAMPLES:
 	- "list the tags" → ListTags
@@ -264,6 +292,10 @@ func buildSystemPrompt() string {
 	- "get tag details" → GetTag (requires tagId)
 	- "how many users" → UserCount
 	- "what tag types exist" → UniqueTagTypes
+	- "deploy the app" → Deploy (requires appId)
+	- "rollback to previous version" → Rollback (requires appId and deploymentId)
+	- "list deployments" → ListDeployments (requires appId)
+	- "check deployment status" → GetDeploymentStatus (requires appId and deploymentId)
 	- "I don't understand" → Unknown
 	`, operationsList, detailsList, tagTypeGuidance, formatGuidance)
 }
@@ -347,6 +379,10 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 				"UniqueContextTypes",
 				"UserCount",
 				"GetUser",
+				"Deploy",
+				"Rollback",
+				"ListDeployments",
+				"GetDeploymentStatus",
 				"Unknown",
 			}, ", "))
 		}
@@ -384,7 +420,7 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 		fmt.Printf("DEBUG: === AI RESPONSE ===\n")
 		fmt.Printf("DEBUG: Operation: %s\n", plan.Operation)
 		fmt.Printf("DEBUG: Parameters: %+v\n", plan.Parameters)
-		
+
 		// Debug: Print format information for Slack bot
 		if format, ok := plan.Parameters["format"]; ok {
 			fmt.Printf("DEBUG: Determined format for Slack bot: %s\n", format)
@@ -443,5 +479,3 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 
 	return resp.(*chatpb.ChatResponse), nil
 }
-
-

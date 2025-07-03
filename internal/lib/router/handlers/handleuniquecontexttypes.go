@@ -63,6 +63,6 @@ func HandleUniqueContextTypes(ctx context.Context, store store.Store, params map
 		Message:     message,
 		ContentType: contentType,
 	}
-	
+
 	return response.ToJSON(), nil
 }

@@ -508,5 +508,3 @@ func TagAsDetailedText(tag *sharedpb.Tag) string {
 
 	return response
 }
-
-

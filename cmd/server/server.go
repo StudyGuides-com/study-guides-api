@@ -9,9 +9,9 @@ import (
 	"os"
 	"strings"
 
-	devopspb "github.com/studyguides-com/study-guides-api/api/v1/devops"
 	adminpb "github.com/studyguides-com/study-guides-api/api/v1/admin"
 	chatpb "github.com/studyguides-com/study-guides-api/api/v1/chat"
+	devopspb "github.com/studyguides-com/study-guides-api/api/v1/devops"
 	healthpb "github.com/studyguides-com/study-guides-api/api/v1/health"
 	questionpb "github.com/studyguides-com/study-guides-api/api/v1/question"
 	searchpb "github.com/studyguides-com/study-guides-api/api/v1/search"

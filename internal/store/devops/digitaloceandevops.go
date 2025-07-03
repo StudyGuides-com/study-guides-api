@@ -10,7 +10,7 @@ import (
 )
 
 type DigitalOceanDevopsStore struct {
-	token string
+	token  string
 	client *godo.Client
 }
 

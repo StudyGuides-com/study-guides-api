@@ -32,4 +32,4 @@ func GetParserTypeForContext(contextType sharedpb.ContextType) (sharedpb.ParserT
 		}
 	}
 	return sharedpb.ParserType_PARSER_TYPE_UNSPECIFIED, false
-} 
+}

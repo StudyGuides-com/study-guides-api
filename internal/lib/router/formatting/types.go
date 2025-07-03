@@ -28,23 +28,23 @@ const (
 
 // APIResponse is the universal wrapper for all API responses
 type APIResponse struct {
-	Type        ResponseType         `json:"type"`
-	Data        interface{}          `json:"data"`
-	Message     string               `json:"message,omitempty"`
-	ContentType string               `json:"content_type"`
-	Filters     map[string]string    `json:"filters,omitempty"`
-	Pagination  *PaginationInfo      `json:"pagination,omitempty"`
+	Type        ResponseType           `json:"type"`
+	Data        interface{}            `json:"data"`
+	Message     string                 `json:"message,omitempty"`
+	ContentType string                 `json:"content_type"`
+	Filters     map[string]string      `json:"filters,omitempty"`
+	Pagination  *PaginationInfo        `json:"pagination,omitempty"`
 	Metadata    map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // PaginationInfo contains pagination details
 type PaginationInfo struct {
-	Page     int `json:"page"`
-	Limit    int `json:"limit"`
-	Total    int `json:"total"`
-	Pages    int `json:"pages"`
-	HasNext  bool `json:"has_next"`
-	HasPrev  bool `json:"has_prev"`
+	Page    int  `json:"page"`
+	Limit   int  `json:"limit"`
+	Total   int  `json:"total"`
+	Pages   int  `json:"pages"`
+	HasNext bool `json:"has_next"`
+	HasPrev bool `json:"has_prev"`
 }
 
 // Formatter interface for different data types
@@ -85,7 +85,7 @@ func NewListResponse(data interface{}, message string, filters map[string]string
 			contentType = "application/json"
 		}
 	}
-	
+
 	return &APIResponse{
 		Type:        ResponseTypeList,
 		Data:        data,
@@ -107,7 +107,7 @@ func NewSingleResponse(item interface{}, message string) *APIResponse {
 			contentType = "application/json"
 		}
 	}
-	
+
 	return &APIResponse{
 		Type:        ResponseTypeSingle,
 		Data:        item,
