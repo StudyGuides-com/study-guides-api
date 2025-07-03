@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	devopspb "github.com/studyguides-com/study-guides-api/api/v1/devops"
 	adminpb "github.com/studyguides-com/study-guides-api/api/v1/admin"
 	chatpb "github.com/studyguides-com/study-guides-api/api/v1/chat"
 	healthpb "github.com/studyguides-com/study-guides-api/api/v1/health"
@@ -131,6 +132,9 @@ func (s *Server) registerServices(appStore store.Store) {
 
 	// Register Admin Service
 	adminpb.RegisterAdminServiceServer(s.grpcServer, services.NewAdminService(appStore))
+
+	// Register Devops Service
+	devopspb.RegisterDevopsServiceServer(s.grpcServer, services.NewDevopsService(appStore))
 }
 
 // Shutdown gracefully shuts down the server

@@ -107,6 +107,7 @@ proto:
 		$(PROTO_DIR)/v1/shared/ancestor.proto \
 		$(PROTO_DIR)/v1/shared/section.proto \
 		$(PROTO_DIR)/v1/shared/guide.proto \
+		$(PROTO_DIR)/v1/devops/devops.proto \
 
 build:
 	go build -o ./bin/server ./cmd/server

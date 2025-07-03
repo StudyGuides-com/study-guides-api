@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package devops.v1;
+
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/devops;devopsv1";
+
+import "google/protobuf/timestamp.proto";
+
+message DeployRequest {
+  string app_id = 1;
+  bool force = 2; // if true, triggers a rebuild even if unchanged
+}
+
+message DeployResponse {
+  string deployment_id = 1;
+}
+
+message ListDeploymentsRequest {
+  string app_id = 1;
+}
+
+message ListDeploymentsResponse {
+  repeated Deployment deployments = 1;
+}
+
+message GetDeploymentStatusRequest {
+  string app_id = 1;
+  string deployment_id = 2;
+}
+
+message GetDeploymentStatusResponse {
+  Deployment deployment = 1;
+}
+
+enum DeploymentStatus {
+  UNKNOWN = 0;
+  PENDING = 1;
+  BUILDING = 2;
+  ACTIVE = 3;
+  ERROR = 4;
+  CANCELED = 5;
+}
+
+message Deployment {
+  string deployment_id = 1;
+  string app_id = 2;
+  DeploymentStatus status = 3;
+  google.protobuf.Timestamp created_at = 4;
+}
+
+message RollbackRequest {
+  string app_id = 1;
+  string deployment_id = 2; // ID of the deployment to roll back to
+}
+
+message RollbackResponse {
+  string deployment_id = 1; // new deployment ID created by rollback
+}
+
+service DevopsService {
+  rpc Deploy(DeployRequest) returns (DeployResponse);
+  rpc Rollback(RollbackRequest) returns (RollbackResponse);
+  rpc ListDeployments(ListDeploymentsRequest) returns (ListDeploymentsResponse);
+  rpc GetDeploymentStatus(GetDeploymentStatusRequest) returns (GetDeploymentStatusResponse);
+}

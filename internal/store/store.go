@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/studyguides-com/study-guides-api/internal/store/devops"
 	"github.com/studyguides-com/study-guides-api/internal/store/interaction"
 	"github.com/studyguides-com/study-guides-api/internal/store/question"
 	"github.com/studyguides-com/study-guides-api/internal/store/roland"
@@ -21,6 +22,7 @@ type Store interface {
 	QuestionStore() question.QuestionStore
 	InteractionStore() interaction.InteractionStore
 	RolandStore() roland.RolandStore
+	DevopsStore() devops.DevopsStore
 }
 
 type store struct {
@@ -30,6 +32,7 @@ type store struct {
 	questionStore    question.QuestionStore
 	interactionStore interaction.InteractionStore
 	rolandStore      roland.RolandStore
+	devopsStore      devops.DevopsStore
 }
 
 func (s *store) SearchStore() search.SearchStore {
@@ -54,6 +57,10 @@ func (s *store) InteractionStore() interaction.InteractionStore {
 
 func (s *store) RolandStore() roland.RolandStore {
 	return s.rolandStore
+}
+
+func (s *store) DevopsStore() devops.DevopsStore {
+	return s.devopsStore
 }
 
 func NewStore() (Store, error) {
@@ -97,6 +104,11 @@ func NewStore() (Store, error) {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	devopsStore, err := devops.NewDevopsStore(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	return &store{
 		searchStore:      searchStore,
 		tagStore:         tagStore,
@@ -104,5 +116,6 @@ func NewStore() (Store, error) {
 		questionStore:    questionStore,
 		interactionStore: interactionStore,
 		rolandStore:      rolandStore,
+		devopsStore:      devopsStore,
 	}, nil
 }
