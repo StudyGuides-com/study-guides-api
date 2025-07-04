@@ -41,6 +41,13 @@
         <p><strong>Region:</strong> {{.Region}}</p>
         <p><strong>Deployment ID:</strong> {{.DeploymentID}}</p>
         <p><strong>Platform:</strong> Digital Ocean App Platform</p>
+
+        <div class="do-env-vars">
+          <h3>All Digital Ocean Environment Variables:</h3>
+          {{range $key, $value := .AllDOEnvVars}}
+          <p><strong>{{$key}}:</strong> {{$value}}</p>
+          {{end}}
+        </div>
         {{end}}
       </div>
     </div>

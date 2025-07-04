@@ -176,6 +176,27 @@ a:hover {
   color: #495057;
 }
 
+/* Digital Ocean Environment Variables */
+.do-env-vars {
+  margin-top: 20px;
+  padding: 15px;
+  background: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  font-size: 12px;
+}
+
+.do-env-vars h3 {
+  margin-bottom: 10px;
+  color: #1976d2;
+  font-size: 16px;
+}
+
+.do-env-vars p {
+  margin: 3px 0;
+  color: #424242;
+  font-family: monospace;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   body {
