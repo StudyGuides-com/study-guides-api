@@ -4,6 +4,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+
+	"github.com/studyguides-com/study-guides-api/internal/lib/webrouter/utils"
 )
 
 // HomeHandler handles home page requests
@@ -24,6 +26,9 @@ func (h *HomeHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		"Title":   "Study Guides API",
 		"Message": "Welcome to the Study Guides API",
 	}
+
+	// Add environment data
+	data = utils.MergeWithEnvData(data)
 
 	if err := h.templates.ExecuteTemplate(w, "home.html", data); err != nil {
 		log.Printf("Error executing template: %v", err)

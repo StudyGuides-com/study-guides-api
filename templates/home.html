@@ -14,6 +14,35 @@
       <div class="roland-image">
         <img src="/static/images/roland-phone.png" alt="Roland Phone" />
       </div>
+
+      {{if .IsDev}}
+      <div class="env-badge dev">
+        <span>🚧 Development Environment</span>
+      </div>
+      {{else if .IsStaging}}
+      <div class="env-badge staging">
+        <span>🧪 Staging Environment</span>
+      </div>
+      {{else if .IsProd}}
+      <div class="env-badge prod">
+        <span>✅ Production Environment</span>
+      </div>
+      {{else}}
+      <div class="env-badge unknown">
+        <span>❓ {{.Environment}} Environment</span>
+      </div>
+      {{end}}
+
+      <div class="build-info">
+        <p><strong>Version:</strong> {{.Version}}</p>
+        <p><strong>Build Time:</strong> {{.BuildTime}}</p>
+        {{if .IsDigitalOcean}}
+        <p><strong>App:</strong> {{.AppName}}</p>
+        <p><strong>Region:</strong> {{.Region}}</p>
+        <p><strong>Deployment ID:</strong> {{.DeploymentID}}</p>
+        <p><strong>Platform:</strong> Digital Ocean App Platform</p>
+        {{end}}
+      </div>
     </div>
   </body>
 </html>

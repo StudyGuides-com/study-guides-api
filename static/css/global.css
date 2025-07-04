@@ -128,6 +128,54 @@ a:hover {
   margin-top: 30px;
 }
 
+/* Environment Badges */
+.env-badge {
+  text-align: center;
+  margin: 20px 0;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.env-badge.dev {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.env-badge.staging {
+  background: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
+.env-badge.prod {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.env-badge.unknown {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Build Info */
+.build-info {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-left: 4px solid #6c757d;
+  font-size: 14px;
+}
+
+.build-info p {
+  margin: 5px 0;
+  color: #495057;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   body {

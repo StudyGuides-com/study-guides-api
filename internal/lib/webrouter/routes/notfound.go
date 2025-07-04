@@ -4,6 +4,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+
+	"github.com/studyguides-com/study-guides-api/internal/lib/webrouter/utils"
 )
 
 // NotFoundHandler handles 404 errors
@@ -27,6 +29,9 @@ func (h *NotFoundHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		"Message": "The requested page could not be found",
 		"Path":    r.URL.Path,
 	}
+
+	// Add environment data
+	data = utils.MergeWithEnvData(data)
 
 	if err := h.templates.ExecuteTemplate(w, "404.html", data); err != nil {
 		log.Printf("Error executing 404 template: %v", err)
