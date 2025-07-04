@@ -23,8 +23,8 @@ func NewHomeHandler(templates *template.Template) *HomeHandler {
 // Handle responds to home page requests
 func (h *HomeHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
-		"Title":   "Study Guides API",
-		"Message": "Welcome to the Study Guides API",
+		"Title":   "StudyGuides.com API",
+		"Message": "Welcome to the StudyGuides.com API",
 	}
 
 	// Add environment data
