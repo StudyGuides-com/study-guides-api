@@ -28,7 +28,7 @@ func (h *HomeHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add environment data
-	data = utils.MergeWithEnvData(data)
+	data = utils.MergeWithEnvData(data, r)
 
 	if err := h.templates.ExecuteTemplate(w, "home.html", data); err != nil {
 		log.Printf("Error executing template: %v", err)

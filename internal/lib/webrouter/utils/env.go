@@ -2,6 +2,7 @@ package utils
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -22,21 +23,46 @@ type EnvironmentData struct {
 	AllDOEnvVars   map[string]string
 }
 
+// detectEnvironmentFromHostname determines environment based on hostname
+func detectEnvironmentFromHostname(hostname string) string {
+	hostname = strings.ToLower(hostname)
+	
+	// Check for common environment subdomains
+	if strings.HasPrefix(hostname, "dev.") || strings.HasPrefix(hostname, "development.") {
+		return "development"
+	}
+	if strings.HasPrefix(hostname, "test.") || strings.HasPrefix(hostname, "staging.") {
+		return "staging"
+	}
+	
+	// Production is the main domain without subdomain (api.studyguides.com)
+	// or explicitly prod subdomain
+	if strings.HasPrefix(hostname, "prod.") || strings.HasPrefix(hostname, "production.") {
+		return "production"
+	}
+	
+	// If it's the main domain (api.studyguides.com), it's production
+	if hostname == "api.studyguides.com" {
+		return "production"
+	}
+	
+	// If no subdomain or unknown subdomain, default to development
+	return "development"
+}
+
 // GetEnvironmentData returns environment information for templates
-func GetEnvironmentData() EnvironmentData {
+func GetEnvironmentData(r *http.Request) EnvironmentData {
 	// Environment detection - prioritize explicit ENVIRONMENT setting
 	env := os.Getenv("ENVIRONMENT")
 	if env == "" {
-		// Auto-detect environment based on Digital Ocean variables
-		if os.Getenv("DIGITALOCEAN_APP_PLATFORM") != "" {
-			// On Digital Ocean App Platform, check for specific environment indicators
-			if os.Getenv("DIGITALOCEAN_APP_ENV") != "" {
-				env = os.Getenv("DIGITALOCEAN_APP_ENV")
-			} else {
-				// Default to production on Digital Ocean unless explicitly set otherwise
-				env = "production"
-			}
+		// Check for Digital Ocean specific environment variable
+		if os.Getenv("DIGITALOCEAN_APP_ENV") != "" {
+			env = os.Getenv("DIGITALOCEAN_APP_ENV")
+		} else if r != nil {
+			// Detect from hostname if request is available
+			env = detectEnvironmentFromHostname(r.Host)
 		} else {
+			// Default to development for safety
 			env = "development"
 		}
 	}
@@ -87,8 +113,12 @@ func GetEnvironmentData() EnvironmentData {
 	// Debug: Log environment detection for troubleshooting
 	log.Printf("Environment Detection Debug:")
 	log.Printf("  ENVIRONMENT: %s", os.Getenv("ENVIRONMENT"))
-	log.Printf("  DIGITALOCEAN_APP_PLATFORM: %s", os.Getenv("DIGITALOCEAN_APP_PLATFORM"))
 	log.Printf("  DIGITALOCEAN_APP_ENV: %s", os.Getenv("DIGITALOCEAN_APP_ENV"))
+	if r != nil {
+		log.Printf("  Hostname: %s", r.Host)
+		log.Printf("  Detected from hostname: %s", detectEnvironmentFromHostname(r.Host))
+	}
+	log.Printf("  DIGITALOCEAN_APP_PLATFORM: %s", os.Getenv("DIGITALOCEAN_APP_PLATFORM"))
 	log.Printf("  DIGITALOCEAN_APP_NAME: %s", os.Getenv("DIGITALOCEAN_APP_NAME"))
 	log.Printf("  DIGITALOCEAN_APP_DEPLOYMENT_ID: %s", os.Getenv("DIGITALOCEAN_APP_DEPLOYMENT_ID"))
 	log.Printf("  DIGITALOCEAN_APP_REGION: %s", os.Getenv("DIGITALOCEAN_APP_REGION"))
@@ -111,8 +141,8 @@ func GetEnvironmentData() EnvironmentData {
 }
 
 // MergeWithEnvData merges environment data with existing template data
-func MergeWithEnvData(data map[string]interface{}) map[string]interface{} {
-	envData := GetEnvironmentData()
+func MergeWithEnvData(data map[string]interface{}, r *http.Request) map[string]interface{} {
+	envData := GetEnvironmentData(r)
 	
 	// Merge environment data with existing data
 	for key, value := range map[string]interface{}{

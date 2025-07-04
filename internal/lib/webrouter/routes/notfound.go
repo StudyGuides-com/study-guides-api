@@ -31,7 +31,7 @@ func (h *NotFoundHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add environment data
-	data = utils.MergeWithEnvData(data)
+	data = utils.MergeWithEnvData(data, r)
 
 	if err := h.templates.ExecuteTemplate(w, "404.html", data); err != nil {
 		log.Printf("Error executing 404 template: %v", err)
