@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -18,6 +16,7 @@ import (
 	tagpb "github.com/studyguides-com/study-guides-api/api/v1/tag"
 	userpb "github.com/studyguides-com/study-guides-api/api/v1/user"
 	"github.com/studyguides-com/study-guides-api/internal/lib/ai"
+	"github.com/studyguides-com/study-guides-api/internal/lib/webrouter"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 
 	"github.com/studyguides-com/study-guides-api/internal/lib/router"
@@ -63,6 +62,9 @@ func (s *Server) Start(appStore store.Store) {
 	// Enable gRPC reflection
 	reflection.Register(s.grpcServer)
 
+	// Create web router for HTTP requests
+	webRouter := webrouter.NewWebRouter(appStore)
+
 	// Create unified handler for both HTTP and gRPC
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("=== REQUEST START ===")
@@ -74,14 +76,6 @@ func (s *Server) Start(appStore store.Store) {
 		log.Printf("User-Agent: %s", r.Header.Get("User-Agent"))
 		log.Printf("All Headers: %v", r.Header)
 
-		// Handle health check endpoint
-		if r.URL.Path == "/health" {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]string{"status": "healthy"})
-			return
-		}
-
 		// Handle gRPC requests (both HTTP/1.1 and HTTP/2)
 		if strings.HasPrefix(r.Header.Get("Content-Type"), "application/grpc") {
 			log.Printf("*** ROUTING TO GRPC: %s (Protocol: %s) ***", r.URL.Path, r.Proto)
@@ -91,9 +85,10 @@ func (s *Server) Start(appStore store.Store) {
 			return
 		}
 
-		// Handle other requests
-		log.Printf("Handling regular HTTP request")
-		io.WriteString(w, "Hello from API")
+		// Handle HTTP requests with web router
+		log.Printf("*** ROUTING TO WEB ROUTER: %s ***", r.URL.Path)
+		webRouter.ServeHTTP(w, r)
+		log.Printf("*** WEB ROUTER COMPLETED ***")
 		log.Printf("=== REQUEST END ===")
 	}
 

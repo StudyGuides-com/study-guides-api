@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/static/css/global.css" />
+  </head>
+  <body>
+    <div class="container error-page">
+      <div class="roland-maintenance">
+        <img
+          src="/static/images/roland-maintenance.png"
+          alt="Roland Maintenance"
+        />
+      </div>
+      <h1>404</h1>
+      <div class="message">{{.Message}}</div>
+      <div class="path">Requested path: {{.Path}}</div>
+      <div class="back-link">
+        <a href="/">← Back to Home</a>
+      </div>
+    </div>
+  </body>
+</html>
