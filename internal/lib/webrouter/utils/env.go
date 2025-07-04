@@ -46,8 +46,9 @@ func detectEnvironmentFromHostname(hostname string) string {
 		return "production"
 	}
 	
-	// If no subdomain or unknown subdomain, default to development
-	return "development"
+	// For any other domain that doesn't have a known subdomain, assume production
+	// This handles cases where the domain might be different or has other subdomains
+	return "production"
 }
 
 // GetEnvironmentData returns environment information for templates
@@ -117,6 +118,8 @@ func GetEnvironmentData(r *http.Request) EnvironmentData {
 	if r != nil {
 		log.Printf("  Hostname: %s", r.Host)
 		log.Printf("  Detected from hostname: %s", detectEnvironmentFromHostname(r.Host))
+		log.Printf("  Request URL: %s", r.URL.String())
+		log.Printf("  Request Method: %s", r.Method)
 	}
 	log.Printf("  DIGITALOCEAN_APP_PLATFORM: %s", os.Getenv("DIGITALOCEAN_APP_PLATFORM"))
 	log.Printf("  DIGITALOCEAN_APP_NAME: %s", os.Getenv("DIGITALOCEAN_APP_NAME"))
@@ -124,6 +127,7 @@ func GetEnvironmentData(r *http.Request) EnvironmentData {
 	log.Printf("  DIGITALOCEAN_APP_REGION: %s", os.Getenv("DIGITALOCEAN_APP_REGION"))
 	log.Printf("  Final Environment: %s", env)
 	log.Printf("  Is Digital Ocean: %t", isDigitalOcean)
+	log.Printf("  All DO Env Vars Count: %d", len(allDOEnvVars))
 
 	return EnvironmentData{
 		Environment:    env,
