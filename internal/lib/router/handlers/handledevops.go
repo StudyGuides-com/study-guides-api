@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/studyguides-com/study-guides-api/internal/lib/router/formatting"
+	"github.com/studyguides-com/study-guides-api/internal/lib/tools"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 )
 
@@ -12,8 +13,13 @@ import (
 func HandleDeploy(ctx context.Context, store store.Store, params map[string]string) (string, error) {
 	appID, ok := params["appId"]
 	if !ok || appID == "" {
-		return "", fmt.Errorf("appId is required")
+		return formatting.NewSingleResponse(nil, "appId is required").ToJSON(), nil
 	}
+
+	// Resolve app name to app ID if it's a friendly name
+	resolvedAppID := tools.ResolveAppName(appID)
+	originalAppID := appID
+	appID = resolvedAppID
 
 	force := false
 	if forceStr, ok := params["force"]; ok && forceStr == "true" {
@@ -22,41 +28,83 @@ func HandleDeploy(ctx context.Context, store store.Store, params map[string]stri
 
 	deploymentID, err := store.DevopsStore().Deploy(ctx, appID)
 	if err != nil {
-		return "", fmt.Errorf("failed to deploy app %s: %w", appID, err)
+		return formatting.NewSingleResponse(nil, fmt.Sprintf("failed to deploy app %s: %v", appID, err)).ToJSON(), nil
 	}
 
-	if force {
-		return fmt.Sprintf("✅ Forced deployment initiated for app %s\nDeployment ID: %s", appID, deploymentID), nil
+	// Show the friendly name in the response if it was resolved
+	displayName := originalAppID
+	if originalAppID != appID {
+		displayName = fmt.Sprintf("%s (%s)", originalAppID, appID)
 	}
-	return fmt.Sprintf("✅ Deployment initiated for app %s\nDeployment ID: %s", appID, deploymentID), nil
+
+	// Create deployment data structure
+	deploymentData := map[string]interface{}{
+		"deploymentId": deploymentID,
+		"appId":        appID,
+		"appName":      originalAppID,
+		"force":        force,
+	}
+
+	msg := ""
+	if force {
+		msg = fmt.Sprintf("✅ Forced deployment initiated for app %s\nDeployment ID: %s", displayName, deploymentID)
+	} else {
+		msg = fmt.Sprintf("✅ Deployment initiated for app %s\nDeployment ID: %s", displayName, deploymentID)
+	}
+	return formatting.NewSingleResponse(deploymentData, msg).ToJSON(), nil
 }
 
 // HandleRollback handles rollback requests
 func HandleRollback(ctx context.Context, store store.Store, params map[string]string) (string, error) {
 	appID, ok := params["appId"]
 	if !ok || appID == "" {
-		return "", fmt.Errorf("appId is required")
+		return formatting.NewSingleResponse(nil, "appId is required").ToJSON(), nil
 	}
+
+	// Resolve app name to app ID if it's a friendly name
+	resolvedAppID := tools.ResolveAppName(appID)
+	originalAppID := appID
+	appID = resolvedAppID
 
 	deploymentID, ok := params["deploymentId"]
 	if !ok || deploymentID == "" {
-		return "", fmt.Errorf("deploymentId is required")
+		return formatting.NewSingleResponse(nil, "deploymentId is required").ToJSON(), nil
 	}
 
 	newDeploymentID, err := store.DevopsStore().Rollback(ctx, appID, deploymentID)
 	if err != nil {
-		return "", fmt.Errorf("failed to rollback app %s to deployment %s: %w", appID, deploymentID, err)
+		return formatting.NewSingleResponse(nil, fmt.Sprintf("failed to rollback app %s to deployment %s: %v", appID, deploymentID, err)).ToJSON(), nil
 	}
 
-	return fmt.Sprintf("✅ Rollback initiated for app %s\nRolling back to deployment: %s\nNew deployment ID: %s", appID, deploymentID, newDeploymentID), nil
+	// Show the friendly name in the response if it was resolved
+	displayName := originalAppID
+	if originalAppID != appID {
+		displayName = fmt.Sprintf("%s (%s)", originalAppID, appID)
+	}
+
+	// Create rollback data structure
+	rollbackData := map[string]interface{}{
+		"newDeploymentId": newDeploymentID,
+		"originalDeploymentId": deploymentID,
+		"appId":        appID,
+		"appName":      originalAppID,
+	}
+
+	msg := fmt.Sprintf("✅ Rollback initiated for app %s\nRolling back to deployment: %s\nNew deployment ID: %s", displayName, deploymentID, newDeploymentID)
+	return formatting.NewSingleResponse(rollbackData, msg).ToJSON(), nil
 }
 
 // HandleListDeployments handles listing deployments
 func HandleListDeployments(ctx context.Context, store store.Store, params map[string]string) (string, error) {
 	appID, ok := params["appId"]
 	if !ok || appID == "" {
-		return "", fmt.Errorf("appId is required")
+		return formatting.NewSingleResponse(nil, "appId is required").ToJSON(), nil
 	}
+
+	// Resolve app name to app ID if it's a friendly name
+	resolvedAppID := tools.ResolveAppName(appID)
+	originalAppID := appID
+	appID = resolvedAppID
 
 	format := "list"
 	if f, ok := params["format"]; ok {
@@ -65,22 +113,36 @@ func HandleListDeployments(ctx context.Context, store store.Store, params map[st
 
 	deployments, err := store.DevopsStore().ListDeployments(ctx, appID)
 	if err != nil {
-		return "", fmt.Errorf("failed to list deployments for app %s: %w", appID, err)
+		return formatting.NewSingleResponse(nil, fmt.Sprintf("failed to list deployments for app %s: %v", appID, err)).ToJSON(), nil
 	}
 
 	if len(deployments) == 0 {
-		return fmt.Sprintf("No deployments found for app %s", appID), nil
+		// Show the friendly name in the response if it was resolved
+		displayName := originalAppID
+		if originalAppID != appID {
+			displayName = fmt.Sprintf("%s (%s)", originalAppID, appID)
+		}
+		return formatting.NewSingleResponse(nil, fmt.Sprintf("No deployments found for app %s", displayName)).ToJSON(), nil
+	}
+
+	// Create deployments data structure
+	deploymentsData := map[string]interface{}{
+		"deployments": deployments,
+		"count":       len(deployments),
+		"appId":       appID,
+		"appName":     originalAppID,
+		"format":      format,
 	}
 
 	switch format {
 	case "json":
-		return formatting.FormatDeploymentsAsJSON(deployments)
+		return formatting.NewSingleResponse(deploymentsData, "Deployments as JSON").ToJSON(), nil
 	case "csv":
-		return formatting.FormatDeploymentsAsCSV(deployments)
+		return formatting.NewSingleResponse(deploymentsData, "Deployments as CSV").ToJSON(), nil
 	case "table":
-		return formatting.FormatDeploymentsAsTable(deployments)
+		return formatting.NewSingleResponse(deploymentsData, "Deployments as table").ToJSON(), nil
 	default:
-		return formatting.FormatDeploymentsAsList(deployments)
+		return formatting.NewSingleResponse(deploymentsData, "Deployments as list").ToJSON(), nil
 	}
 }
 
@@ -88,12 +150,16 @@ func HandleListDeployments(ctx context.Context, store store.Store, params map[st
 func HandleGetDeploymentStatus(ctx context.Context, store store.Store, params map[string]string) (string, error) {
 	appID, ok := params["appId"]
 	if !ok || appID == "" {
-		return "", fmt.Errorf("appId is required")
+		return formatting.NewSingleResponse(nil, "appId is required").ToJSON(), nil
 	}
+
+	// Resolve app name to app ID if it's a friendly name
+	resolvedAppID := tools.ResolveAppName(appID)
+	appID = resolvedAppID
 
 	deploymentID, ok := params["deploymentId"]
 	if !ok || deploymentID == "" {
-		return "", fmt.Errorf("deploymentId is required")
+		return formatting.NewSingleResponse(nil, "deploymentId is required").ToJSON(), nil
 	}
 
 	format := "list"
@@ -103,17 +169,24 @@ func HandleGetDeploymentStatus(ctx context.Context, store store.Store, params ma
 
 	deployment, err := store.DevopsStore().GetDeploymentStatus(ctx, appID, deploymentID)
 	if err != nil {
-		return "", fmt.Errorf("failed to get deployment status for app %s deployment %s: %w", appID, deploymentID, err)
+		return formatting.NewSingleResponse(nil, fmt.Sprintf("failed to get deployment status for app %s deployment %s: %v", appID, deploymentID, err)).ToJSON(), nil
+	}
+
+	// Create deployment status data structure
+	deploymentStatusData := map[string]interface{}{
+		"deployment": deployment,
+		"appId":      appID,
+		"format":     format,
 	}
 
 	switch format {
 	case "json":
-		return formatting.FormatDeploymentAsJSON(deployment)
+		return formatting.NewSingleResponse(deploymentStatusData, "Deployment as JSON").ToJSON(), nil
 	case "csv":
-		return formatting.FormatDeploymentAsCSV(deployment)
+		return formatting.NewSingleResponse(deploymentStatusData, "Deployment as CSV").ToJSON(), nil
 	case "table":
-		return formatting.FormatDeploymentAsTable(deployment)
+		return formatting.NewSingleResponse(deploymentStatusData, "Deployment as table").ToJSON(), nil
 	default:
-		return formatting.FormatDeploymentAsList(deployment)
+		return formatting.NewSingleResponse(deploymentStatusData, "Deployment as list").ToJSON(), nil
 	}
 }

@@ -293,6 +293,8 @@ func buildSystemPrompt() string {
 	- "how many users" → UserCount
 	- "what tag types exist" → UniqueTagTypes
 	- "deploy the app" → Deploy (requires appId)
+	- "deploy test slackbot" → Deploy with appId: "test slackbot"
+	- "deploy dev api" → Deploy with appId: "dev api"
 	- "rollback to previous version" → Rollback (requires appId and deploymentId)
 	- "list deployments" → ListDeployments (requires appId)
 	- "check deployment status" → GetDeploymentStatus (requires appId and deploymentId)
