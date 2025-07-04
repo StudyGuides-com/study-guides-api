@@ -55,17 +55,14 @@ func detectEnvironmentFromHostname(hostname string) string {
 func GetEnvironmentData(r *http.Request) EnvironmentData {
 	// Environment detection - prioritize explicit ENVIRONMENT setting
 	env := os.Getenv("ENVIRONMENT")
-	if env == "" {
-		// Check for Digital Ocean specific environment variable
-		if os.Getenv("DIGITALOCEAN_APP_ENV") != "" {
-			env = os.Getenv("DIGITALOCEAN_APP_ENV")
-		} else if r != nil {
-			// Detect from hostname if request is available
-			env = detectEnvironmentFromHostname(r.Host)
-		} else {
-			// Default to development for safety
-			env = "development"
-		}
+	if env == "" && r != nil {
+		// Detect from hostname if request is available
+		env = detectEnvironmentFromHostname(r.Host)
+		log.Printf("Environment detected from hostname '%s': %s", r.Host, env)
+	} else if env == "" {
+		// Default to development for safety
+		env = "development"
+		log.Printf("Environment defaulted to development (no request or explicit setting)")
 	}
 	
 	// Version detection - prioritize explicit VERSION setting
