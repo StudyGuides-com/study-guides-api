@@ -111,19 +111,16 @@ proto:
 
 build:
 	go build -o ./bin/server ./cmd/server
-
-run: build
+	
+start: build
 	./bin/server
-
-run-dev: build
+start-dev: build
 	cp .env.dev .env
 	./bin/server
-
-run-test: build
+start-test: build
 	cp .env.test .env
 	./bin/server
-
-run-prod: build
+start-prod: build
 	cp .env.prod .env
 	./bin/server
 
@@ -144,5 +141,12 @@ generate-tokens:
 	node scripts/generate_jwt.js > .jwt.dev
 	node scripts/generate_jwt.js > .jwt.test
 	node scripts/generate_jwt.js > .jwt.prod
+
+
+# Quick tunnel setup with HTTP/2 support (requires ngrok to be installed)
+tunnel:
+	@echo "Starting ngrok tunnel with HTTP/2 support for local.studyguides.com..."
+	ngrok http --app-protocol=http2 --domain local.studyguides.com 8081
+
 
 all: proto build
