@@ -31,27 +31,27 @@ var ClassificationToolDefinitions = []ToolDefinition{
 
 	NewToolDefinition(
 		string(ToolNameListTags),
-		"Returns a list of tags. Use 'type' for tag categories (Course, Subject, etc.) and 'contextType' for organizational contexts (College, DoD, etc.). Use 'name' for partial name searches. Optional filters: type, contextType, name, and public status. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
+		"Returns a list of tags. Use 'type' for tag categories (Course, Subject, etc.) and 'contextType' for organizational contexts (College, DoD, etc.). Use 'name' for partial name searches. Optional filters: type, contextType, name, and public status. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets.",
 	).WithParameters(NoRequiredParams, typeProperty, contextProperty, nameProperty, publicProperty, formatProperty, limitProperty),
 
 	NewToolDefinition(
 		string(ToolNameListRootTags),
-		"Returns a list of root tags (tags with no parent). Optional filters: name and public status. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
+		"Returns a list of root tags (tags with no parent). Optional filters: name and public status. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets.",
 	).WithParameters(NoRequiredParams, nameProperty, publicProperty, formatProperty, limitProperty),
 
 	NewToolDefinition(
 		string(ToolNameGetTag),
-		"Returns detailed information about a specific tag by its ID. When user refers to 'tag number X', first use ListTags to get a list of tags with their IDs, then use the actual tag ID from that list. Tag IDs are CUIDs (25-character alphanumeric strings like 'cmav63fwp03ef1jmtqkh9wnvv'). The tagId parameter must be the actual CUID, not a number. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
+		"Returns detailed information about a specific tag by its ID. When user refers to 'tag number X', first use ListTags to get a list of tags with their IDs, then use the actual tag ID from that list. Tag IDs are CUIDs (25-character alphanumeric strings like 'cmav63fwp03ef1jmtqkh9wnvv'). The tagId parameter must be the actual CUID, not a number. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets.",
 	).WithParameters([]string{"tagId"}, NewProperty("tagId", "string", "The actual CUID of the tag to retrieve (25-character alphanumeric string like 'cmav63fwp03ef1jmtqkh9wnvv'). Use ListTags first to get the CUID if user refers to a tag by number."), formatProperty),
 
 	NewToolDefinition(
 		string(ToolNameUniqueTagTypes),
-		"Returns a list of all unique tag types available in the system. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
+		"Returns a list of all unique tag types available in the system. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets.",
 	).WithParameters(NoRequiredParams, formatProperty),
 
 	NewToolDefinition(
 		string(ToolNameUniqueContextTypes),
-		"Returns a list of all unique context types (organizational contexts) available in the system. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
+		"Returns a list of all unique context types (organizational contexts) available in the system. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets.",
 	).WithParameters(NoRequiredParams, formatProperty),
 
 	NewToolDefinition(
@@ -61,7 +61,7 @@ var ClassificationToolDefinitions = []ToolDefinition{
 
 	NewToolDefinition(
 		string(ToolNameGetUser),
-		"Returns detailed information about a specific user by their email address. The userEmail parameter must be a valid email address. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
+		"Returns detailed information about a specific user by their email address. The userEmail parameter must be a valid email address. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets.",
 	).WithParameters([]string{"userEmail"}, userEmailProperty, formatProperty),
 
 	NewToolDefinition(
@@ -76,12 +76,12 @@ var ClassificationToolDefinitions = []ToolDefinition{
 
 	NewToolDefinition(
 		string(ToolNameListDeployments),
-		"Lists all deployments for an application. Use when user wants to see deployment history, list deployments, or check deployment status. The appId parameter is required and can be either a DigitalOcean App Platform app ID or a friendly name like 'test slackbot', 'dev api', etc. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
+		"Lists all deployments for an application. Use when user wants to see deployment history, list deployments, or check deployment status. The appId parameter is required and can be either a DigitalOcean App Platform app ID or a friendly name like 'test slackbot', 'dev api', etc. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets.",
 	).WithParameters([]string{"appId"}, appIdProperty, formatProperty),
 
 	NewToolDefinition(
 		string(ToolNameGetDeploymentStatus),
-		"Gets the status of a specific deployment. Use when user wants to check deployment status, see if deployment is complete, or get deployment details. Both appId and deploymentId parameters are required. The appId can be either a DigitalOcean App Platform app ID or a friendly name like 'test slackbot', 'dev api', etc. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets, 'table' for markdown.",
+		"Gets the status of a specific deployment. Use when user wants to check deployment status, see if deployment is complete, or get deployment details. Both appId and deploymentId parameters are required. The appId can be either a DigitalOcean App Platform app ID or a friendly name like 'test slackbot', 'dev api', etc. Choose format based on user intent: 'list' for human reading, 'json' for data/API use, 'csv' for spreadsheets.",
 	).WithParameters([]string{"appId", "deploymentId"}, appIdProperty, deploymentIdProperty, formatProperty),
 
 	NewToolDefinition(

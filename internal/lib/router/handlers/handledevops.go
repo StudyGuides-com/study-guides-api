@@ -139,8 +139,6 @@ func HandleListDeployments(ctx context.Context, store store.Store, params map[st
 		return formatting.NewSingleResponse(deploymentsData, "Deployments as JSON").ToJSON(), nil
 	case "csv":
 		return formatting.NewSingleResponse(deploymentsData, "Deployments as CSV").ToJSON(), nil
-	case "table":
-		return formatting.NewSingleResponse(deploymentsData, "Deployments as table").ToJSON(), nil
 	default:
 		return formatting.NewSingleResponse(deploymentsData, "Deployments as list").ToJSON(), nil
 	}
@@ -184,8 +182,6 @@ func HandleGetDeploymentStatus(ctx context.Context, store store.Store, params ma
 		return formatting.NewSingleResponse(deploymentStatusData, "Deployment as JSON").ToJSON(), nil
 	case "csv":
 		return formatting.NewSingleResponse(deploymentStatusData, "Deployment as CSV").ToJSON(), nil
-	case "table":
-		return formatting.NewSingleResponse(deploymentStatusData, "Deployment as table").ToJSON(), nil
 	default:
 		return formatting.NewSingleResponse(deploymentStatusData, "Deployment as list").ToJSON(), nil
 	}

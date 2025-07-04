@@ -251,16 +251,13 @@ func buildSystemPrompt() string {
 	Format Detection Rules:
 	- "as csv", "in csv", "csv format", "spreadsheet", "Excel" → format: "csv"
 	- "as json", "in json", "json format", "data", "API", "programmatic" → format: "json"  
-	- "as table", "in table", "table format", "markdown" → format: "table"
 	- "as list", "in list", "plain text", "human readable" → format: "list"
 	- Default (no format specified) → format: "list"
 	
 	Examples:
 	- "list tag types as csv" → UniqueTagTypes with format: "csv"
 	- "show tags in json" → ListTags with format: "json"
-	- "export users as table" → ListUsers with format: "table"
 	- "get tag count in csv" → TagCount with format: "csv"
-	- "list deployments as table" → ListDeployments with format: "table"
 	
 	ALWAYS set the format parameter when the user specifies a format preference!
 	`

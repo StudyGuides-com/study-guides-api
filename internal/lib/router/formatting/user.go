@@ -14,8 +14,7 @@ func UserAsFormatted(user *sharedpb.User, format FormatType) string {
 		return UserAsJSON(user)
 	case FormatCSV:
 		return UserAsCSV(user)
-	case FormatTable:
-		return UserAsTable(user)
+
 	case FormatList:
 		fallthrough
 	default:
@@ -105,62 +104,7 @@ func UserAsCSV(user *sharedpb.User) string {
 	return header + row
 }
 
-// UserAsTable formats a single user as a table
-func UserAsTable(user *sharedpb.User) string {
-	name := ""
-	if user.Name != nil && *user.Name != "" {
-		name = *user.Name
-	}
 
-	gamerTag := ""
-	if user.GamerTag != nil && *user.GamerTag != "" {
-		gamerTag = *user.GamerTag
-	}
-
-	email := ""
-	if user.Email != nil && *user.Email != "" {
-		email = *user.Email
-	}
-
-	emailVerified := ""
-	if user.EmailVerified != nil {
-		emailVerified = user.EmailVerified.AsTime().Format("2006-01-02 15:04:05")
-	}
-
-	image := ""
-	if user.Image != nil && *user.Image != "" {
-		image = *user.Image
-	}
-
-	contentTagID := ""
-	if user.ContentTagId != nil && *user.ContentTagId != "" {
-		contentTagID = *user.ContentTagId
-	}
-
-	response := "| Field | Value |\n"
-	response += "|-------|-------|\n"
-	response += fmt.Sprintf("| ID | %s |\n", user.Id)
-	if name != "" {
-		response += fmt.Sprintf("| Name | %s |\n", name)
-	}
-	if gamerTag != "" {
-		response += fmt.Sprintf("| Gamer Tag | %s |\n", gamerTag)
-	}
-	if email != "" {
-		response += fmt.Sprintf("| Email | %s |\n", email)
-	}
-	if emailVerified != "" {
-		response += fmt.Sprintf("| Email Verified | %s |\n", emailVerified)
-	}
-	if image != "" {
-		response += fmt.Sprintf("| Image | %s |\n", image)
-	}
-	if contentTagID != "" {
-		response += fmt.Sprintf("| Content Tag ID | %s |\n", contentTagID)
-	}
-
-	return response
-}
 
 // UserAsDetailedText formats a single user with comprehensive details
 func UserAsDetailedText(user *sharedpb.User) string {

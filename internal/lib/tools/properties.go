@@ -27,7 +27,7 @@ var publicProperty = NewProperty(
 var formatProperty = NewProperty(
 	"format",
 	"string",
-	"Output format: 'list' (default, human-readable), 'json' (machine-readable), 'csv' (spreadsheet), or 'table' (markdown table)",
+	"Output format: 'list' (default, human-readable), 'json' (machine-readable), or 'csv' (spreadsheet)",
 )
 
 var limitProperty = NewProperty(

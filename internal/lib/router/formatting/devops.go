@@ -42,30 +42,7 @@ func FormatDeploymentsAsCSV(deployments []devopspb.Deployment) (string, error) {
 	return strings.Join(lines, "\n"), nil
 }
 
-// FormatDeploymentsAsTable formats deployments as a markdown table
-func FormatDeploymentsAsTable(deployments []devopspb.Deployment) (string, error) {
-	if len(deployments) == 0 {
-		return "| Deployment ID | App ID | Status | Created At |\n|---------------|--------|--------|------------|", nil
-	}
 
-	var lines []string
-	lines = append(lines, "| Deployment ID | App ID | Status | Created At |")
-	lines = append(lines, "|---------------|--------|--------|------------|")
-
-	for i := range deployments {
-		deployment := &deployments[i]
-		createdAt := formatTimestamp(deployment.CreatedAt)
-		line := fmt.Sprintf("| %s | %s | %s | %s |",
-			deployment.DeploymentId,
-			deployment.AppId,
-			deployment.Status.String(),
-			createdAt,
-		)
-		lines = append(lines, line)
-	}
-
-	return strings.Join(lines, "\n"), nil
-}
 
 // FormatDeploymentsAsList formats deployments as a human-readable list
 func FormatDeploymentsAsList(deployments []devopspb.Deployment) (string, error) {
@@ -116,16 +93,7 @@ func FormatDeploymentAsCSV(deployment devopspb.Deployment) (string, error) {
 	), nil
 }
 
-// FormatDeploymentAsTable formats a single deployment as a markdown table
-func FormatDeploymentAsTable(deployment devopspb.Deployment) (string, error) {
-	createdAt := formatTimestamp(deployment.CreatedAt)
-	return fmt.Sprintf("| Deployment ID | App ID | Status | Created At |\n|---------------|--------|--------|------------|\n| %s | %s | %s | %s |",
-		deployment.DeploymentId,
-		deployment.AppId,
-		deployment.Status.String(),
-		createdAt,
-	), nil
-}
+
 
 // FormatDeploymentAsList formats a single deployment as human-readable text
 func FormatDeploymentAsList(deployment devopspb.Deployment) (string, error) {

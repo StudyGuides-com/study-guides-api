@@ -25,8 +25,7 @@ func (tf *TagFormatter) Format(format FormatType) interface{} {
 		return tf.tags // Return raw data for JSON
 	case FormatCSV:
 		return tf.asCSV()
-	case FormatTable:
-		return tf.asTable()
+
 	case FormatList:
 		fallthrough
 	default:
@@ -71,26 +70,7 @@ func (tf *TagFormatter) asCSV() string {
 	return response.String()
 }
 
-// asTable formats tags as a markdown table
-func (tf *TagFormatter) asTable() string {
-	if len(tf.tags) == 0 {
-		return "No tags found."
-	}
 
-	var response strings.Builder
-	response.WriteString("| Name | Description | Type | Context | ID |\n")
-	response.WriteString("|------|-------------|------|---------|----|\n")
-
-	for _, tag := range tf.tags {
-		description := ""
-		if tag.Description != nil && *tag.Description != "" {
-			description = *tag.Description
-		}
-		response.WriteString(fmt.Sprintf("| %s | %s | %s | %s | %s |\n",
-			tag.Name, description, tag.Type.String(), tag.Context.String(), tag.Id))
-	}
-	return response.String()
-}
 
 // Legacy functions for backward compatibility
 func TagsAsNumberedList(tags []*sharedpb.Tag) string {
@@ -135,9 +115,7 @@ func TagsAsCSV(tags []*sharedpb.Tag) string {
 	return NewTagFormatter(tags).asCSV()
 }
 
-func TagsAsTable(tags []*sharedpb.Tag) string {
-	return NewTagFormatter(tags).asTable()
-}
+
 
 func FormatTags(tags []*sharedpb.Tag, format FormatType) string {
 	formatter := NewTagFormatter(tags)
@@ -155,8 +133,7 @@ func TagAsFormatted(tag *sharedpb.Tag, format FormatType) string {
 		return TagAsJSON(tag)
 	case FormatCSV:
 		return TagAsCSV(tag)
-	case FormatTable:
-		return TagAsTable(tag)
+
 	case FormatList:
 		fallthrough
 	default:
@@ -364,90 +341,7 @@ func TagAsCSV(tag *sharedpb.Tag) string {
 	return header + row
 }
 
-// TagAsTable formats a single tag as a table
-func TagAsTable(tag *sharedpb.Tag) string {
-	description := ""
-	if tag.Description != nil && *tag.Description != "" {
-		description = *tag.Description
-	}
 
-	parentTagID := ""
-	if tag.ParentTagId != nil && *tag.ParentTagId != "" {
-		parentTagID = *tag.ParentTagId
-	}
-
-	contentDescriptors := ""
-	if len(tag.ContentDescriptors) > 0 {
-		// Convert ContentDescriptorType enums to strings
-		var contentDescriptorStrings []string
-		for _, descriptor := range tag.ContentDescriptors {
-			contentDescriptorStrings = append(contentDescriptorStrings, descriptor.String())
-		}
-		contentDescriptors = strings.Join(contentDescriptorStrings, ", ")
-	}
-
-	metaTags := ""
-	if len(tag.MetaTags) > 0 {
-		metaTags = strings.Join(tag.MetaTags, ", ")
-	}
-
-	metadata := ""
-	if tag.Metadata != nil && len(tag.Metadata.Metadata) > 0 {
-		var metadataPairs []string
-		for key, value := range tag.Metadata.Metadata {
-			metadataPairs = append(metadataPairs, fmt.Sprintf("%s: %s", key, value))
-		}
-		metadata = strings.Join(metadataPairs, "; ")
-	}
-
-	batchID := ""
-	if tag.BatchId != nil && *tag.BatchId != "" {
-		batchID = *tag.BatchId
-	}
-
-	ownerID := ""
-	if tag.OwnerId != nil && *tag.OwnerId != "" {
-		ownerID = *tag.OwnerId
-	}
-
-	response := "| Field | Value |\n"
-	response += "|-------|-------|\n"
-	response += fmt.Sprintf("| ID | %s |\n", tag.Id)
-	response += fmt.Sprintf("| Name | %s |\n", tag.Name)
-	if description != "" {
-		response += fmt.Sprintf("| Description | %s |\n", description)
-	}
-	response += fmt.Sprintf("| Type | %s |\n", tag.Type.String())
-	response += fmt.Sprintf("| Context | %s |\n", tag.Context)
-	if parentTagID != "" {
-		response += fmt.Sprintf("| Parent Tag ID | %s |\n", parentTagID)
-	}
-	response += fmt.Sprintf("| Content Rating | %s |\n", tag.ContentRating.String())
-	if contentDescriptors != "" {
-		response += fmt.Sprintf("| Content Descriptors | %s |\n", contentDescriptors)
-	}
-	if metaTags != "" {
-		response += fmt.Sprintf("| Meta Tags | %s |\n", metaTags)
-	}
-	response += fmt.Sprintf("| Public | %t |\n", tag.Public)
-	response += fmt.Sprintf("| Access Count | %d |\n", tag.AccessCount)
-	if metadata != "" {
-		response += fmt.Sprintf("| Metadata | %s |\n", metadata)
-	}
-	if batchID != "" {
-		response += fmt.Sprintf("| Batch ID | %s |\n", batchID)
-	}
-	response += fmt.Sprintf("| Hash | %s |\n", tag.Hash)
-	response += fmt.Sprintf("| Has Questions | %t |\n", tag.HasQuestions)
-	response += fmt.Sprintf("| Has Children | %t |\n", tag.HasChildren)
-	if ownerID != "" {
-		response += fmt.Sprintf("| Owner ID | %s |\n", ownerID)
-	}
-	response += fmt.Sprintf("| Created | %s |\n", tag.CreatedAt.AsTime().Format("2006-01-02 15:04:05"))
-	response += fmt.Sprintf("| Updated | %s |\n", tag.UpdatedAt.AsTime().Format("2006-01-02 15:04:05"))
-
-	return response
-}
 
 // TagAsDetailedText formats a single tag with comprehensive details
 func TagAsDetailedText(tag *sharedpb.Tag) string {

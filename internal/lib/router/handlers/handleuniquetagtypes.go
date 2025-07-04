@@ -36,14 +36,7 @@ func HandleUniqueTagTypes(ctx context.Context, store store.Store, params map[str
 		data = tagTypeStrings
 	case formatting.FormatCSV:
 		data = "tag_type\n" + strings.Join(tagTypeStrings, "\n")
-	case formatting.FormatTable:
-		var table strings.Builder
-		table.WriteString("| Tag Type |\n")
-		table.WriteString("|----------|\n")
-		for _, tagType := range tagTypeStrings {
-			table.WriteString(fmt.Sprintf("| %s |\n", tagType))
-		}
-		data = table.String()
+
 	case formatting.FormatList:
 		// For list format, return as a string but ensure it's not empty
 		if len(tagTypeStrings) > 0 {

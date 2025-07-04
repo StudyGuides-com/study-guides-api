@@ -12,7 +12,6 @@ const (
 	FormatList  FormatType = "list"
 	FormatJSON  FormatType = "json"
 	FormatCSV   FormatType = "csv"
-	FormatTable FormatType = "table"
 )
 
 // ResponseType represents the type of data being returned
@@ -23,7 +22,6 @@ const (
 	ResponseTypeList   ResponseType = "list"
 	ResponseTypeSingle ResponseType = "single"
 	ResponseTypeCSV    ResponseType = "csv"
-	ResponseTypeTable  ResponseType = "table"
 )
 
 // APIResponse is the universal wrapper for all API responses
@@ -127,16 +125,7 @@ func NewCSVResponse(csvData string, message string, filters map[string]string) *
 	}
 }
 
-// NewTableResponse creates a new table response
-func NewTableResponse(tableData string, message string, filters map[string]string) *APIResponse {
-	return &APIResponse{
-		Type:        ResponseTypeTable,
-		Data:        tableData,
-		Message:     message,
-		ContentType: "text/plain",
-		Filters:     filters,
-	}
-}
+
 
 // GetFormatFromParams extracts the format parameter from the params map
 func GetFormatFromParams(params map[string]string) FormatType {
