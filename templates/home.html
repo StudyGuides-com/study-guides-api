@@ -19,8 +19,8 @@
       <div class="env-badge dev">
         <span>🚧 Dev Environment</span>
       </div>
-      {{else if .IsStaging}}
-      <div class="env-badge staging">
+      {{else if .IsTest}}
+      <div class="env-badge test">
         <span>🧪 Test Environment</span>
       </div>
       {{else if .IsProd}}
@@ -36,19 +36,6 @@
       <div class="build-info">
         <p><strong>Version:</strong> {{.Version}}</p>
         <p><strong>Build Time:</strong> {{.BuildTime}}</p>
-        {{if .IsDigitalOcean}}
-        <p><strong>App:</strong> {{.AppName}}</p>
-        <p><strong>Region:</strong> {{.Region}}</p>
-        <p><strong>Deployment ID:</strong> {{.DeploymentID}}</p>
-        <p><strong>Platform:</strong> Digital Ocean App Platform</p>
-
-        <div class="do-env-vars">
-          <h3>All Digital Ocean Environment Variables:</h3>
-          {{range $key, $value := .AllDOEnvVars}}
-          <p><strong>{{$key}}:</strong> {{$value}}</p>
-          {{end}}
-        </div>
-        {{end}}
       </div>
     </div>
   </body>

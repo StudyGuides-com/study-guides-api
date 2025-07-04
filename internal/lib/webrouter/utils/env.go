@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -10,17 +9,12 @@ import (
 
 // EnvironmentData contains environment information for templates
 type EnvironmentData struct {
-	Environment    string
-	Version        string
-	BuildTime      string
-	DeploymentID   string
-	AppName        string
-	Region         string
-	IsDev          bool
-	IsProd         bool
-	IsStaging      bool
-	IsDigitalOcean bool
-	AllDOEnvVars   map[string]string
+	Environment string
+	Version     string
+	BuildTime   string
+	IsDev       bool
+	IsProd      bool
+	IsTest      bool
 }
 
 // detectEnvironmentFromHostname determines environment based on hostname
@@ -51,11 +45,9 @@ func GetEnvironmentData(r *http.Request) EnvironmentData {
 	if env == "" && r != nil {
 		// Detect from hostname if request is available
 		env = detectEnvironmentFromHostname(r.Host)
-		log.Printf("Environment detected from hostname '%s': %s", r.Host, env)
 	} else if env == "" {
 		// Default to development for safety
 		env = "development"
-		log.Printf("Environment defaulted to development (no request or explicit setting)")
 	}
 	
 	// Version detection - prioritize explicit VERSION setting
@@ -78,59 +70,15 @@ func GetEnvironmentData(r *http.Request) EnvironmentData {
 		}
 	}
 	
-	// Digital Ocean specific information (only available on DO)
-	deploymentID := os.Getenv("DIGITALOCEAN_APP_DEPLOYMENT_ID")
-	appName := os.Getenv("DIGITALOCEAN_APP_NAME")
-	region := os.Getenv("DIGITALOCEAN_APP_REGION")
-	
-	// Check if running on Digital Ocean (any DO env var present)
-	isDigitalOcean := os.Getenv("DIGITALOCEAN_APP_PLATFORM") != "" || 
-		os.Getenv("DIGITALOCEAN_APP_NAME") != "" ||
-		os.Getenv("DIGITALOCEAN_APP_DEPLOYMENT_ID") != "" ||
-		os.Getenv("DIGITALOCEAN_APP_ENV") != "" ||
-		os.Getenv("DIGITALOCEAN_APP_REGION") != ""
 
-	// Collect all Digital Ocean environment variables for debugging
-	allDOEnvVars := make(map[string]string)
-	for _, envVar := range os.Environ() {
-		if len(envVar) > 0 {
-			parts := strings.SplitN(envVar, "=", 2)
-			if len(parts) == 2 && strings.HasPrefix(parts[0], "DIGITALOCEAN_") {
-				allDOEnvVars[parts[0]] = parts[1]
-			}
-		}
-	}
-
-	// Debug: Log environment detection for troubleshooting
-	log.Printf("Environment Detection Debug:")
-	log.Printf("  ENVIRONMENT: %s", os.Getenv("ENVIRONMENT"))
-	log.Printf("  DIGITALOCEAN_APP_ENV: %s", os.Getenv("DIGITALOCEAN_APP_ENV"))
-	if r != nil {
-		log.Printf("  Hostname: %s", r.Host)
-		log.Printf("  Detected from hostname: %s", detectEnvironmentFromHostname(r.Host))
-		log.Printf("  Request URL: %s", r.URL.String())
-		log.Printf("  Request Method: %s", r.Method)
-	}
-	log.Printf("  DIGITALOCEAN_APP_PLATFORM: %s", os.Getenv("DIGITALOCEAN_APP_PLATFORM"))
-	log.Printf("  DIGITALOCEAN_APP_NAME: %s", os.Getenv("DIGITALOCEAN_APP_NAME"))
-	log.Printf("  DIGITALOCEAN_APP_DEPLOYMENT_ID: %s", os.Getenv("DIGITALOCEAN_APP_DEPLOYMENT_ID"))
-	log.Printf("  DIGITALOCEAN_APP_REGION: %s", os.Getenv("DIGITALOCEAN_APP_REGION"))
-	log.Printf("  Final Environment: %s", env)
-	log.Printf("  Is Digital Ocean: %t", isDigitalOcean)
-	log.Printf("  All DO Env Vars Count: %d", len(allDOEnvVars))
 
 	return EnvironmentData{
-		Environment:    env,
-		Version:        version,
-		BuildTime:      buildTime,
-		DeploymentID:   deploymentID,
-		AppName:        appName,
-		Region:         region,
-		IsDev:          env == "dev",
-		IsProd:         env == "prod",
-		IsStaging:      env == "test",
-		IsDigitalOcean: isDigitalOcean,
-		AllDOEnvVars:   allDOEnvVars,
+		Environment: env,
+		Version:     version,
+		BuildTime:   buildTime,
+		IsDev:       env == "dev",
+		IsProd:      env == "prod",
+		IsTest:      env == "test",
 	}
 }
 
@@ -140,17 +88,12 @@ func MergeWithEnvData(data map[string]interface{}, r *http.Request) map[string]i
 	
 	// Merge environment data with existing data
 	for key, value := range map[string]interface{}{
-		"Environment":    envData.Environment,
-		"Version":        envData.Version,
-		"BuildTime":      envData.BuildTime,
-		"DeploymentID":   envData.DeploymentID,
-		"AppName":        envData.AppName,
-		"Region":         envData.Region,
-		"IsDev":          envData.IsDev,
-		"IsProd":         envData.IsProd,
-		"IsStaging":      envData.IsStaging,
-		"IsDigitalOcean": envData.IsDigitalOcean,
-		"AllDOEnvVars":   envData.AllDOEnvVars,
+		"Environment": envData.Environment,
+		"Version":     envData.Version,
+		"BuildTime":   envData.BuildTime,
+		"IsDev":       envData.IsDev,
+		"IsProd":      envData.IsProd,
+		"IsTest":      envData.IsTest,
 	} {
 		data[key] = value
 	}
