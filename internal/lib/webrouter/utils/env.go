@@ -27,28 +27,21 @@ type EnvironmentData struct {
 func detectEnvironmentFromHostname(hostname string) string {
 	hostname = strings.ToLower(hostname)
 	
-	// Check for common environment subdomains
-	if strings.HasPrefix(hostname, "dev.") || strings.HasPrefix(hostname, "development.") {
-		return "development"
+	// Check for environment subdomains
+	if strings.HasPrefix(hostname, "dev.") {
+		return "dev"
 	}
-	if strings.HasPrefix(hostname, "test.") || strings.HasPrefix(hostname, "staging.") {
-		return "staging"
+	if strings.HasPrefix(hostname, "test.") {
+		return "test"
 	}
 	
 	// Production is the main domain without subdomain (api.studyguides.com)
-	// or explicitly prod subdomain
-	if strings.HasPrefix(hostname, "prod.") || strings.HasPrefix(hostname, "production.") {
-		return "production"
-	}
-	
-	// If it's the main domain (api.studyguides.com), it's production
 	if hostname == "api.studyguides.com" {
-		return "production"
+		return "prod"
 	}
 	
 	// For any other domain that doesn't have a known subdomain, assume production
-	// This handles cases where the domain might be different or has other subdomains
-	return "production"
+	return "prod"
 }
 
 // GetEnvironmentData returns environment information for templates
@@ -133,9 +126,9 @@ func GetEnvironmentData(r *http.Request) EnvironmentData {
 		DeploymentID:   deploymentID,
 		AppName:        appName,
 		Region:         region,
-		IsDev:          env == "development",
-		IsProd:         env == "production",
-		IsStaging:      env == "staging",
+		IsDev:          env == "dev",
+		IsProd:         env == "prod",
+		IsStaging:      env == "test",
 		IsDigitalOcean: isDigitalOcean,
 		AllDOEnvVars:   allDOEnvVars,
 	}

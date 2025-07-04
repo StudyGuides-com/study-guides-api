@@ -17,15 +17,15 @@
 
       {{if .IsDev}}
       <div class="env-badge dev">
-        <span>🚧 Development Environment</span>
+        <span>🚧 Dev Environment</span>
       </div>
       {{else if .IsStaging}}
       <div class="env-badge staging">
-        <span>🧪 Staging Environment</span>
+        <span>🧪 Test Environment</span>
       </div>
       {{else if .IsProd}}
       <div class="env-badge prod">
-        <span>✅ Production Environment</span>
+        <span>✅ Prod Environment</span>
       </div>
       {{else}}
       <div class="env-badge unknown">
