@@ -4,14 +4,12 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 )
 
 // EnvironmentData contains environment information for templates
 type EnvironmentData struct {
 	Environment string
 	Version     string
-	BuildTime   string
 	IsDev       bool
 	IsProd      bool
 	IsTest      bool
@@ -50,32 +48,19 @@ func GetEnvironmentData(r *http.Request) EnvironmentData {
 		env = "development"
 	}
 	
-	// Version detection - prioritize explicit VERSION setting
+	// Version detection
 	version := os.Getenv("VERSION")
 	if version == "" {
-		// Fall back to Digital Ocean version if available
-		version = os.Getenv("DIGITALOCEAN_APP_VERSION")
-		if version == "" {
-			version = "dev"
-		}
+		version = "dev"
 	}
 	
-	// Build time detection - prioritize explicit BUILD_TIME setting
-	buildTime := os.Getenv("BUILD_TIME")
-	if buildTime == "" {
-		// Fall back to Digital Ocean build time if available
-		buildTime = os.Getenv("DIGITALOCEAN_APP_BUILD_TIME")
-		if buildTime == "" {
-			buildTime = time.Now().Format("2006-01-02T15:04:05Z")
-		}
-	}
+
 	
 
 
 	return EnvironmentData{
 		Environment: env,
 		Version:     version,
-		BuildTime:   buildTime,
 		IsDev:       env == "dev",
 		IsProd:      env == "prod",
 		IsTest:      env == "test",
@@ -90,7 +75,6 @@ func MergeWithEnvData(data map[string]interface{}, r *http.Request) map[string]i
 	for key, value := range map[string]interface{}{
 		"Environment": envData.Environment,
 		"Version":     envData.Version,
-		"BuildTime":   envData.BuildTime,
 		"IsDev":       envData.IsDev,
 		"IsProd":      envData.IsProd,
 		"IsTest":      envData.IsTest,
