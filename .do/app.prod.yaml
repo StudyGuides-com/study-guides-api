@@ -1,19 +1,30 @@
+domains:
+  - domain: api.studyguides.com
+    type: PRIMARY
+ingress:
+  rules:
+    - component:
+        name: api
+      match:
+        path:
+          prefix: /
 name: study-guides-api-prod
+region: nyc
 services:
   - name: api
-    source_dir: .
+    source_dir: /
     github:
       deploy_on_push: true
       repo: StudyGuides-com/study-guides-api
       branch: main
     protocol: HTTP2
-    build_command: |
-      go mod download
-      go mod tidy
-      go build -ldflags="-s -w" -o ./bin/server ./cmd/server
+    build_command: go build -o ./bin/server ./cmd/server
     run_command: ./bin/server
     environment_slug: go
     instance_count: 1
     instance_size_slug: basic-s
+    http_port: 8080
     health_check:
       http_path: /health
+features:
+  - buildpack-stack=ubuntu-22
