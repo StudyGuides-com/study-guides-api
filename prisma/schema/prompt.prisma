@@ -1,0 +1,33 @@
+enum PromptType {
+  Tagging
+  Distractors
+  LearnMore
+  ContentRating
+}
+
+model Prompt {
+  id        String          @id @default(cuid())
+  text      String
+  type      PromptType      @unique
+  version   Int             @default(1)
+  versions  PromptVersion[]
+  metadata  Json?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@map("Prompt")
+  @@index([type])
+}
+
+model PromptVersion {
+  id        String          @id @default(cuid())
+  promptId  String     
+  text      String
+  version   Int
+  metadata  Json?
+  createdAt DateTime        @default(now())
+
+  prompt    Prompt   @relation(fields: [promptId], references: [id])
+
+  @@map("PromptVersion")
+}

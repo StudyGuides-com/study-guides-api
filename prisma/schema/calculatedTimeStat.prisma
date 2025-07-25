@@ -1,0 +1,48 @@
+/// Time-based Calculated Stats
+enum CalculatedTimeStatType {
+  /// Interactions
+  InteractionsByMonth     // Number of unique users who interacted with anything
+  UniqueTopicInteractionsByMonth    // Number of unique users who interacted with topics
+  UniqueQuestionInteractionsByMonth  // Number of unique users who interacted with questions
+  NewUsersByMonth                  // Number of new users who joined the platform in the month
+}
+
+enum CalculatedTimeStatGroup {
+  MonthlyInteractions  // Group for monthly interaction metrics
+  DailyInteractions    // Reserved for future daily interaction metrics
+}
+
+enum CalculatedTimeGranularity {
+  Monthly
+  Daily
+}
+
+/// Source configuration for time-based stats
+model CalculatedTimeStatSource {
+  id            String                    @id @default(cuid())
+  type          CalculatedTimeStatType    @unique    // Each type has one source configuration
+  group         CalculatedTimeStatGroup   @default(MonthlyInteractions)
+  name          String                    // Display name for the stat
+  description   String                    @default("No description")
+  sqlQuery      String                    // The query that generates this stat
+  granularity   CalculatedTimeGranularity @default(Monthly)
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+}
+
+/// Time-based calculated stats for the system
+model CalculatedTimeStat {
+  id            String                    @id @default(cuid())
+  group         CalculatedTimeStatGroup   @default(MonthlyInteractions)
+  type          CalculatedTimeStatType
+  name          String                    @default("")
+  value         Int
+  timePoint     DateTime                  // The point in time this stat represents (e.g., start of month)
+  granularity   CalculatedTimeGranularity @default(Monthly)
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+
+  @@unique([type, timePoint])  // Ensure we don't have duplicate stats for the same time period
+  @@index([timePoint])         // Index for time-based queries
+  @@index([type, timePoint])   // Index for type + time queries
+} 

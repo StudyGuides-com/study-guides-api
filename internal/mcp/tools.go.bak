@@ -1,0 +1,392 @@
+package mcp
+
+import (
+	"encoding/json"
+	"fmt"
+	"reflect"
+	"strings"
+
+	"github.com/sashabaranov/go-openai"
+)
+
+// ToolGenerator generates OpenAI tools from repository schemas
+type ToolGenerator struct {
+	registry *RepositoryRegistry
+}
+
+// NewToolGenerator creates a new tool generator
+func NewToolGenerator(registry *RepositoryRegistry) *ToolGenerator {
+	return &ToolGenerator{
+		registry: registry,
+	}
+}
+
+// GenerateTools creates OpenAI tools for all registered repositories
+func (g *ToolGenerator) GenerateTools() []openai.Tool {
+	var tools []openai.Tool
+
+	for _, resource := range g.registry.ListResources() {
+		schema, exists := g.registry.GetSchema(resource)
+		if !exists {
+			continue
+		}
+
+		// Generate CRUD tools for each resource
+		tools = append(tools, g.generateFindTool(resource, schema)...)
+		tools = append(tools, g.generateFindByIDTool(resource, schema))
+		tools = append(tools, g.generateCreateTool(resource, schema))
+		tools = append(tools, g.generateUpdateTool(resource, schema))
+		tools = append(tools, g.generateDeleteTool(resource))
+		tools = append(tools, g.generateCountTool(resource, schema))
+	}
+
+	return tools
+}
+
+// generateFindTool creates a find tool for a resource
+func (g *ToolGenerator) generateFindTool(resource string, schema ResourceSchema) []openai.Tool {
+	filterSchema := g.generateJSONSchema(schema.FilterType)
+	
+	tool := openai.Tool{
+		Type: openai.ToolTypeFunction,
+		Function: &openai.FunctionDefinition{
+			Name:        fmt.Sprintf("%s_find", resource),
+			Description: fmt.Sprintf("Find %s entities based on filter criteria. Returns a list of matching entities.", resource),
+			Parameters: openai.FunctionParameters{
+				Type:       "object",
+				Properties: map[string]openai.JSONSchemaDefine{
+					"filter": {
+						Type:        "object",
+						Description: fmt.Sprintf("Filter criteria for %s entities", resource),
+						Properties:  filterSchema.Properties,
+					},
+				},
+			},
+		},
+	}
+
+	return []openai.Tool{tool}
+}
+
+// generateFindByIDTool creates a findById tool for a resource
+func (g *ToolGenerator) generateFindByIDTool(resource string, schema ResourceSchema) openai.Tool {
+	return openai.Tool{
+		Type: openai.ToolTypeFunction,
+		Function: &openai.FunctionDefinition{
+			Name:        fmt.Sprintf("%s_findById", resource),
+			Description: fmt.Sprintf("Find a specific %s entity by its ID", resource),
+			Parameters: openai.FunctionParameters{
+				Type: "object",
+				Properties: map[string]openai.JSONSchemaDefine{
+					"id": {
+						Type:        "string",
+						Description: fmt.Sprintf("The ID of the %s to retrieve", resource),
+					},
+				},
+				Required: []string{"id"},
+			},
+		},
+	}
+}
+
+// generateCreateTool creates a create tool for a resource
+func (g *ToolGenerator) generateCreateTool(resource string, schema ResourceSchema) openai.Tool {
+	entitySchema := g.generateJSONSchema(schema.EntityType)
+	
+	return openai.Tool{
+		Type: openai.ToolTypeFunction,
+		Function: &openai.FunctionDefinition{
+			Name:        fmt.Sprintf("%s_create", resource),
+			Description: fmt.Sprintf("Create a new %s entity", resource),
+			Parameters: openai.FunctionParameters{
+				Type:       "object",
+				Properties: map[string]openai.JSONSchemaDefine{
+					"entity": {
+						Type:        "object",
+						Description: fmt.Sprintf("The %s entity to create", resource),
+						Properties:  entitySchema.Properties,
+						Required:    entitySchema.Required,
+					},
+				},
+				Required: []string{"entity"},
+			},
+		},
+	}
+}
+
+// generateUpdateTool creates an update tool for a resource
+func (g *ToolGenerator) generateUpdateTool(resource string, schema ResourceSchema) openai.Tool {
+	updateSchema := g.generateJSONSchema(schema.UpdateType)
+	
+	return openai.Tool{
+		Type: openai.ToolTypeFunction,
+		Function: &openai.FunctionDefinition{
+			Name:        fmt.Sprintf("%s_update", resource),
+			Description: fmt.Sprintf("Update an existing %s entity", resource),
+			Parameters: openai.FunctionParameters{
+				Type: "object",
+				Properties: map[string]openai.JSONSchemaDefine{
+					"id": {
+						Type:        "string",
+						Description: fmt.Sprintf("The ID of the %s to update", resource),
+					},
+					"update": {
+						Type:        "object",
+						Description: fmt.Sprintf("The updates to apply to the %s", resource),
+						Properties:  updateSchema.Properties,
+					},
+				},
+				Required: []string{"id", "update"},
+			},
+		},
+	}
+}
+
+// generateDeleteTool creates a delete tool for a resource
+func (g *ToolGenerator) generateDeleteTool(resource string) openai.Tool {
+	return openai.Tool{
+		Type: openai.ToolTypeFunction,
+		Function: &openai.FunctionDefinition{
+			Name:        fmt.Sprintf("%s_delete", resource),
+			Description: fmt.Sprintf("Delete a %s entity by its ID", resource),
+			Parameters: openai.FunctionParameters{
+				Type: "object",
+				Properties: map[string]openai.JSONSchemaDefine{
+					"id": {
+						Type:        "string",
+						Description: fmt.Sprintf("The ID of the %s to delete", resource),
+					},
+				},
+				Required: []string{"id"},
+			},
+		},
+	}
+}
+
+// generateCountTool creates a count tool for a resource
+func (g *ToolGenerator) generateCountTool(resource string, schema ResourceSchema) openai.Tool {
+	filterSchema := g.generateJSONSchema(schema.FilterType)
+	
+	return openai.Tool{
+		Type: openai.ToolTypeFunction,
+		Function: &openai.FunctionDefinition{
+			Name:        fmt.Sprintf("%s_count", resource),
+			Description: fmt.Sprintf("Count %s entities based on filter criteria", resource),
+			Parameters: openai.FunctionParameters{
+				Type: "object",
+				Properties: map[string]openai.JSONSchemaDefine{
+					"filter": {
+						Type:        "object",
+						Description: fmt.Sprintf("Filter criteria for counting %s entities", resource),
+						Properties:  filterSchema.Properties,
+					},
+				},
+			},
+		},
+	}
+}
+
+// JSONSchema represents a JSON schema structure
+type JSONSchema struct {
+	Type       string                          `json:"type"`
+	Properties map[string]openai.JSONSchemaDefine `json:"properties"`
+	Required   []string                        `json:"required"`
+}
+
+// generateJSONSchema generates a JSON schema from a Go type using reflection
+func (g *ToolGenerator) generateJSONSchema(t interface{}) JSONSchema {
+	schema := JSONSchema{
+		Type:       "object",
+		Properties: make(map[string]openai.JSONSchemaDefine),
+		Required:   []string{},
+	}
+
+	typ := reflect.TypeOf(t)
+	if typ.Kind() == reflect.Ptr {
+		typ = typ.Elem()
+	}
+
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		
+		// Skip unexported fields
+		if !field.IsExported() {
+			continue
+		}
+
+		jsonTag := field.Tag.Get("json")
+		if jsonTag == "-" {
+			continue
+		}
+
+		// Parse JSON tag
+		fieldName, omitempty := g.parseJSONTag(jsonTag, field.Name)
+		
+		// Generate schema for the field
+		fieldSchema := g.generateFieldSchema(field.Type)
+		
+		// Add description from field name or tag
+		fieldSchema.Description = g.generateFieldDescription(field, fieldName)
+		
+		schema.Properties[fieldName] = fieldSchema
+		
+		// Add to required if not omitempty and not a pointer
+		if !omitempty && field.Type.Kind() != reflect.Ptr && !g.isOptionalType(field.Type) {
+			validateTag := field.Tag.Get("validate")
+			if strings.Contains(validateTag, "required") {
+				schema.Required = append(schema.Required, fieldName)
+			}
+		}
+	}
+
+	return schema
+}
+
+// generateFieldSchema generates a JSON schema for a specific field type
+func (g *ToolGenerator) generateFieldSchema(t reflect.Type) openai.JSONSchemaDefine {
+	switch t.Kind() {
+	case reflect.String:
+		return openai.JSONSchemaDefine{Type: "string"}
+	case reflect.Int, reflect.Int32, reflect.Int64:
+		return openai.JSONSchemaDefine{Type: "integer"}
+	case reflect.Float32, reflect.Float64:
+		return openai.JSONSchemaDefine{Type: "number"}
+	case reflect.Bool:
+		return openai.JSONSchemaDefine{Type: "boolean"}
+	case reflect.Slice:
+		elementSchema := g.generateFieldSchema(t.Elem())
+		return openai.JSONSchemaDefine{
+			Type:  "array",
+			Items: &elementSchema,
+		}
+	case reflect.Map:
+		return openai.JSONSchemaDefine{
+			Type: "object",
+			AdditionalProperties: true,
+		}
+	case reflect.Ptr:
+		// For pointers, generate the schema for the underlying type
+		return g.generateFieldSchema(t.Elem())
+	case reflect.Struct:
+		// For structs, we might want to handle time.Time specially
+		if t.String() == "time.Time" {
+			return openai.JSONSchemaDefine{
+				Type:   "string",
+				Format: "date-time",
+			}
+		}
+		// For other structs, treat as objects
+		return openai.JSONSchemaDefine{Type: "object"}
+	default:
+		// For unknown types, default to string
+		return openai.JSONSchemaDefine{Type: "string"}
+	}
+}
+
+// parseJSONTag parses a JSON struct tag and returns the field name and omitempty flag
+func (g *ToolGenerator) parseJSONTag(tag, defaultName string) (string, bool) {
+	if tag == "" {
+		return defaultName, false
+	}
+
+	parts := strings.Split(tag, ",")
+	name := parts[0]
+	if name == "" {
+		name = defaultName
+	}
+
+	omitempty := false
+	for _, part := range parts[1:] {
+		if part == "omitempty" {
+			omitempty = true
+			break
+		}
+	}
+
+	return name, omitempty
+}
+
+// generateFieldDescription generates a description for a field
+func (g *ToolGenerator) generateFieldDescription(field reflect.StructField, fieldName string) string {
+	// Check for description in tags
+	if desc := field.Tag.Get("description"); desc != "" {
+		return desc
+	}
+
+	// Generate description from field name
+	return g.camelCaseToDescription(fieldName)
+}
+
+// camelCaseToDescription converts camelCase to a human-readable description
+func (g *ToolGenerator) camelCaseToDescription(s string) string {
+	var result strings.Builder
+	for i, r := range s {
+		if i > 0 && r >= 'A' && r <= 'Z' {
+			result.WriteRune(' ')
+		}
+		if i == 0 {
+			result.WriteRune(r)
+		} else {
+			result.WriteRune(r)
+		}
+	}
+	return strings.ToLower(result.String())
+}
+
+// isOptionalType checks if a type is considered optional (slice, map, interface)
+func (g *ToolGenerator) isOptionalType(t reflect.Type) bool {
+	switch t.Kind() {
+	case reflect.Slice, reflect.Map, reflect.Interface:
+		return true
+	default:
+		return false
+	}
+}
+
+// ParseToolCall parses an OpenAI tool call into a Command
+func (g *ToolGenerator) ParseToolCall(toolCall openai.ToolCall) (*Command, error) {
+	// Parse the function name to extract resource and operation
+	parts := strings.Split(toolCall.Function.Name, "_")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid tool name format: %s", toolCall.Function.Name)
+	}
+
+	resource := parts[0]
+	operation := CRUDOperation(parts[1])
+
+	// Parse the arguments
+	var args map[string]interface{}
+	if err := json.Unmarshal([]byte(toolCall.Function.Arguments), &args); err != nil {
+		return nil, fmt.Errorf("failed to parse tool arguments: %w", err)
+	}
+
+	cmd := &Command{
+		Resource:  resource,
+		Operation: operation,
+	}
+
+	// Extract operation-specific parameters
+	switch operation {
+	case OperationFindByID, OperationDelete:
+		if id, ok := args["id"].(string); ok {
+			cmd.ID = id
+		}
+	case OperationFind, OperationCount:
+		if filter, ok := args["filter"]; ok {
+			cmd.Payload = filter
+		}
+	case OperationCreate:
+		if entity, ok := args["entity"]; ok {
+			cmd.Payload = entity
+		}
+	case OperationUpdate:
+		if id, ok := args["id"].(string); ok {
+			cmd.ID = id
+		}
+		if update, ok := args["update"]; ok {
+			cmd.Payload = update
+		}
+	}
+
+	return cmd, nil
+}

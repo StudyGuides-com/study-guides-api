@@ -1,0 +1,23 @@
+model UserTagRating {
+  userId      String
+  tagId       String
+  rating      Int       // Assuming rating is an integer
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag         Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@id([userId, tagId])
+  @@map("UserTagRating")
+}
+
+model UserQuestionRating {
+  userId      String
+  questionId  String
+  rating      Int 
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@id([userId, questionId])
+	@@map("UserQuestionRating")
+}

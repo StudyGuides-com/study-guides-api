@@ -1,0 +1,48 @@
+enum AlgoliaRecordType {
+  Question
+  Topic
+  SubCategory
+  Category
+  User
+  Batch
+  Course
+  Department
+  Region
+  University
+  Organization
+  Certifying_Agency
+  Entrance_Exam
+  AP_Exam
+  Certification
+  Module
+  Domain
+  UserTopic
+  UserFolder
+  UserStudyGuide
+  UserContent
+  Faq
+  Contact
+  Branch
+  Instruction_Type
+  Instruction_Group
+  Instruction
+  Chapter
+  Section
+}
+
+model AlgoliaRecord {
+  id          String              @id @default(cuid())
+  batchId     String?
+  batch       ImportBatch?         @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  type        AlgoliaRecordType
+  record      Json
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  uploaded    Boolean             @default(false)
+  uploadedAt  DateTime?
+
+  @@index([batchId])
+  @@index([type])
+  @@index([type, uploaded])
+  @@index([uploaded, type])
+}

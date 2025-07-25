@@ -1,0 +1,46 @@
+enum SurvivalAnswerStatus {
+  Correct
+  Incorrect
+  Unanswered
+}
+
+model SurvivalSession {
+  id                String        @id @default(cuid())
+  userId            String?
+  browserId         String?
+  user              User?          @relation(fields: [userId], references: [id])
+  browser           Browser?      @relation(fields: [browserId], references: [browserId])
+  tagId             String
+  tag               Tag           @relation(fields: [tagId], references: [id])
+  startTime         DateTime      @default(now())
+  endTime           DateTime?
+  correctAnswers    Int           @default(0)
+  totalTime         Int           // Duration in seconds
+  score             Int           // Computed score based on time and number of correct answers
+  questions         SurvivalQuestion[]  // Relation to questions in the session
+  metadata          Json?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@map("SurvivalSession")
+  @@index([userId])
+  @@index([browserId])
+  @@index([score])  // New index for best session query
+  @@index([createdAt])  // New index for queries by creation time
+}
+
+model SurvivalQuestion {
+  id                String                @id @default(cuid())
+  sessionId         String
+  session           SurvivalSession       @relation(fields: [sessionId], references: [id])
+  questionId        String
+  question          Question              @relation(fields: [questionId], references: [id])
+  answerStatus      SurvivalAnswerStatus  @default(Unanswered)
+  answeredAt        DateTime              @default(now())
+  
+  @@map("SurvivalQuestion")
+  @@index([sessionId])
+  @@index([questionId])
+  @@index([sessionId, answerStatus]) // New index for filtering by status within a session
+  @@index([sessionId, answeredAt])   // New index for sorting/filtering by answered time
+}

@@ -8,8 +8,9 @@ import (
 
 	chatpb "github.com/studyguides-com/study-guides-api/api/v1/chat"
 	"github.com/studyguides-com/study-guides-api/internal/lib/ai"
-	"github.com/studyguides-com/study-guides-api/internal/lib/router"
-	"github.com/studyguides-com/study-guides-api/internal/lib/tools"
+	"github.com/studyguides-com/study-guides-api/internal/mcp"
+	"github.com/studyguides-com/study-guides-api/internal/mcp/tag"
+	"github.com/studyguides-com/study-guides-api/internal/store"
 
 	"github.com/sashabaranov/go-openai"
 )
@@ -197,127 +198,65 @@ func (ch *ConversationHistory) GetMessagesForAI() []openai.ChatCompletionMessage
 
 type ChatService struct {
 	chatpb.UnimplementedChatServiceServer
-	router router.Router
-	ai     ai.AiClient
+	mcpProcessor *mcp.MCPProcessor
+	store        store.Store
 }
 
-func NewChatService(router router.Router, ai ai.AiClient) *ChatService {
+func NewChatService(store store.Store, ai ai.AiClient) *ChatService {
+	// Create MCP processor
+	mcpProcessor := mcp.NewMCPProcessor(ai)
+	
+	// Register tag repository
+	tagRepo := tag.NewTagRepositoryAdapter(store.TagStore())
+	mcpProcessor.Register(tag.ResourceName, tagRepo, tag.GetResourceSchema())
+	
 	return &ChatService{
-		router: router,
-		ai:     ai,
+		mcpProcessor: mcpProcessor,
+		store:        store,
 	}
 }
 
-// buildSystemPrompt dynamically creates a system prompt based on available tools
-func buildSystemPrompt() string {
-	toolDefinitions := tools.GetClassificationDefinitions()
-
-	var operations []string
-	var operationDetails []string
-
-	for _, toolDef := range toolDefinitions {
-		operationName := toolDef.Name
-		operations = append(operations, operationName)
-
-		// Build parameter list for this operation
-		var params []string
-		for _, param := range toolDef.Parameters {
-			params = append(params, param.Name)
-		}
-
-		if len(params) > 0 {
-			operationDetails = append(operationDetails, fmt.Sprintf("For %s, allowed parameters: %s.", operationName, strings.Join(params, ", ")))
-		} else {
-			operationDetails = append(operationDetails, fmt.Sprintf("For %s, no parameters required.", operationName))
+// convertMCPResponseToLegacyFormat converts MCP response to match the old API format
+func convertMCPResponseToLegacyFormat(mcpResp *mcp.Response) (string, string, map[string]string) {
+	// Extract operation and parameters from MCP response
+	operation := "MCP_Operation"
+	parameters := make(map[string]string)
+	
+	// The MCP response contains the formatted data we need
+	answer := mcpResp.Message
+	if !mcpResp.Success {
+		answer = fmt.Sprintf("Error: %s", mcpResp.Error)
+	}
+	
+	// If we have data, include it in the answer
+	if mcpResp.Data != nil {
+		if _, err := json.Marshal(mcpResp.Data); err == nil {
+			// For backwards compatibility, we format the data nicely
+			answer = mcpResp.Message
 		}
 	}
-
-	operationsList := strings.Join(operations, ", ")
-	detailsList := strings.Join(operationDetails, "\n")
-
-	// Add tag type guidance
-	tagTypeGuidance := `
-	When using ListTags with a type parameter, use the exact tag types that exist in the system.
-	Common tag types include: Category, UserContent, UserTopic, Branch, Instruction_Type, 
-	Instruction_Group, Instruction, Chapter, Section, etc.
 	
-	Use the exact type name as it appears in the system. Do NOT use synonyms or variations.
-	`
-
-	// Add format selection guidance
-	formatGuidance := `
-	CRITICAL: Always detect format requests from user's natural language and set the 'format' parameter accordingly:
-	
-	Format Detection Rules:
-	- "as csv", "in csv", "csv format", "spreadsheet", "Excel" → format: "csv"
-	- "as json", "in json", "json format", "data", "API", "programmatic" → format: "json"  
-	- "as list", "in list", "plain text", "human readable" → format: "list"
-	- Default (no format specified) → format: "list"
-	
-	Examples:
-	- "list tag types as csv" → UniqueTagTypes with format: "csv"
-	- "show tags in json" → ListTags with format: "json"
-	- "get tag count in csv" → TagCount with format: "csv"
-	
-	ALWAYS set the format parameter when the user specifies a format preference!
-	`
-
-	return fmt.Sprintf(`
-	You are an intent router for a study guides API. You MUST respond using exactly one of the available tools.
-
-	AVAILABLE TOOLS: %s
-
-	TOOL DETAILS:
-	%s
-
-	%s
-	%s
-
-	IMPORTANT RULES:
-	1. You MUST call exactly one tool for every user request
-	2. If the user's request doesn't match any specific tool, use the "Unknown" tool
-	3. For tag-related requests, use ListTags, TagCount, GetTag, or ListRootTags as appropriate
-	4. For user-related requests, use UserCount or GetUser
-	5. For metadata requests, use UniqueTagTypes or UniqueContextTypes
-	6. For devops requests, use Deploy, Rollback, ListDeployments, or GetDeploymentStatus as appropriate
-	7. Always respond using the provided tool to return your response in JSON format
-
-	EXAMPLES:
-	- "list the tags" → ListTags
-	- "how many tags are there" → TagCount  
-	- "show me root tags" → ListRootTags
-	- "get tag details" → GetTag (requires tagId)
-	- "how many users" → UserCount
-	- "what tag types exist" → UniqueTagTypes
-	- "deploy the app" → Deploy (requires appId)
-	- "deploy test slackbot" → Deploy with appId: "test slackbot"
-	- "deploy dev api" → Deploy with appId: "dev api"
-	- "rollback to previous version" → Rollback (requires appId and deploymentId)
-	- "list deployments" → ListDeployments (requires appId)
-	- "check deployment status" → GetDeploymentStatus (requires appId and deploymentId)
-	- "I don't understand" → Unknown
-	`, operationsList, detailsList, tagTypeGuidance, formatGuidance)
+	return answer, operation, parameters
 }
 
 func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatpb.ChatResponse, error) {
 	// Debug: Print incoming request details
-	fmt.Printf("DEBUG: === CHAT REQUEST ===\n")
+	fmt.Printf("DEBUG: === MCP CHAT REQUEST ===\n")
 	fmt.Printf("DEBUG: User ID: %s\n", req.Context.GetUserId())
 	fmt.Printf("DEBUG: Session ID: %s\n", req.Context.GetSessionId())
 	fmt.Printf("DEBUG: Message: %s\n", req.Message)
 	fmt.Printf("DEBUG: Context Metadata: %+v\n", req.Context.GetMetadata())
 
 	resp, err := PublicBaseHandler(ctx, func(ctx context.Context) (interface{}, error) {
-
-		systemPrompt := buildSystemPrompt()
+		// Get conversation history from context metadata
+		conversationHistory := FromContextMetadata(req.Context.GetMetadata())
 
 		// Add current user message to history
 		currentUserMessage := openai.ChatCompletionMessage{
 			Role:    openai.ChatMessageRoleUser,
 			Content: req.Message,
 		}
-		// Get conversation history from context metadata
-		conversationHistory := FromContextMetadata(req.Context.GetMetadata())
+		conversationHistory.AddMessage(currentUserMessage)
 
 		// Debug: Print conversation history
 		fmt.Printf("DEBUG: === CONVERSATION HISTORY ===\n")
@@ -326,125 +265,28 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 			fmt.Printf("DEBUG: Message %d - Role: %s, Content: %s\n", i+1, msg.Role, msg.Content)
 		}
 
-		conversationHistory.AddMessage(currentUserMessage)
-
-		// Debug: Print updated history
-		fmt.Printf("DEBUG: === UPDATED HISTORY ===\n")
-		fmt.Printf("DEBUG: Updated history length: %d messages\n", len(conversationHistory.Messages))
-		for i, msg := range conversationHistory.Messages {
-			fmt.Printf("DEBUG: Message %d - Role: %s, Content: %s\n", i+1, msg.Role, msg.Content)
-		}
-
-		tools := tools.GetClassificationTools()
-
-		// Use optimized messages for AI to prevent token limit issues
-		aiMessages := conversationHistory.GetMessagesForAI()
-		raw, err := s.ai.ChatCompletionWithHistory(ctx, systemPrompt, aiMessages, tools, nil)
+		// Process request through MCP system
+		fmt.Printf("DEBUG: === MCP PROCESSING ===\n")
+		mcpResponse, err := s.mcpProcessor.ProcessRequest(ctx, req.Message)
 		if err != nil {
-			return nil, err
+			fmt.Printf("DEBUG: MCP processing failed: %v\n", err)
+			return nil, fmt.Errorf("failed to process request: %w", err)
 		}
 
-		var plan struct {
-			Operation  string
-			Parameters map[string]string
+		// Debug: Print MCP response
+		fmt.Printf("DEBUG: === MCP RESPONSE ===\n")
+		fmt.Printf("DEBUG: Success: %v\n", mcpResponse.Success)
+		fmt.Printf("DEBUG: Message: %s\n", mcpResponse.Message)
+		fmt.Printf("DEBUG: Error: %s\n", mcpResponse.Error)
+		if mcpResponse.Count != nil {
+			fmt.Printf("DEBUG: Count: %d\n", *mcpResponse.Count)
 		}
 
-		// parse from tool call JSON:
-		var chatResp openai.ChatCompletionResponse
-		if err := json.Unmarshal([]byte(raw), &chatResp); err != nil {
-			return nil, fmt.Errorf("failed to parse AI response: %w", err)
-		}
-
-		// Debug: Print the raw AI response for troubleshooting
-		fmt.Printf("DEBUG: === RAW AI RESPONSE ===\n")
-		fmt.Printf("DEBUG: Raw response: %s\n", raw)
-		fmt.Printf("DEBUG: Choices count: %d\n", len(chatResp.Choices))
-		if len(chatResp.Choices) > 0 {
-			fmt.Printf("DEBUG: First choice message: %+v\n", chatResp.Choices[0].Message)
-			fmt.Printf("DEBUG: Tool calls count: %d\n", len(chatResp.Choices[0].Message.ToolCalls))
-		}
-
-		if len(chatResp.Choices) == 0 {
-			return nil, fmt.Errorf("AI returned no choices for request: %s", req.Message)
-		}
-
-		if len(chatResp.Choices[0].Message.ToolCalls) == 0 {
-			return nil, fmt.Errorf("AI did not call any tools for request: %s. Available tools: %s", req.Message, strings.Join([]string{
-				"ListTags",
-				"TagCount",
-				"ListRootTags",
-				"GetTag",
-				"UniqueTagTypes",
-				"UniqueContextTypes",
-				"UserCount",
-				"GetUser",
-				"Deploy",
-				"Rollback",
-				"ListDeployments",
-				"GetDeploymentStatus",
-				"Unknown",
-			}, ", "))
-		}
-
-		toolCall := chatResp.Choices[0].Message.ToolCalls[0]
-		plan.Operation = toolCall.Function.Name
-
-		// First unmarshal to map[string]interface{} to handle mixed types
-		var rawParams map[string]interface{}
-		if err := json.Unmarshal([]byte(toolCall.Function.Arguments), &rawParams); err != nil {
-			return nil, err
-		}
-
-		// Convert all values to strings
-		plan.Parameters = make(map[string]string)
-		for k, v := range rawParams {
-			switch val := v.(type) {
-			case string:
-				plan.Parameters[k] = val
-			case float64:
-				plan.Parameters[k] = fmt.Sprintf("%.0f", val) // Convert to integer string
-			case bool:
-				plan.Parameters[k] = fmt.Sprintf("%v", val)
-			default:
-				// For any other type, convert to JSON string
-				if jsonBytes, err := json.Marshal(val); err == nil {
-					plan.Parameters[k] = string(jsonBytes)
-				} else {
-					plan.Parameters[k] = fmt.Sprintf("%v", val)
-				}
-			}
-		}
-
-		// Debug: Print AI response and plan
-		fmt.Printf("DEBUG: === AI RESPONSE ===\n")
-		fmt.Printf("DEBUG: Operation: %s\n", plan.Operation)
-		fmt.Printf("DEBUG: Parameters: %+v\n", plan.Parameters)
-
-		// Debug: Print format information for Slack bot
-		if format, ok := plan.Parameters["format"]; ok {
-			fmt.Printf("DEBUG: Determined format for Slack bot: %s\n", format)
-		} else {
-			fmt.Printf("DEBUG: No format specified, using default (list)\n")
-		}
-
-		answer, err := s.router.Route(ctx, plan.Operation, plan.Parameters)
-		if err != nil {
-			return nil, err
-		}
-
-		// Debug: Print router answer
-		fmt.Printf("DEBUG: === ROUTER ANSWER ===\n")
-		fmt.Printf("DEBUG: Answer: %s\n", answer)
+		// Convert MCP response to legacy format for backwards compatibility
+		answer, operation, parameters := convertMCPResponseToLegacyFormat(mcpResponse)
 
 		// Add assistant response to conversation history
-		conversationHistory.AddAssistantResponse(answer, plan.Operation, plan.Parameters)
-
-		// Debug: Print final history
-		fmt.Printf("DEBUG: === FINAL HISTORY ===\n")
-		fmt.Printf("DEBUG: Final history length: %d messages\n", len(conversationHistory.Messages))
-		for i, msg := range conversationHistory.Messages {
-			fmt.Printf("DEBUG: Message %d - Role: %s, Content: %s\n", i+1, msg.Role, msg.Content)
-		}
+		conversationHistory.AddAssistantResponse(answer, operation, parameters)
 
 		// Create updated context with conversation history
 		updatedContext := &chatpb.Context{
@@ -453,23 +295,17 @@ func (s *ChatService) Chat(ctx context.Context, req *chatpb.ChatRequest) (*chatp
 			Metadata:  conversationHistory.ToContextMetadata(),
 		}
 
-		// Debug: Print updated context
-		fmt.Printf("DEBUG: === UPDATED CONTEXT ===\n")
-		fmt.Printf("DEBUG: Updated Context Metadata: %+v\n", updatedContext.GetMetadata())
-
-		// Debug: Print response details for Slack bot
-		fmt.Printf("DEBUG: === RESPONSE FOR SLACK BOT ===\n")
-		fmt.Printf("DEBUG: Operation: %s\n", plan.Operation)
-		fmt.Printf("DEBUG: Parameters: %+v\n", plan.Parameters)
-		if format, ok := plan.Parameters["format"]; ok {
-			fmt.Printf("DEBUG: Format for Slack formatting: %s\n", format)
-		}
+		// Debug: Print final response
+		fmt.Printf("DEBUG: === FINAL RESPONSE ===\n")
+		fmt.Printf("DEBUG: Answer: %s\n", answer)
+		fmt.Printf("DEBUG: Operation: %s\n", operation)
+		fmt.Printf("DEBUG: Parameters: %+v\n", parameters)
 
 		return &chatpb.ChatResponse{
 			Answer:     answer,
 			Context:    updatedContext,
-			Operation:  plan.Operation,
-			Parameters: plan.Parameters,
+			Operation:  operation,
+			Parameters: parameters,
 		}, nil
 	})
 	if err != nil {

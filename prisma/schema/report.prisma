@@ -1,0 +1,32 @@
+enum ReportType {
+  Spam
+  Inappropriate
+  Incorrect
+  Other
+}
+
+model UserQuestionReport {
+  userId      String
+  questionId  String
+  report      ReportType
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@id([userId, questionId])
+	@@map("UserQuestionReport")
+}
+
+model UserTagReport {
+  userId      String
+  tagId       String
+  report      ReportType
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag         Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@id([userId, tagId])
+	@@map("UserTagReport")
+  @@index([report])
+
+}

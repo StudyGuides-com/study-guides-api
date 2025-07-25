@@ -1,0 +1,14 @@
+model Faq {
+    id                  String @id @default(cuid())
+    question            String
+    answer              String
+    hash                String        @unique
+    createdAt           DateTime @default(now())
+    updatedAt           DateTime @updatedAt
+    createdBy           String
+    updatedBy           String
+    createdByUser       User @relation("createdFaqs", fields: [createdBy], references: [id])
+    updatedByUser       User @relation("updatedFaqs", fields: [updatedBy], references: [id])
+
+    @@map("Faq")
+}

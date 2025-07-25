@@ -1,0 +1,32 @@
+enum InteractionType {
+  AnswerCorrectly
+  AnswerIncorrectly
+  Reveal
+  AnswerEasy
+  AnswerHard
+  ViewLearnMore
+  ViewPassage
+  None
+}
+
+model UserQuestionInteraction {
+  id            String            @id @default(cuid())
+  occurredAt    DateTime          @default(now()) // Timestamp for when the interaction occurred
+  studyMethod   StudyMethod       @default(None)
+  type          InteractionType
+  correct       Boolean?          // Optional field to indicate if the interaction was correct
+  strengthScore Float             @default(0.0) // A score to indicate the strength of the interaction
+  metadata      Json?             // Optional JSON field for additional interaction details
+  userId        String            // Foreign key to User
+  questionId    String            // Foreign key to Question
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question      Question          @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  createdAt     DateTime          @default(now())
+
+  @@map("UserQuestionInteraction")
+  @@index([userId, occurredAt])
+  @@index([userId, questionId], name: "idx_interaction_user_question") // Index for faster lookups on user and question
+  @@index([questionId, userId])
+  @@index([questionId])
+  @@index([questionId, createdAt])
+}

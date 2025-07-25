@@ -1,0 +1,6 @@
+model IndexCache {
+  id String @id
+  ts DateTime?
+
+  @@map("_index_cache")
+} 

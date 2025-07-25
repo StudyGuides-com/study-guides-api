@@ -19,7 +19,6 @@ import (
 	"github.com/studyguides-com/study-guides-api/internal/lib/webrouter"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 
-	"github.com/studyguides-com/study-guides-api/internal/lib/router"
 	"github.com/studyguides-com/study-guides-api/internal/middleware"
 	"github.com/studyguides-com/study-guides-api/internal/services"
 	"golang.org/x/net/http2"
@@ -120,10 +119,9 @@ func (s *Server) registerServices(appStore store.Store) {
 	// Register Question Service
 	questionpb.RegisterQuestionServiceServer(s.grpcServer, services.NewQuestionService(appStore))
 
-	// Register Chat Service
-	router := router.NewRouter(appStore)
+	// Register Chat Service with MCP system
 	ai := ai.NewClient(os.Getenv("OPENAI_API_KEY"), os.Getenv("OPENAI_MODEL"))
-	chatpb.RegisterChatServiceServer(s.grpcServer, services.NewChatService(router, ai))
+	chatpb.RegisterChatServiceServer(s.grpcServer, services.NewChatService(appStore, ai))
 
 	// Register Admin Service
 	adminpb.RegisterAdminServiceServer(s.grpcServer, services.NewAdminService(appStore))

@@ -1,0 +1,55 @@
+enum UserAction {
+  FavoriteATopic
+  UnfavoriteATopic
+  ReportATopic
+  ReportAQuestion
+  UseAStudyMethod
+  RevealAnAnswer
+  AnswerCorrectly
+  AnswerIncorrectly
+  AnswerEasy
+  AnswerHard
+  Login
+  ViewLearnMore
+  ViewPassage
+}
+
+model Challenge {
+  id                String        @id @default(cuid())
+  name              String
+  description       String
+  imageUrl          String?   
+  userChallenges    UserChallenge[]
+  badges            Badge[]
+  xpReward          Int
+  isActive          Boolean       @default(true)
+  action            UserAction
+  targetCount       Int
+  metadata          Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("Challenge")
+  @@index([action, isActive])
+}
+
+model UserChallenge {
+  id              String        @id @default(cuid())
+  userId          String
+  challengeId     String
+  isCompleted     Boolean       @default(false)
+  completionDate  DateTime?
+  progress        Int           @default(0)
+  progressDetails Json?
+  xpReward        Int           // Snapshot of xpReward from Challenge at time of creation
+  action          UserAction    // Action required to progress this UserChallenge
+  targetCount     Int           // Snapshot of the target count from Challenge
+
+  user            User           @relation(fields: [userId], references: [id])
+  challenge       Challenge      @relation(fields: [challengeId], references: [id])
+
+  @@map("UserChallenges")
+  @@unique([userId, challengeId])
+  @@index([userId, action, targetCount])
+  @@index([id, isCompleted])
+}

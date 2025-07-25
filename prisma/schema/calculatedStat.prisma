@@ -1,0 +1,92 @@
+/// Calculated Stats
+enum CalculatedStatType {
+  /// Tags
+  TotalTags
+  TotalTagsPrivate
+  TotalTagsCategory
+  TotalTagsSubCategory
+  TotalTagsUniversity
+  TotalTagsRegion
+  TotalTagsDepartment
+  TotalTagsCourse
+  TotalTagsTopic
+  TotalTagsUserFolder
+  TotalTagsOrganization
+  TotalTagsCertifyingAgency
+  TotalTagsCertification
+  TotalTagsModule
+  TotalTagsDomain
+  TotalTagsUserTopic
+  TotalTagsEntranceExam
+  TotalTagsAPExam
+  TotalTagsBranch
+  TotalTagsInstructionType
+  TotalTagsInstructionGroup
+  TotalTagsInstruction
+  TotalTagsChapter
+  TotalTagsSection
+  TotalTagsUserStudyGuide
+  TotalTagsUserContent
+  TotalTagsRatings
+  TotalTagsReportedSpam
+  TotalTagsReportedInappropriate 
+  TotalTagsReportedIncorrect
+  TotalTagsReportedOther
+
+
+  /// Topics
+  TotalTopicsMissingMetaTags
+  TotalTopicsMissingContentDescriptors
+  TotalTopicsContentRatingEveryone
+  TotalTopicsContentRatingEveryone10
+  TotalTopicsContentRatingTeen
+  TotalTopicsContentRatingMature
+  TotalTopicsContentRatingAdultsOnly
+  TotalTopicsContentRatingPending
+
+  /// Users
+  TotalUsers
+  /// Questions
+  TotalQuestions
+  TotalQuestionsPrivate
+  TotalQuestionsAssignments
+  TotalQuestionsInteractions
+  TotalQuestionsRatings
+  TotalQuestionsReportedSpam
+  TotalQuestionsReportedInappropriate
+  TotalQuestionsReportedIncorrect
+  TotalQuestionsReportedOther
+  TotalQuestionsMissingLearnMore
+  TotalQuestionsMissingDistractors
+
+  /// Contacts
+  TotalContacts
+  TotalContactsPending
+  TotalContactsResolved
+  TotalContactsClosed
+}
+
+enum CalculatedStatGroup {
+  Tags
+  TagTypes
+  Reports
+  Topics
+  MissingData
+  Ratings
+  Questions
+  Users
+  UserContent
+  Contacts
+}
+
+/// Calculated stats for the system
+model CalculatedStat {
+  id          String                @id @default(cuid())
+  group       CalculatedStatGroup   @default(Topics)
+  type        CalculatedStatType    @unique
+  name        String                @default("")
+  value       Int
+  description String?               @default("No description")
+  sqlQuery    String                @default("")
+  updatedAt   DateTime              @updatedAt
+}

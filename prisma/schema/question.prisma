@@ -1,0 +1,70 @@
+model Question {
+  id                String        @id @default(cuid())
+  batchId           String?
+  batch             ImportBatch?   @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  questionText      String
+  answerText        String
+  hash              String        @unique
+  learnMore         String?
+  distractors       String[]                      @default([])
+  videoUrl          String?
+  imageUrl          String?
+  version           Int                           @default(1)
+  correctCount      Int?                          @default(0)
+  incorrectCount    Int?                          @default(0)
+  difficultyRatio   Float?                        @default(0)
+  passageId         String?
+  passage           Passage?                      @relation(fields: [passageId], references: [id])
+  survivalQuestion  SurvivalQuestion[]
+  testQuestion      TestQuestion[]
+  tags              QuestionTag[]
+  interactions      UserQuestionInteraction[]
+  ratings           UserQuestionRating[]
+  reports           UserQuestionReport[]
+  topicProgress     UserTopicProgress[]
+  public            Boolean                     @default(true)
+  ownerId           String?
+  owner             User?                       @relation(fields: [ownerId], references: [id])
+  accessList        QuestionAccess[]
+  metadata          Json?
+  createdAt         DateTime                    @default(now())
+  updatedAt         DateTime                    @updatedAt  
+
+  @@map("Question")
+  @@index([batchId])
+  @@index([hash], name: "questions_hash_idx")
+  @@index([distractors], type: Gin)
+  @@index([questionText])
+  @@index([ownerId, id])
+  @@index([public], name: "questions_public_idx")
+  @@index([public, id], name: "questions_public_id_idx")
+}
+
+model QuestionTag {
+  questionId  String          
+  tagId       String          
+  batchId     String?
+  batch       ImportBatch?    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  question    Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  tag         Tag             @relation(fields: [tagId], references: [id])
+  createdAt   DateTime        @default(now())
+
+  @@map("QuestionTag")
+  @@id([questionId, tagId])
+  @@index([tagId], name: "idx_questiontag_tag_id")
+  @@index([batchId])
+  @@index([questionId, tagId], name: "idx_questiontag_composite")
+}
+
+model QuestionAccess {
+  id          String    @id @default(cuid())
+  questionId  String
+  userId      String
+  accessType  AccessType
+  question    Question  @relation(fields: [questionId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@unique([questionId, userId])
+  @@map("QuestionAccess")
+}

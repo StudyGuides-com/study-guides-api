@@ -1,0 +1,15 @@
+// Main article model
+model Article {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   @db.Text
+  slug        String   @unique
+  description String   @db.Text
+  category    String
+  imageUrl    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("Article")
+  @@index([slug])
+}

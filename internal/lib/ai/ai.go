@@ -110,17 +110,13 @@ func (c *OpenAiClient) ChatCompletionWithTools(ctx context.Context, systemPrompt
 		return "", fmt.Errorf("failed to create chat completion with tools: %w", err)
 	}
 
-	// Return the tool call output if present
-	if len(resp.Choices) > 0 {
-		toolCalls := resp.Choices[0].Message.ToolCalls
-		if len(toolCalls) > 0 {
-			return toolCalls[0].Function.Arguments, nil
-		}
-		// Fallback to message content
-		return resp.Choices[0].Message.Content, nil
+	// Return the full response as JSON so MCP processor can parse tool calls
+	responseJSON, err := json.Marshal(resp)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal response: %w", err)
 	}
 
-	return "", errors.ErrNoCompletionChoicesReturned
+	return string(responseJSON), nil
 }
 
 // ChatCompletionWithHistory generates a chat completion with conversation history
@@ -159,14 +155,19 @@ func (c *OpenAiClient) ChatCompletionWithHistory(ctx context.Context, systemProm
 	return string(responseJSON), nil
 }
 
-// CreateJSONChatCompletionRequest creates a chat completion request with JSON response format
+// CreateJSONChatCompletionRequest creates a chat completion request with tools
 func CreateJSONChatCompletionRequest(model string, messages []openai.ChatCompletionMessage, tools []openai.Tool, toolChoice *openai.ToolChoice) openai.ChatCompletionRequest {
 	req := openai.ChatCompletionRequest{
 		Model:    model,
 		Messages: messages,
-		ResponseFormat: &openai.ChatCompletionResponseFormat{
+	}
+
+	// Only add JSON response format if no tools are provided
+	// Tools and JSON response format are incompatible
+	if tools == nil {
+		req.ResponseFormat = &openai.ChatCompletionResponseFormat{
 			Type: openai.ChatCompletionResponseFormatTypeJSONObject,
-		},
+		}
 	}
 
 	if tools != nil {

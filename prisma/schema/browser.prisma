@@ -1,0 +1,26 @@
+model Browser {
+  browserId         String   @id                         // Primary key, set from the cookie value (anon-browser-id)
+  userId            String?                              // Nullable; populated if the user is authenticated
+  createdAt         DateTime @default(now())             // Timestamp when the browser record was created
+  lastSeenAt        DateTime @updatedAt                  // Timestamp of the last interaction by this browser
+  favoriteTags      UserTagFavorite[]
+  recentTags        UserTagRecent[]
+  userTopicProgress UserTopicProgress[]
+  testSessions      TestSession[]
+  survivalSessions  SurvivalSession[]
+  dataTransfers     AnonymousDataTransfer[]             // Track data transfers
+
+  @@map("Browser")
+}
+
+model AnonymousDataTransfer {
+  id                String   @id @default(cuid())
+  browserId         String                              // The browser ID that was transferred
+  userId            String                              // The user ID that received the data
+  transferredAt     DateTime @default(now())            // When the transfer occurred
+  browser           Browser  @relation(fields: [browserId], references: [browserId], onDelete: Cascade)
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([browserId, userId])                        // Prevent duplicate transfers
+  @@map("AnonymousDataTransfer")
+}

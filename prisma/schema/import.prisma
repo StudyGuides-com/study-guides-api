@@ -1,0 +1,28 @@
+model ImportBatch {
+  id                    String   @id @default(cuid())
+  file                  String   @default("")
+  startedAt             DateTime @default(now())
+  completedAt           DateTime?
+  questions             Question[]
+  tags                  Tag[]
+  algoliaRecords        AlgoliaRecord[]
+  questionLinks         QuestionTag[]
+  files                 ImportFile[]
+  @@map("ImportBatch")
+  @@index([startedAt])
+
+}
+
+model ImportFile {
+  id                    String      @id @default(cuid())
+  name                  String
+  imported              Boolean     @default(false)
+  importedAt            DateTime?
+  importBatchId         String
+  importBatch           ImportBatch @relation(fields: [importBatchId], references: [id])
+
+  @@map("ImportFile")
+  @@index([imported])
+  @@index([importBatchId])
+  @@index([importBatchId, name])
+}

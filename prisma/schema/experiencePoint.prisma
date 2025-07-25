@@ -1,0 +1,14 @@
+model ExperiencePoint {
+  id         String   @id @default(cuid())
+  userId     String
+  amount     Int      // The number of XP points
+  source     String   // Description of the activity that awarded these points
+  user       User @relation(fields: [userId], references: [id])
+  metadata          Json?
+  createdAt  DateTime @default(now())
+
+  @@map("ExperiencePoint")
+  @@index([userId])
+  @@index([amount])
+  @@index([userId, amount])
+}

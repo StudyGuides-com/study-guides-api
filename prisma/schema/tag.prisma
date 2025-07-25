@@ -1,0 +1,167 @@
+enum TagType {
+  Category
+  SubCategory
+  University
+  Region
+  Department
+  Course
+  Topic
+  UserStudyGuide
+  UserContent
+  UserFolder
+  UserTopic
+  Organization
+  Certifying_Agency
+  Certification
+  Module
+  Domain
+  Entrance_Exam
+  AP_Exam
+  Branch
+  Instruction_Type
+  Instruction_Group
+  Instruction
+  Chapter
+  Section
+  Part
+}
+
+enum ContentRatingType {
+  Everyone
+  Everyone10
+  Teen
+  Mature
+  AdultsOnly
+  RatingPending
+}
+
+enum ContextType {
+  Colleges
+  Certifications
+  EntranceExams
+  APExams
+  UserGeneratedContent
+  DoD
+}
+
+enum TagInviteStatus {
+  Pending
+  Accepted
+  Rejected
+}
+
+model Tag {
+  id                  String                @id @default(cuid())
+  batchId             String?
+  batch               ImportBatch?          @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  hash                String                @unique
+  name                String        
+  description         String?
+  type                TagType
+  context             ContextType?
+  parentTagId         String?
+  parentTag           Tag?                  @relation("ParentChild", fields: [parentTagId], references: [id])
+  childTags           Tag[]                 @relation("ParentChild")
+  hasChildren         Boolean               @default(false)
+  questions           QuestionTag[]
+  hasQuestions        Boolean               @default(false)
+  passages            Passage[]
+  ratings             UserTagRating[]
+  testSessions        TestSession[]
+  reports             UserTagReport[]
+  recentTags          UserTagRecent[]
+  favoriteTags        UserTagFavorite[]
+  topicProgress       UserTopicProgress[]
+  survivalSessions    SurvivalSession[]
+  contentRating       ContentRatingType     @default(RatingPending)
+  contentDescriptors  String[]              @default([])  
+  metaTags            String[]              @default([])  
+  public              Boolean               @default(true)
+  ownerId             String?
+  owner               User?                 @relation(fields: [ownerId], references: [id])
+  accessList          TagAccess[]
+  tagInvites          TagInvite[]
+  accessCount         Int                   @default(0)
+  metadata            Json?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+
+  @@map("Tag")
+  @@index([hash], name: "tags_hash_idx")
+  @@index([batchId])
+  @@index([type, batchId, id])
+  @@index([type, contentRating])
+  @@index([parentTagId])
+  @@index([contentRating, type])
+  @@index([metaTags], type: Gin)
+  @@index([type, metaTags])
+  @@index([type, contentDescriptors])
+  @@index([ownerId, type, public])
+  @@index([public], name: "tags_public_idx")
+  @@index([type, public], name: "tags_type_public_idx")
+  @@index([public, id], name: "tags_public_id_idx")
+}
+
+model TagAccess {
+  id          String    @id @default(cuid())
+  tagId       String
+  userId      String
+  accessType  AccessType
+  tag         Tag  @relation(fields: [tagId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@unique([tagId, userId])
+  @@map("TagAccess")
+}
+
+model TagInvite {
+  id String @id @default(cuid())
+  tagId String
+  tag Tag @relation(fields: [tagId], references: [id])
+  inviterId String
+  inviter User @relation("sentTagInvites", fields: [inviterId], references: [id])
+  inviteeId String?
+  invitee User? @relation("receivedTagInvites", fields: [inviteeId], references: [id])
+  email String?
+  accessType AccessType @default(ReadOnly)
+  status TagInviteStatus @default(Pending)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime @default(dbgenerated("NOW() + INTERVAL '1 days'"))
+
+  @@map("TagInvite")
+}
+
+model UserTagFavorite {
+  id            String   @id @default(cuid())
+  userId        String?   // Nullable, populated if user is authenticated
+  browserId     String?   // Nullable, populated if user is anonymous
+  tagId         String    
+  user          User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag           Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  browser       Browser?  @relation(fields: [browserId], references: [browserId], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+
+  @@index([tagId])
+  @@unique([userId, tagId], name: "userTagFavorite_userId_tagId_unique")
+  @@unique([browserId, tagId], name: "userTagFavorite_browserId_tagId_unique")
+  @@map("UserTagFavorite")
+}
+
+
+model UserTagRecent {
+  id            String   @id @default(cuid())
+  userId        String?
+  browserId     String?
+  tagId         String
+  user          User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag           Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  browser       Browser?  @relation(fields: [browserId], references: [browserId], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+
+  @@index([tagId])
+  @@unique([userId, tagId], name: "userTagRecent_userId_tagId_unique")
+  @@unique([browserId, tagId], name: "userTagRecent_browserId_tagId_unique")
+  @@map("UserTagRecent") 
+}

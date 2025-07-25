@@ -1,0 +1,44 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder"]
+
+}
+
+enum StudyMethod {
+  StudyGuide
+  Flashcards
+  MultipleChoice
+  Survival
+  MatchGame
+  Test
+  Quiz
+  None
+}
+
+enum AccessType {
+  Public
+  Private
+  ReadOnly
+  ReadWrite
+}
+
+model IndexExclusionHelper {
+  id String @id
+}
+
+
+
+
+
+
+
+
+
+
+

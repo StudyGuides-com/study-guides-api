@@ -1,0 +1,60 @@
+model User {
+  id                String    @id @default(cuid())
+  name              String?
+  gamerTag          String?   
+  email             String?   @unique
+  emailVerified     DateTime?
+  image             String?
+  contentTagId      String?
+  createdFaqs       Faq[] @relation("createdFaqs")
+  updatedFaqs       Faq[] @relation("updatedFaqs")
+  roles             UserRole[] 
+  accounts          Account[]
+  sessions          Session[]
+  survivalSessions  SurvivalSession[]
+  testSessions      TestSession[]
+  subscriptions     Subscription[]
+  interactions      UserQuestionInteraction[]
+  tagRatings        UserTagRating[]
+  tagReports        UserTagReport[]
+  questionRatings   UserQuestionRating[]
+  questionReports   UserQuestionReport[]
+  badges            UserBadge[]
+  questionAccess    QuestionAccess[]
+  tagAccess         TagAccess[]
+  recentTags        UserTagRecent[]
+  favoriteTags      UserTagFavorite[]
+  dismissedAnnouncements UserAnnouncementDismiss[]
+  challenges        UserChallenge[]
+  xp                ExperiencePoint[]
+  topicProgress     UserTopicProgress[]
+  dataTransfers     AnonymousDataTransfer[]
+  stripeCustomerId  String? @unique
+  tags              Tag[]
+  questions         Question[]
+  createdAt         DateTime @default(now())
+  sentTagInvites    TagInvite[] @relation("sentTagInvites")
+  receivedTagInvites TagInvite[] @relation("receivedTagInvites")
+}
+
+model UserTopicProgress {
+  id              String     @id @default(cuid())
+  userId          String?
+  browserId       String?
+  topicId         String
+  questionId      String
+  studyMethod     StudyMethod       @default(None)
+  complete        Boolean           @default(true)
+  user            User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  browser         Browser?          @relation(fields: [browserId], references: [browserId], onDelete: Cascade)
+  topic           Tag               @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  question        Question          @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now())
+
+  @@map("UserTopicProgress")
+  @@index([userId, topicId])
+  @@index([studyMethod, complete, topicId])
+  @@unique([userId, studyMethod, topicId, questionId], name: "userTopicProgress_userId_studyMethod_topicId_questionId_unique")
+  @@unique([browserId, studyMethod, topicId, questionId], name: "userTopicProgress_browserId_studyMethod_topicId_questionId_unique")
+}

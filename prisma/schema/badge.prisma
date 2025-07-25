@@ -1,0 +1,32 @@
+model Badge {
+  id                String   @id @default(cuid())
+  name              String
+  description       String
+  imageUrl          String?   // Optional field to store an image URL for the badge
+  xpThreshold       Int?      // The XP threshold required to earn the badge
+  challengeId       String?   // The challenge ID associated with the badge
+  userBadges        UserBadge[]
+  isActive          Boolean   @default(true)
+  challenge         Challenge? @relation(fields: [challengeId], references: [id])
+  metadata          Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("Badge")
+}
+
+model UserBadge {
+  id          String   @id @default(cuid())
+  userId      String
+  badgeId     String
+  awardedAt   DateTime @default(now())
+  metadata    Json?
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge       Badge  @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@map("UserBadge")
+  @@unique([userId, badgeId])
+  @@index([userId, awardedAt])
+  
+}

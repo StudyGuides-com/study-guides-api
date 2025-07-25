@@ -1,0 +1,17 @@
+model Role {
+  id            String   @id @default(cuid())
+  name          String
+  userRoles     UserRole[]
+  @@map("Role")
+}
+
+model UserRole {
+  userId String
+  roleId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@id([userId, roleId])
+  @@map("UserRole")
+}

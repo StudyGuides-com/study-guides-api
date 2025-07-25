@@ -1,0 +1,36 @@
+enum AnnouncementType {
+  Info
+  Warn
+  Danger
+}
+
+
+model Announcement {
+  id                String   @id @default(cuid())
+  message           String
+  type              AnnouncementType 
+  dismissible       Boolean
+  dismissed         UserAnnouncementDismiss[]
+  isActive          Boolean  @default(true)
+  metadata          Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("Announcement")
+  @@index([isActive])
+  @@index([isActive, dismissible])
+  @@index([isActive, createdAt])
+}
+
+model UserAnnouncementDismiss {
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String       
+  announcementId  String
+  announcement    Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  
+  @@map("UserAnnouncementDismiss")
+  @@id([userId, announcementId])
+  @@index([userId])
+  @@index([announcementId])
+}
