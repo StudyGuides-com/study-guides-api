@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/studyguides-com/study-guides-api/internal/repository"
 )
@@ -460,13 +461,13 @@ func (h *CommandHandler) generateKPIMessage(data interface{}, count int) string 
 			}
 			
 			if group != nil && status != nil {
-				statusStr := fmt.Sprintf("%v", status)
+				statusStr := strings.ToLower(fmt.Sprintf("%v", status))
 				groupStr := fmt.Sprintf("%v", group)
 				
 				switch statusStr {
 				case "running":
 					return fmt.Sprintf("KPI execution for %s is running", groupStr)
-				case "complete":
+				case "complete", "completed":
 					// Try to get duration info
 					if duration != nil {
 						return fmt.Sprintf("KPI execution for %s completed in %v", groupStr, duration)
@@ -522,11 +523,11 @@ func (h *CommandHandler) generateKPIMessage(data interface{}, count int) string 
 			groups = append(groups, fmt.Sprintf("%v", group))
 		}
 		if status != nil {
-			statusStr := fmt.Sprintf("%v", status)
+			statusStr := strings.ToLower(fmt.Sprintf("%v", status))
 			switch statusStr {
 			case "running":
 				runningCount++
-			case "complete":
+			case "complete", "completed":
 				completedCount++
 			case "failed":
 				failedCount++
