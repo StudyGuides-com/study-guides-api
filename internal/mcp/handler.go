@@ -561,15 +561,15 @@ func (h *CommandHandler) generateKPIMessage(data interface{}, count int) string 
 			statusStr := strings.ToLower(fmt.Sprintf("%v", status))
 			groupStr := fmt.Sprintf("%v", group)
 			
-			// Format timestamp for display
+			// Format timestamp for display (full date/time since this is the latest execution)
 			var timeStr string
 			if completedAt != nil {
 				if t, ok := completedAt.(*time.Time); ok && t != nil {
-					timeStr = fmt.Sprintf(" at %s", t.Format("15:04:05"))
+					timeStr = fmt.Sprintf(" at %s", t.Format("2006-01-02 15:04:05"))
 				}
 			} else if startedAt != nil {
 				if t, ok := startedAt.(*time.Time); ok && t != nil {
-					timeStr = fmt.Sprintf(" at %s", t.Format("15:04:05"))
+					timeStr = fmt.Sprintf(" at %s", t.Format("2006-01-02 15:04:05"))
 				}
 			}
 			
