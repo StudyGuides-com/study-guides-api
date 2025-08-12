@@ -41,7 +41,7 @@ func (h *CommandHandler) Handle(ctx context.Context, cmd repository.Command) (*r
 
 	switch cmd.Operation {
 	case OperationFind:
-		return h.handleFind(ctx, repo, schema, cmd.Payload)
+		return h.handleFind(ctx, repo, schema, cmd.Resource, cmd.Payload)
 	case OperationFindByID:
 		return h.handleFindByID(ctx, repo, cmd.ID)
 	case OperationCreate:
@@ -52,6 +52,8 @@ func (h *CommandHandler) Handle(ctx context.Context, cmd repository.Command) (*r
 		return h.handleDelete(ctx, repo, cmd.ID)
 	case OperationCount:
 		return h.handleCount(ctx, repo, schema, cmd.Payload)
+	case OperationListGroups:
+		return h.handleListGroups(ctx, repo, cmd.Resource)
 	default:
 		return &Response{
 			Success: false,
@@ -61,7 +63,7 @@ func (h *CommandHandler) Handle(ctx context.Context, cmd repository.Command) (*r
 }
 
 // handleFind executes a find operation using reflection
-func (h *CommandHandler) handleFind(ctx context.Context, repo interface{}, schema repository.ResourceSchema, payload interface{}) (*Response, error) {
+func (h *CommandHandler) handleFind(ctx context.Context, repo interface{}, schema repository.ResourceSchema, resource string, payload interface{}) (*Response, error) {
 	// Convert payload to the correct filter type
 	filter, err := h.convertPayload(payload, schema.FilterType)
 	if err != nil {
@@ -109,11 +111,14 @@ func (h *CommandHandler) handleFind(ctx context.Context, repo interface{}, schem
 	dataSlice := reflect.ValueOf(data)
 	count := dataSlice.Len()
 
+	// Generate a more informative message based on resource type and operation
+	message := h.generateFindMessage(resource, data, count)
+
 	return &Response{
 		Success: true,
 		Data:    data,
 		Count:   &count,
-		Message: fmt.Sprintf("Found %d items", count),
+		Message: message,
 	}, nil
 }
 
@@ -393,4 +398,226 @@ func (h *CommandHandler) convertPayload(payload interface{}, targetType interfac
 	}
 
 	return targetPtr, nil
+}
+
+// generateFindMessage creates context-appropriate messages for find operations
+func (h *CommandHandler) generateFindMessage(resource string, data interface{}, count int) string {
+	if resource == "kpi" {
+		return h.generateKPIMessage(data, count)
+	}
+	
+	// Default message for other resources
+	return fmt.Sprintf("Found %d items", count)
+}
+
+// generateKPIMessage creates specific messages for KPI operations
+func (h *CommandHandler) generateKPIMessage(data interface{}, count int) string {
+	// Try to extract execution details from the data
+	dataSlice := reflect.ValueOf(data)
+	if dataSlice.Kind() != reflect.Slice {
+		return fmt.Sprintf("Found %d items", count)
+	}
+
+	if count == 0 {
+		return "No KPI executions found"
+	}
+
+	if count == 1 {
+		// Single execution - show details
+		if dataSlice.Len() > 0 {
+			item := dataSlice.Index(0).Interface()
+			
+			// Handle both map[string]interface{} and direct struct types
+			var group, status interface{}
+			var duration interface{}
+			var errorMsg interface{}
+			
+			if execution, ok := item.(map[string]interface{}); ok {
+				group = execution["group"]
+				status = execution["status"]
+				duration = execution["duration"]
+				errorMsg = execution["error"]
+			} else {
+				// Try to access as struct fields using reflection
+				itemValue := reflect.ValueOf(item)
+				if itemValue.Kind() == reflect.Ptr {
+					itemValue = itemValue.Elem()
+				}
+				if itemValue.Kind() == reflect.Struct {
+					if groupField := itemValue.FieldByName("Group"); groupField.IsValid() {
+						group = groupField.Interface()
+					}
+					if statusField := itemValue.FieldByName("Status"); statusField.IsValid() {
+						status = statusField.Interface()
+					}
+					if durationField := itemValue.FieldByName("Duration"); durationField.IsValid() && !durationField.IsNil() {
+						duration = durationField.Interface()
+					}
+					if errorField := itemValue.FieldByName("Error"); errorField.IsValid() {
+						errorMsg = errorField.Interface()
+					}
+				}
+			}
+			
+			if group != nil && status != nil {
+				statusStr := fmt.Sprintf("%v", status)
+				groupStr := fmt.Sprintf("%v", group)
+				
+				switch statusStr {
+				case "running":
+					return fmt.Sprintf("KPI execution for %s is running", groupStr)
+				case "complete":
+					// Try to get duration info
+					if duration != nil {
+						return fmt.Sprintf("KPI execution for %s completed in %v", groupStr, duration)
+					}
+					return fmt.Sprintf("KPI execution for %s completed", groupStr)
+				case "failed":
+					if errorMsg != nil {
+						return fmt.Sprintf("KPI execution for %s failed: %v", groupStr, errorMsg)
+					}
+					return fmt.Sprintf("KPI execution for %s failed", groupStr)
+				default:
+					return fmt.Sprintf("KPI execution for %s is %s", groupStr, statusStr)
+				}
+			} else if group != nil {
+				return fmt.Sprintf("Started KPI execution for %v", group)
+			}
+		}
+		return "Found 1 KPI execution"
+	}
+
+	// Multiple executions - show summary
+	var groups []string
+	runningCount := 0
+	completedCount := 0
+	failedCount := 0
+	
+	for i := 0; i < dataSlice.Len() && i < 5; i++ { // Show first 5 groups
+		item := dataSlice.Index(i).Interface()
+		
+		// Handle both map[string]interface{} and direct struct types
+		var group, status interface{}
+		
+		if execution, ok := item.(map[string]interface{}); ok {
+			group = execution["group"]
+			status = execution["status"]
+		} else {
+			// Try to access as struct fields using reflection
+			itemValue := reflect.ValueOf(item)
+			if itemValue.Kind() == reflect.Ptr {
+				itemValue = itemValue.Elem()
+			}
+			if itemValue.Kind() == reflect.Struct {
+				if groupField := itemValue.FieldByName("Group"); groupField.IsValid() {
+					group = groupField.Interface()
+				}
+				if statusField := itemValue.FieldByName("Status"); statusField.IsValid() {
+					status = statusField.Interface()
+				}
+			}
+		}
+		
+		if group != nil {
+			groups = append(groups, fmt.Sprintf("%v", group))
+		}
+		if status != nil {
+			statusStr := fmt.Sprintf("%v", status)
+			switch statusStr {
+			case "running":
+				runningCount++
+			case "complete":
+				completedCount++
+			case "failed":
+				failedCount++
+			}
+		}
+	}
+
+	// Generate a smart message based on the mix of statuses
+	message := fmt.Sprintf("Found %d KPI executions", count)
+	if len(groups) > 0 {
+		if len(groups) <= 3 {
+			message += fmt.Sprintf(" (%s)", joinStrings(groups, ", "))
+		} else {
+			message += fmt.Sprintf(" (%s and %d more)", joinStrings(groups[:3], ", "), len(groups)-3)
+		}
+	}
+	
+	// Add status summary
+	var statusParts []string
+	if runningCount > 0 {
+		statusParts = append(statusParts, fmt.Sprintf("%d running", runningCount))
+	}
+	if completedCount > 0 {
+		statusParts = append(statusParts, fmt.Sprintf("%d completed", completedCount))
+	}
+	if failedCount > 0 {
+		statusParts = append(statusParts, fmt.Sprintf("%d failed", failedCount))
+	}
+	
+	if len(statusParts) > 0 {
+		message += ": " + joinStrings(statusParts, ", ")
+	}
+
+	return message
+}
+
+// joinStrings joins a slice of strings with a separator
+func joinStrings(strs []string, sep string) string {
+	if len(strs) == 0 {
+		return ""
+	}
+	if len(strs) == 1 {
+		return strs[0]
+	}
+	
+	result := strs[0]
+	for i := 1; i < len(strs); i++ {
+		result += sep + strs[i]
+	}
+	return result
+}
+
+// handleListGroups executes a list_groups operation for KPI resource
+func (h *CommandHandler) handleListGroups(ctx context.Context, repo interface{}, resource string) (*Response, error) {
+	if resource != "kpi" {
+		return &Response{
+			Success: false,
+			Error:   fmt.Sprintf("list_groups operation not supported for resource: %s", resource),
+		}, nil
+	}
+
+	// For KPI, return the available groups
+	groups := []map[string]interface{}{
+		{"name": "MonthlyInteractions", "description": "Monthly user interaction statistics"},
+		{"name": "Tags", "description": "Tag usage and hierarchy stats"},
+		{"name": "TagTypes", "description": "Tag type distribution stats"},
+		{"name": "Reports", "description": "Report generation statistics"},
+		{"name": "Topics", "description": "Topic usage and engagement stats"},
+		{"name": "MissingData", "description": "Data quality and completeness metrics"},
+		{"name": "Ratings", "description": "Rating and feedback statistics"},
+		{"name": "Questions", "description": "Question performance and usage stats"},
+		{"name": "Users", "description": "User registration and activity metrics"},
+		{"name": "UserContent", "description": "User-generated content statistics"},
+		{"name": "Contacts", "description": "Contact and communication statistics"},
+	}
+
+	return &Response{
+		Success: true,
+		Data:    groups,
+		Count:   &[]int{len(groups)}[0],
+		Message: fmt.Sprintf("Available KPI groups: %s", joinGroupNames(groups)),
+	}, nil
+}
+
+// joinGroupNames extracts and joins group names for the message
+func joinGroupNames(groups []map[string]interface{}) string {
+	var names []string
+	for _, group := range groups {
+		if name, ok := group["name"].(string); ok {
+			names = append(names, name)
+		}
+	}
+	return joinStrings(names, ", ")
 }

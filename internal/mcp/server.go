@@ -98,11 +98,22 @@ func (s *MCPProcessor) ProcessRequest(ctx context.Context, userPrompt string) (*
 	fmt.Printf("🔍 DEBUG: First choice message content: '%s'\n", chatResp.Choices[0].Message.Content)
 	
 	if len(chatResp.Choices[0].Message.ToolCalls) == 0 {
-		fmt.Printf("❌ DEBUG: AI did not select any tools\n")
-		fmt.Printf("🔍 DEBUG: Message role: %s\n", chatResp.Choices[0].Message.Role)
+		// AI chose to respond conversationally - use the content directly
+		content := chatResp.Choices[0].Message.Content
+		fmt.Printf("💬 DEBUG: AI chose conversational response: '%s'\n", content)
+		
+		if content != "" {
+			return &Response{
+				Success: true,
+				Message: content,
+			}, nil
+		}
+		
+		// Only error if no content AND no tool calls
+		fmt.Printf("❌ DEBUG: AI provided no response content or tools\n")
 		return &Response{
 			Success: false,
-			Error:   "AI did not select any tools",
+			Error:   "AI provided no response",
 		}, nil
 	}
 
@@ -213,33 +224,36 @@ func (s *MCPProcessor) Health() map[string]interface{} {
 }
 
 // Default system prompt for the MCP server
-const defaultSystemPrompt = `You are a data access assistant that MUST use tools to respond to user requests. You have access to various resources through specialized function tools.
+const defaultSystemPrompt = `You are a helpful assistant with access to data management and operational tools for a study guides platform. You can handle both conversational interactions and data operations.
 
-CRITICAL: You MUST always call one of the available tools. Do not provide explanations or text responses - only use function calls.
+Use tools when users request specific operations or data:
+- Data queries and searches
+- KPI calculations and monitoring  
+- Administrative tasks
+- DevOps operations
+- User management
+- Content management
+
+For greetings, clarifications, help requests, or general conversation, respond normally without using tools.
 
 Available operations:
-- find: Search for entities with filters (use tag_find, user_find, kpi_find, etc.)
+- find: Search for entities with filters (use tag_find, user_find, kpi_find, devops_find, etc.)
 - findById: Get a specific entity by ID (use tag_findById, kpi_findById, etc.)
 - create: Create new entities or start operations (use kpi_create to start KPI calculations)
 - update: Modify existing entities
 - delete: Remove entities or cancel operations
 - count: Count entities matching criteria (use tag_count, kpi_count, etc.)
 
-Guidelines:
-1. ALWAYS call a function tool - never respond with plain text
-2. Use the most specific tool for the user's request
-3. For searches, use appropriate filters to narrow results
-4. For counts, use the count tool for that resource type
-5. Map natural language to proper filter parameters
-
 KPI Operations:
 - "run all KPIs" or "update all stats" → call kpi_find with {"filter": {"run_all": true}}
 - "calculate monthly interactions" → call kpi_find with {"filter": {"group": "MonthlyInteractions"}}
 - "update user stats" → call kpi_find with {"filter": {"group": "Users"}}
 - "check running KPIs" → call kpi_find with {"filter": {"status": "running"}}
+- "show KPI status" → call kpi_find with {}
+- "what KPIs can I run" or "list available KPIs" → call kpi_list_groups
 - KPIs run in the background and may take several minutes to complete
 
-Tag Examples:
+Tag Operations:
 - "find public tags" → call tag_find with {"filter": {"public": true}}
 - "how many tags are there" → call tag_count with {}
 - "find category tags" → call tag_find with {"filter": {"type": "Category"}}
@@ -247,4 +261,10 @@ Tag Examples:
 
 Common tag types: Category, Topic, UserContent, UserTopic, Branch, Instruction_Type, Instruction_Group, Instruction, Chapter, Section
 
-You must use function calling for every response.`
+Guidelines:
+1. Use tools for data operations, calculations, and administrative tasks
+2. Respond conversationally for greetings, help, clarifications, and general chat
+3. Use the most specific tool for the user's request
+4. For searches, use appropriate filters to narrow results
+5. Map natural language to proper filter parameters
+6. Provide helpful context in responses when appropriate`

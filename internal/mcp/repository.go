@@ -12,12 +12,13 @@ type ResourceSchema = repository.ResourceSchema
 
 // Re-export constants
 const (
-	OperationFind     = repository.OperationFind
-	OperationFindByID = repository.OperationFindByID
-	OperationCreate   = repository.OperationCreate
-	OperationUpdate   = repository.OperationUpdate
-	OperationDelete   = repository.OperationDelete
-	OperationCount    = repository.OperationCount
+	OperationFind       = repository.OperationFind
+	OperationFindByID   = repository.OperationFindByID
+	OperationCreate     = repository.OperationCreate
+	OperationUpdate     = repository.OperationUpdate
+	OperationDelete     = repository.OperationDelete
+	OperationCount      = repository.OperationCount
+	OperationListGroups = repository.OperationListGroups
 )
 
 // RepositoryRegistry manages the mapping of resource names to repositories

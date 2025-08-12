@@ -29,12 +29,13 @@ type Repository[T any, F any, U any] interface {
 type CRUDOperation string
 
 const (
-	OperationFind     CRUDOperation = "find"
-	OperationFindByID CRUDOperation = "findById"
-	OperationCreate   CRUDOperation = "create"
-	OperationUpdate   CRUDOperation = "update"
-	OperationDelete   CRUDOperation = "delete"
-	OperationCount    CRUDOperation = "count"
+	OperationFind       CRUDOperation = "find"
+	OperationFindByID   CRUDOperation = "findById"
+	OperationCreate     CRUDOperation = "create"
+	OperationUpdate     CRUDOperation = "update"
+	OperationDelete     CRUDOperation = "delete"
+	OperationCount      CRUDOperation = "count"
+	OperationListGroups CRUDOperation = "list_groups"
 )
 
 // Command represents a request to perform an operation on a resource

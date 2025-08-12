@@ -12,16 +12,12 @@ import (
 // KPIRepositoryAdapter adapts the KPI store to implement the MCP repository pattern
 type KPIRepositoryAdapter struct {
 	store kpi.KPIStore
-	
-	// Track MCP-level executions
-	executions map[string]*KPIExecution
 }
 
 // NewKPIRepositoryAdapter creates a new adapter for KPI operations
 func NewKPIRepositoryAdapter(store kpi.KPIStore) *KPIRepositoryAdapter {
 	return &KPIRepositoryAdapter{
-		store:      store,
-		executions: make(map[string]*KPIExecution),
+		store: store,
 	}
 }
 
@@ -51,13 +47,13 @@ func (a *KPIRepositoryAdapter) Find(ctx context.Context, filter KPIFilter) ([]KP
 		return results, nil
 	}
 	
-	// Otherwise return status of running executions
-	running, err := a.GetRunningExecutions()
+	// Otherwise return status of all recent executions (both running and completed)
+	allExecutions, err := a.GetRecentExecutions()
 	if err != nil {
 		return nil, err
 	}
 	
-	for _, exec := range running {
+	for _, exec := range allExecutions {
 		results = append(results, *exec)
 	}
 	
@@ -98,46 +94,47 @@ func (a *KPIRepositoryAdapter) Count(ctx context.Context, filter KPIFilter) (int
 		return len(running), nil
 	}
 	
-	// Count all tracked executions
-	return len(a.executions), nil
+	// Count all recent executions
+	recent, err := a.GetRecentExecutions()
+	if err != nil {
+		return 0, err
+	}
+	return len(recent), nil
 }
 
 // Execute starts a KPI calculation (returns immediately with execution ID)
 func (a *KPIRepositoryAdapter) Execute(group KPIGroup) (*KPIExecution, error) {
-	executionID := cuid.New()
 	now := time.Now()
 	
-	execution := &KPIExecution{
-		ID:        executionID,
-		Group:     group,
-		Status:    KPIStatusRunning,
-		StartedAt: &now,
-	}
-	
-	// Store execution
-	a.executions[executionID] = execution
-	
-	// Determine which procedure to run
+	// Determine which procedure to run (this creates the Job record and returns the ID)
 	ctx := context.Background()
+	var executionID string
 	var err error
 	
 	switch group {
 	case KPIGroupMonthlyInteractions:
-		err = a.store.ExecuteTimeStatsProcedure(ctx, string(group))
+		executionID, err = a.store.ExecuteTimeStatsProcedure(ctx, string(group))
 	default:
-		err = a.store.ExecuteUpdateStatsProcedure(ctx, string(group))
+		executionID, err = a.store.ExecuteUpdateStatsProcedure(ctx, string(group))
 	}
 	
 	if err != nil {
-		execution.Status = KPIStatusFailed
-		execution.Error = err.Error()
-		return execution, err
+		return &KPIExecution{
+			ID:        "",
+			Group:     group,
+			Status:    KPIStatusFailed,
+			StartedAt: &now,
+			Error:     err.Error(),
+		}, err
 	}
 	
-	// Start background status monitoring
-	go a.monitorExecution(executionID)
-	
-	return execution, nil
+	// Return execution info (the actual job is running in the background)
+	return &KPIExecution{
+		ID:        executionID,
+		Group:     group,
+		Status:    KPIStatusRunning,
+		StartedAt: &now,
+	}, nil
 }
 
 // ExecuteAll starts all KPI calculations
@@ -164,10 +161,6 @@ func (a *KPIRepositoryAdapter) ExecuteAll() ([]*KPIExecution, error) {
 
 // GetStatus returns the status of a KPI execution
 func (a *KPIRepositoryAdapter) GetStatus(id string) (*KPIExecution, error) {
-	if execution, exists := a.executions[id]; exists {
-		return execution, nil
-	}
-	
 	// Check with the store
 	storeStatus, err := a.store.GetExecutionStatus(context.Background(), id)
 	if err != nil {
@@ -178,20 +171,20 @@ func (a *KPIRepositoryAdapter) GetStatus(id string) (*KPIExecution, error) {
 	execution := &KPIExecution{
 		ID:        storeStatus.ID,
 		Group:     KPIGroup(storeStatus.Group),
-		StartedAt: &storeStatus.StartedAt,
+		StartedAt: storeStatus.StartedAt,
 	}
 	
 	switch storeStatus.Status {
-	case "running":
+	case "Running":
 		execution.Status = KPIStatusRunning
-	case "complete":
+	case "Completed":
 		execution.Status = KPIStatusComplete
 		execution.CompletedAt = storeStatus.CompletedAt
 		if execution.CompletedAt != nil && execution.StartedAt != nil {
 			duration := execution.CompletedAt.Sub(*execution.StartedAt)
 			execution.Duration = &duration
 		}
-	case "failed":
+	case "Failed":
 		execution.Status = KPIStatusFailed
 		if storeStatus.Error != nil {
 			execution.Error = *storeStatus.Error
@@ -203,9 +196,14 @@ func (a *KPIRepositoryAdapter) GetStatus(id string) (*KPIExecution, error) {
 
 // GetLatestStatus returns the most recent execution for a group
 func (a *KPIRepositoryAdapter) GetLatestStatus(group KPIGroup) (*KPIExecution, error) {
-	var latest *KPIExecution
+	// Get recent executions and find the latest for this group
+	recent, err := a.GetRecentExecutions()
+	if err != nil {
+		return nil, err
+	}
 	
-	for _, exec := range a.executions {
+	var latest *KPIExecution
+	for _, exec := range recent {
 		if exec.Group == group {
 			if latest == nil || (exec.StartedAt != nil && latest.StartedAt != nil && exec.StartedAt.After(*latest.StartedAt)) {
 				latest = exec
@@ -224,36 +222,20 @@ func (a *KPIRepositoryAdapter) GetLatestStatus(group KPIGroup) (*KPIExecution, e
 func (a *KPIRepositoryAdapter) GetRunningExecutions() ([]*KPIExecution, error) {
 	var running []*KPIExecution
 	
-	// Check our tracked executions
-	for _, exec := range a.executions {
-		if exec.Status == KPIStatusRunning {
-			running = append(running, exec)
-		}
+	// Get running executions from the store
+	storeRunning, err := a.store.ListRunningExecutions(context.Background())
+	if err != nil {
+		return nil, err
 	}
 	
-	// Also check with the store
-	storeRunning, err := a.store.ListRunningExecutions(context.Background())
-	if err == nil {
-		for _, storeExec := range storeRunning {
-			// Check if we already have this execution
-			found := false
-			for _, exec := range running {
-				if exec.ID == storeExec.ID {
-					found = true
-					break
-				}
-			}
-			
-			if !found {
-				execution := &KPIExecution{
-					ID:        storeExec.ID,
-					Group:     KPIGroup(storeExec.Group),
-					Status:    KPIStatusRunning,
-					StartedAt: &storeExec.StartedAt,
-				}
-				running = append(running, execution)
-			}
+	for _, storeExec := range storeRunning {
+		execution := &KPIExecution{
+			ID:        storeExec.ID,
+			Group:     KPIGroup(storeExec.Group),
+			Status:    KPIStatusRunning,
+			StartedAt: storeExec.StartedAt,
 		}
+		running = append(running, execution)
 	}
 	
 	return running, nil
@@ -261,60 +243,58 @@ func (a *KPIRepositoryAdapter) GetRunningExecutions() ([]*KPIExecution, error) {
 
 // CancelExecution attempts to cancel a running execution
 func (a *KPIRepositoryAdapter) CancelExecution(id string) error {
-	if execution, exists := a.executions[id]; exists {
-		if execution.Status == KPIStatusRunning {
-			execution.Status = KPIStatusFailed
-			execution.Error = "Cancelled by user"
-			now := time.Now()
-			execution.CompletedAt = &now
-			if execution.StartedAt != nil {
-				duration := now.Sub(*execution.StartedAt)
-				execution.Duration = &duration
-			}
-			return nil
-		}
+	// Check if execution exists and is running
+	status, err := a.GetStatus(id)
+	if err != nil {
+		return fmt.Errorf("execution %s not found", id)
+	}
+	
+	if status.Status != KPIStatusRunning {
 		return fmt.Errorf("execution %s is not running", id)
 	}
 	
-	return fmt.Errorf("execution %s not found", id)
+	// TODO: Update the Job record to mark as cancelled
+	// For now, just return an error since we can't easily cancel background procedures
+	return fmt.Errorf("cancellation not yet implemented")
 }
 
-// monitorExecution monitors the status of an execution in the background
-func (a *KPIRepositoryAdapter) monitorExecution(executionID string) {
-	// Poll every 5 seconds for status updates
-	ticker := time.NewTicker(5 * time.Second)
-	defer ticker.Stop()
+// GetRecentExecutions returns all recent executions (running and completed)
+func (a *KPIRepositoryAdapter) GetRecentExecutions() ([]*KPIExecution, error) {
+	var recent []*KPIExecution
 	
-	for range ticker.C {
-		storeStatus, err := a.store.GetExecutionStatus(context.Background(), executionID)
-		if err != nil {
-			// Execution might not be tracked by store yet
-			continue
+	// Get recent executions from the store
+	storeExecutions, err := a.store.ListRecentExecutions(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	
+	for _, storeExec := range storeExecutions {
+		execution := &KPIExecution{
+			ID:        storeExec.ID,
+			Group:     KPIGroup(storeExec.Group),
+			StartedAt: storeExec.StartedAt,
 		}
 		
-		if execution, exists := a.executions[executionID]; exists {
-			// Update status based on store
-			if storeStatus.Status == "complete" {
-				execution.Status = KPIStatusComplete
-				execution.CompletedAt = storeStatus.CompletedAt
-				if execution.StartedAt != nil && execution.CompletedAt != nil {
-					duration := execution.CompletedAt.Sub(*execution.StartedAt)
-					execution.Duration = &duration
-				}
-				return // Stop monitoring
-			} else if storeStatus.Status == "failed" {
-				execution.Status = KPIStatusFailed
-				if storeStatus.Error != nil {
-					execution.Error = *storeStatus.Error
-				}
-				now := time.Now()
-				execution.CompletedAt = &now
-				if execution.StartedAt != nil {
-					duration := now.Sub(*execution.StartedAt)
-					execution.Duration = &duration
-				}
-				return // Stop monitoring
+		// Map status from store
+		switch storeExec.Status {
+		case "Running":
+			execution.Status = KPIStatusRunning
+		case "Completed":
+			execution.Status = KPIStatusComplete
+			execution.CompletedAt = storeExec.CompletedAt
+			if execution.CompletedAt != nil && execution.StartedAt != nil {
+				duration := execution.CompletedAt.Sub(*execution.StartedAt)
+				execution.Duration = &duration
+			}
+		case "Failed":
+			execution.Status = KPIStatusFailed
+			if storeExec.Error != nil {
+				execution.Error = *storeExec.Error
 			}
 		}
+		
+		recent = append(recent, execution)
 	}
+	
+	return recent, nil
 }

@@ -30,6 +30,10 @@ func (g *SimpleToolGenerator) GenerateTools() []openai.Tool {
 		tools = append(tools, g.generateFindTool(resource))
 		tools = append(tools, g.generateCountTool(resource))
 		tools = append(tools, g.generateFindByIDTool(resource))
+		
+		// Generate resource-specific tools
+		resourceTools := g.generateResourceSpecificTools(resource)
+		tools = append(tools, resourceTools...)
 	}
 
 	return tools
@@ -124,8 +128,43 @@ func (g *SimpleToolGenerator) generateFindByIDTool(resource string) openai.Tool 
 	}
 }
 
+// generateResourceSpecificTools creates resource-specific tools
+func (g *SimpleToolGenerator) generateResourceSpecificTools(resource string) []openai.Tool {
+	var tools []openai.Tool
+	
+	switch resource {
+	case "kpi":
+		tools = append(tools, g.generateKPIListGroupsTool())
+	}
+	
+	return tools
+}
+
+// generateKPIListGroupsTool creates a tool to list available KPI groups
+func (g *SimpleToolGenerator) generateKPIListGroupsTool() openai.Tool {
+	return openai.Tool{
+		Type: openai.ToolTypeFunction,
+		Function: &openai.FunctionDefinition{
+			Name:        "kpi_list_groups",
+			Description: "List all available KPI groups that can be executed",
+			Parameters: map[string]interface{}{
+				"type": "object",
+				"properties": map[string]interface{}{},
+			},
+		},
+	}
+}
+
 // ParseToolCall parses an OpenAI tool call into a Command
 func (g *SimpleToolGenerator) ParseToolCall(toolCall openai.ToolCall) (*repository.Command, error) {
+	// Handle special tools first
+	if toolCall.Function.Name == "kpi_list_groups" {
+		return &repository.Command{
+			Resource:  "kpi",
+			Operation: repository.CRUDOperation("list_groups"),
+		}, nil
+	}
+
 	// Parse the function name to extract resource and operation
 	parts := strings.Split(toolCall.Function.Name, "_")
 	if len(parts) != 2 {
