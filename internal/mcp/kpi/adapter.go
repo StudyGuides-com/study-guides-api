@@ -47,13 +47,13 @@ func (a *KPIRepositoryAdapter) Find(ctx context.Context, filter KPIFilter) ([]KP
 		return results, nil
 	}
 	
-	// Otherwise return status of all recent executions (both running and completed)
-	allExecutions, err := a.GetRecentExecutions()
+	// Otherwise return status of latest execution for each group
+	latestExecutions, err := a.GetLatestExecutionsPerGroup()
 	if err != nil {
 		return nil, err
 	}
 	
-	for _, exec := range allExecutions {
+	for _, exec := range latestExecutions {
 		results = append(results, *exec)
 	}
 	
@@ -256,6 +256,60 @@ func (a *KPIRepositoryAdapter) CancelExecution(id string) error {
 	// TODO: Update the Job record to mark as cancelled
 	// For now, just return an error since we can't easily cancel background procedures
 	return fmt.Errorf("cancellation not yet implemented")
+}
+
+// GetLatestExecutionsPerGroup returns the latest execution for each KPI group
+func (a *KPIRepositoryAdapter) GetLatestExecutionsPerGroup() ([]*KPIExecution, error) {
+	var latest []*KPIExecution
+	
+	// Get all recent executions from the store
+	storeExecutions, err := a.store.ListRecentExecutions(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	
+	// Group by group name and keep only the latest for each
+	groupLatest := make(map[string]*KPIExecution)
+	
+	for _, storeExec := range storeExecutions {
+		execution := &KPIExecution{
+			ID:        storeExec.ID,
+			Group:     KPIGroup(storeExec.Group),
+			StartedAt: storeExec.StartedAt,
+		}
+		
+		// Map status from store
+		switch storeExec.Status {
+		case "Running":
+			execution.Status = KPIStatusRunning
+		case "Completed":
+			execution.Status = KPIStatusComplete
+			execution.CompletedAt = storeExec.CompletedAt
+			if execution.CompletedAt != nil && execution.StartedAt != nil {
+				duration := execution.CompletedAt.Sub(*execution.StartedAt)
+				execution.Duration = &duration
+			}
+		case "Failed":
+			execution.Status = KPIStatusFailed
+			if storeExec.Error != nil {
+				execution.Error = *storeExec.Error
+			}
+		}
+		
+		// Keep only the latest for each group (by StartedAt)
+		groupName := string(execution.Group)
+		if existing, exists := groupLatest[groupName]; !exists || 
+			(execution.StartedAt != nil && existing.StartedAt != nil && execution.StartedAt.After(*existing.StartedAt)) {
+			groupLatest[groupName] = execution
+		}
+	}
+	
+	// Convert map to slice
+	for _, exec := range groupLatest {
+		latest = append(latest, exec)
+	}
+	
+	return latest, nil
 }
 
 // GetRecentExecutions returns all recent executions (running and completed)

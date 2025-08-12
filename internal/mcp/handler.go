@@ -413,7 +413,7 @@ func (h *CommandHandler) generateFindMessage(resource string, data interface{}, 
 
 // generateKPIMessage creates specific messages for KPI operations
 func (h *CommandHandler) generateKPIMessage(data interface{}, count int) string {
-	// Try to extract execution details from the data
+	// Check if this is a "run all" operation by looking for newly started executions
 	dataSlice := reflect.ValueOf(data)
 	if dataSlice.Kind() != reflect.Slice {
 		return fmt.Sprintf("Found %d items", count)
@@ -423,12 +423,47 @@ func (h *CommandHandler) generateKPIMessage(data interface{}, count int) string 
 		return "No KPI executions found"
 	}
 
+	// Check if all executions have "running" status (indicates a "run all" operation)
+	allRunning := true
+	if dataSlice.Len() > 0 {
+		for i := 0; i < dataSlice.Len(); i++ {
+			item := dataSlice.Index(i).Interface()
+			var status interface{}
+			
+			if execution, ok := item.(map[string]interface{}); ok {
+				status = execution["status"]
+			} else {
+				itemValue := reflect.ValueOf(item)
+				if itemValue.Kind() == reflect.Ptr {
+					itemValue = itemValue.Elem()
+				}
+				if itemValue.Kind() == reflect.Struct {
+					if statusField := itemValue.FieldByName("Status"); statusField.IsValid() {
+						status = statusField.Interface()
+					}
+				}
+			}
+			
+			if status != nil {
+				statusStr := strings.ToLower(fmt.Sprintf("%v", status))
+				if statusStr != "running" {
+					allRunning = false
+					break
+				}
+			}
+		}
+	}
+
+	// If all are running, this is a "run all" operation
+	if allRunning && count > 1 {
+		return fmt.Sprintf("Started %d KPI executions", count)
+	}
+
 	if count == 1 {
 		// Single execution - show details
 		if dataSlice.Len() > 0 {
 			item := dataSlice.Index(0).Interface()
 			
-			// Handle both map[string]interface{} and direct struct types
 			var group, status interface{}
 			var duration interface{}
 			var errorMsg interface{}
@@ -439,7 +474,6 @@ func (h *CommandHandler) generateKPIMessage(data interface{}, count int) string 
 				duration = execution["duration"]
 				errorMsg = execution["error"]
 			} else {
-				// Try to access as struct fields using reflection
 				itemValue := reflect.ValueOf(item)
 				if itemValue.Kind() == reflect.Ptr {
 					itemValue = itemValue.Elem()
@@ -468,7 +502,6 @@ func (h *CommandHandler) generateKPIMessage(data interface{}, count int) string 
 				case "running":
 					return fmt.Sprintf("KPI execution for %s is running", groupStr)
 				case "complete", "completed":
-					// Try to get duration info
 					if duration != nil {
 						return fmt.Sprintf("KPI execution for %s completed in %v", groupStr, duration)
 					}
@@ -488,23 +521,20 @@ func (h *CommandHandler) generateKPIMessage(data interface{}, count int) string 
 		return "Found 1 KPI execution"
 	}
 
-	// Multiple executions - show summary
-	var groups []string
-	runningCount := 0
-	completedCount := 0
-	failedCount := 0
+	// Multiple executions (status query) - show latest status per group
+	var statusLines []string
 	
-	for i := 0; i < dataSlice.Len() && i < 5; i++ { // Show first 5 groups
+	for i := 0; i < dataSlice.Len(); i++ {
 		item := dataSlice.Index(i).Interface()
 		
-		// Handle both map[string]interface{} and direct struct types
 		var group, status interface{}
+		var duration interface{}
 		
 		if execution, ok := item.(map[string]interface{}); ok {
 			group = execution["group"]
 			status = execution["status"]
+			duration = execution["duration"]
 		} else {
-			// Try to access as struct fields using reflection
 			itemValue := reflect.ValueOf(item)
 			if itemValue.Kind() == reflect.Ptr {
 				itemValue = itemValue.Elem()
@@ -516,52 +546,38 @@ func (h *CommandHandler) generateKPIMessage(data interface{}, count int) string 
 				if statusField := itemValue.FieldByName("Status"); statusField.IsValid() {
 					status = statusField.Interface()
 				}
+				if durationField := itemValue.FieldByName("Duration"); durationField.IsValid() && !durationField.IsNil() {
+					duration = durationField.Interface()
+				}
 			}
 		}
 		
-		if group != nil {
-			groups = append(groups, fmt.Sprintf("%v", group))
-		}
-		if status != nil {
+		if group != nil && status != nil {
 			statusStr := strings.ToLower(fmt.Sprintf("%v", status))
+			groupStr := fmt.Sprintf("%v", group)
+			
 			switch statusStr {
 			case "running":
-				runningCount++
+				statusLines = append(statusLines, fmt.Sprintf("%s: running", groupStr))
 			case "complete", "completed":
-				completedCount++
+				if duration != nil {
+					statusLines = append(statusLines, fmt.Sprintf("%s: completed in %v", groupStr, duration))
+				} else {
+					statusLines = append(statusLines, fmt.Sprintf("%s: completed", groupStr))
+				}
 			case "failed":
-				failedCount++
+				statusLines = append(statusLines, fmt.Sprintf("%s: failed", groupStr))
+			default:
+				statusLines = append(statusLines, fmt.Sprintf("%s: %s", groupStr, statusStr))
 			}
 		}
 	}
 
-	// Generate a smart message based on the mix of statuses
-	message := fmt.Sprintf("Found %d KPI executions", count)
-	if len(groups) > 0 {
-		if len(groups) <= 3 {
-			message += fmt.Sprintf(" (%s)", joinStrings(groups, ", "))
-		} else {
-			message += fmt.Sprintf(" (%s and %d more)", joinStrings(groups[:3], ", "), len(groups)-3)
-		}
-	}
-	
-	// Add status summary
-	var statusParts []string
-	if runningCount > 0 {
-		statusParts = append(statusParts, fmt.Sprintf("%d running", runningCount))
-	}
-	if completedCount > 0 {
-		statusParts = append(statusParts, fmt.Sprintf("%d completed", completedCount))
-	}
-	if failedCount > 0 {
-		statusParts = append(statusParts, fmt.Sprintf("%d failed", failedCount))
-	}
-	
-	if len(statusParts) > 0 {
-		message += ": " + joinStrings(statusParts, ", ")
+	if len(statusLines) > 0 {
+		return fmt.Sprintf("KPI Status:\n%s", joinStrings(statusLines, "\n"))
 	}
 
-	return message
+	return fmt.Sprintf("Found %d KPI executions", count)
 }
 
 // joinStrings joins a slice of strings with a separator

@@ -135,9 +135,9 @@ func (s *SqlKPIStore) runProcedureAsync(executionID, query string, args ...inter
 		
 		_, updateErr := s.db.ExecContext(context.Background(), `
 			UPDATE "Job" 
-			SET status = $1, "completedAt" = $2, "durationSeconds" = $3, metadata = $4, "updatedAt" = $5
-			WHERE id = $6
-		`, "Completed", now, duration, completionMetadata, now, executionID)
+			SET status = $1, "completedAt" = $2, "durationSeconds" = $3, metadata = $4, progress = $5, "updatedAt" = $6
+			WHERE id = $7
+		`, "Completed", now, duration, completionMetadata, 100, now, executionID)
 		
 		if updateErr != nil {
 			fmt.Printf("Failed to update job %s as completed: %v\n", executionID, updateErr)
