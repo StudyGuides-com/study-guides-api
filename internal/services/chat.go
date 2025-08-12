@@ -9,6 +9,7 @@ import (
 	chatpb "github.com/studyguides-com/study-guides-api/api/v1/chat"
 	"github.com/studyguides-com/study-guides-api/internal/lib/ai"
 	"github.com/studyguides-com/study-guides-api/internal/mcp"
+	"github.com/studyguides-com/study-guides-api/internal/mcp/kpi"
 	"github.com/studyguides-com/study-guides-api/internal/mcp/tag"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 
@@ -209,6 +210,10 @@ func NewChatService(store store.Store, ai ai.AiClient) *ChatService {
 	// Register tag repository
 	tagRepo := tag.NewTagRepositoryAdapter(store.TagStore())
 	mcpProcessor.Register(tag.ResourceName, tagRepo, tag.GetResourceSchema())
+	
+	// Register KPI repository
+	kpiRepo := kpi.NewKPIRepositoryAdapter(store.KPIStore())
+	mcpProcessor.Register(kpi.ResourceName, kpiRepo, kpi.GetResourceSchema())
 	
 	return &ChatService{
 		mcpProcessor: mcpProcessor,

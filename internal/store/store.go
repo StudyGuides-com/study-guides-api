@@ -6,6 +6,7 @@ import (
 
 	"github.com/studyguides-com/study-guides-api/internal/store/devops"
 	"github.com/studyguides-com/study-guides-api/internal/store/interaction"
+	"github.com/studyguides-com/study-guides-api/internal/store/kpi"
 	"github.com/studyguides-com/study-guides-api/internal/store/question"
 	"github.com/studyguides-com/study-guides-api/internal/store/roland"
 	"github.com/studyguides-com/study-guides-api/internal/store/search"
@@ -23,6 +24,7 @@ type Store interface {
 	InteractionStore() interaction.InteractionStore
 	RolandStore() roland.RolandStore
 	DevopsStore() devops.DevopsStore
+	KPIStore() kpi.KPIStore
 }
 
 type store struct {
@@ -33,6 +35,7 @@ type store struct {
 	interactionStore interaction.InteractionStore
 	rolandStore      roland.RolandStore
 	devopsStore      devops.DevopsStore
+	kpiStore         kpi.KPIStore
 }
 
 func (s *store) SearchStore() search.SearchStore {
@@ -61,6 +64,10 @@ func (s *store) RolandStore() roland.RolandStore {
 
 func (s *store) DevopsStore() devops.DevopsStore {
 	return s.devopsStore
+}
+
+func (s *store) KPIStore() kpi.KPIStore {
+	return s.kpiStore
 }
 
 func NewStore() (Store, error) {
@@ -109,6 +116,11 @@ func NewStore() (Store, error) {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	kpiStore, err := kpi.NewSqlKPIStore(ctx, dbURL)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	return &store{
 		searchStore:      searchStore,
 		tagStore:         tagStore,
@@ -117,5 +129,6 @@ func NewStore() (Store, error) {
 		interactionStore: interactionStore,
 		rolandStore:      rolandStore,
 		devopsStore:      devopsStore,
+		kpiStore:         kpiStore,
 	}, nil
 }
