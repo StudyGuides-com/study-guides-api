@@ -1,0 +1,33 @@
+enum IndexAction {
+  upsert
+  delete
+}
+
+enum IndexObjectType {
+  Tag
+}
+
+model IndexOutbox {
+  id         BigInt          @id @default(autoincrement())
+  objectType IndexObjectType
+  objectId   String
+  action     IndexAction
+  queuedAt   DateTime        @default(now())
+
+  @@unique([objectType, objectId]) 
+  @@index([queuedAt, id])
+}
+
+model SearchIndexState {
+  objectType       IndexObjectType
+  objectId         String
+  lastIndexedAt    DateTime?
+  lastIndexedHash  Bytes?
+  lastAttemptAt    DateTime?
+  attemptCount     Int            @default(0)
+  lastError        String?        @db.Text
+
+  @@id([objectType, objectId])
+  @@index([lastIndexedAt]) // handy for reconciler windows
+}
+

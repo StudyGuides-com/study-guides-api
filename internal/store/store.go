@@ -4,7 +4,9 @@ import (
 	"context"
 	"os"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/studyguides-com/study-guides-api/internal/store/devops"
+	"github.com/studyguides-com/study-guides-api/internal/store/indexing"
 	"github.com/studyguides-com/study-guides-api/internal/store/interaction"
 	"github.com/studyguides-com/study-guides-api/internal/store/kpi"
 	"github.com/studyguides-com/study-guides-api/internal/store/question"
@@ -25,6 +27,7 @@ type Store interface {
 	RolandStore() roland.RolandStore
 	DevopsStore() devops.DevopsStore
 	KPIStore() kpi.KPIStore
+	IndexingStore() indexing.IndexingStore
 }
 
 type store struct {
@@ -36,6 +39,7 @@ type store struct {
 	rolandStore      roland.RolandStore
 	devopsStore      devops.DevopsStore
 	kpiStore         kpi.KPIStore
+	indexingStore    indexing.IndexingStore
 }
 
 func (s *store) SearchStore() search.SearchStore {
@@ -68,6 +72,10 @@ func (s *store) DevopsStore() devops.DevopsStore {
 
 func (s *store) KPIStore() kpi.KPIStore {
 	return s.kpiStore
+}
+
+func (s *store) IndexingStore() indexing.IndexingStore {
+	return s.indexingStore
 }
 
 func NewStore() (Store, error) {
@@ -121,6 +129,17 @@ func NewStore() (Store, error) {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	// Create connection pool for indexing store
+	pool, err := pgxpool.New(ctx, dbURL)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to create connection pool: "+err.Error())
+	}
+
+	indexingStore, err := indexing.NewSqlIndexingStore(ctx, dbURL, pool, tagStore, algoliaAppID, algoliaAdminAPIKey)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	return &store{
 		searchStore:      searchStore,
 		tagStore:         tagStore,
@@ -130,5 +149,6 @@ func NewStore() (Store, error) {
 		rolandStore:      rolandStore,
 		devopsStore:      devopsStore,
 		kpiStore:         kpiStore,
+		indexingStore:    indexingStore,
 	}, nil
 }
