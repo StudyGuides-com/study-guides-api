@@ -90,6 +90,8 @@ func (s *SqlTagStore) GetTagByID(ctx context.Context, id string) (*sharedpb.Tag,
 		}
 	}
 
+	contentRating := sharedpb.ContentRating(sharedpb.ContentRating_value[row.ContentRating])
+
 	return &sharedpb.Tag{
 		Id:                 row.ID,
 		BatchId:            row.BatchID,
@@ -99,7 +101,7 @@ func (s *SqlTagStore) GetTagByID(ctx context.Context, id string) (*sharedpb.Tag,
 		Type:               sharedpb.TagType(sharedpb.TagType_value[row.Type]),
 		Context:            sharedpb.ContextType(sharedpb.ContextType_value[row.Context]),
 		ParentTagId:        row.ParentTagID,
-		ContentRating:      sharedpb.ContentRating(sharedpb.ContentRating_value[row.ContentRating]),
+		ContentRating:      contentRating,
 		ContentDescriptors: convertToContentDescriptorTypes(row.ContentDescriptors),
 		MetaTags:           row.MetaTags,
 		Public:             row.Public,
@@ -288,6 +290,9 @@ func mapRowsToTags(rows []tagRow) []*sharedpb.Tag {
 			}
 		}
 
+		contextType := sharedpb.ContextType(sharedpb.ContextType_value[row.Context])
+		contentRating := sharedpb.ContentRating(sharedpb.ContentRating_value[row.ContentRating])
+
 		tags = append(tags, &sharedpb.Tag{
 			Id:                 row.ID,
 			BatchId:            row.BatchID,
@@ -295,9 +300,9 @@ func mapRowsToTags(rows []tagRow) []*sharedpb.Tag {
 			Name:               row.Name,
 			Description:        row.Description,
 			Type:               sharedpb.TagType(sharedpb.TagType_value[row.Type]),
-			Context:            sharedpb.ContextType(sharedpb.ContextType_value[row.Context]),
+			Context:            contextType,
 			ParentTagId:        row.ParentTagID,
-			ContentRating:      sharedpb.ContentRating(sharedpb.ContentRating_value[row.ContentRating]),
+			ContentRating:      contentRating,
 			ContentDescriptors: convertToContentDescriptorTypes(row.ContentDescriptors),
 			MetaTags:           row.MetaTags,
 			Public:             row.Public,

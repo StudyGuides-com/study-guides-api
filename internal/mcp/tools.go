@@ -41,35 +41,64 @@ func (g *SimpleToolGenerator) GenerateTools() []openai.Tool {
 
 // generateFindTool creates a simple find tool
 func (g *SimpleToolGenerator) generateFindTool(resource string) openai.Tool {
+	baseProperties := map[string]interface{}{
+		"public": map[string]interface{}{
+			"type":        "boolean",
+			"description": "Filter by public/private status",
+		},
+		"type": map[string]interface{}{
+			"type":        "string", 
+			"description": "Filter by type (e.g., Category, Topic, etc.)",
+		},
+		"name": map[string]interface{}{
+			"type":        "string",
+			"description": "Search by name (partial match)",
+		},
+		"limit": map[string]interface{}{
+			"type":        "integer",
+			"description": "Maximum number of results to return",
+		},
+	}
+	
+	// Add resource-specific properties
+	if resource == "indexing" {
+		baseProperties["triggerReindex"] = map[string]interface{}{
+			"type":        "boolean",
+			"description": "Trigger a new indexing job (set to true for reindexing)",
+		}
+		baseProperties["objectType"] = map[string]interface{}{
+			"type":        "string",
+			"description": "Type of object to index (Tag, User, Contact, FAQ)",
+			"enum":        []string{"Tag"},
+		}
+		baseProperties["force"] = map[string]interface{}{
+			"type":        "boolean",
+			"description": "Force reindex even if content hasn't changed",
+		}
+		baseProperties["status"] = map[string]interface{}{
+			"type":        "string",
+			"description": "Filter by job status",
+			"enum":        []string{"running", "complete", "failed"},
+		}
+	}
+	
+	description := fmt.Sprintf("Find %s entities with optional filters", resource)
+	if resource == "indexing" {
+		description = "Trigger indexing operations or check status of running indexing jobs. Use triggerReindex:true with objectType to start reindexing."
+	}
+	
 	return openai.Tool{
 		Type: openai.ToolTypeFunction,
 		Function: &openai.FunctionDefinition{
 			Name:        fmt.Sprintf("%s_find", resource),
-			Description: fmt.Sprintf("Find %s entities with optional filters", resource),
+			Description: description,
 			Parameters: map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{
 					"filter": map[string]interface{}{
 						"type":        "object",
 						"description": fmt.Sprintf("Filter criteria for %s entities", resource),
-						"properties": map[string]interface{}{
-							"public": map[string]interface{}{
-								"type":        "boolean",
-								"description": "Filter by public/private status",
-							},
-							"type": map[string]interface{}{
-								"type":        "string", 
-								"description": "Filter by type (e.g., Category, Topic, etc.)",
-							},
-							"name": map[string]interface{}{
-								"type":        "string",
-								"description": "Search by name (partial match)",
-							},
-							"limit": map[string]interface{}{
-								"type":        "integer",
-								"description": "Maximum number of results to return",
-							},
-						},
+						"properties":  baseProperties,
 					},
 				},
 			},

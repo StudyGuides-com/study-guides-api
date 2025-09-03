@@ -64,7 +64,7 @@ func (s *SqlIndexingStore) StartIndexingJob(ctx context.Context, objectType stri
 	_, err := s.db.ExecContext(ctx, `
 		INSERT INTO "Job" (id, type, status, description, "startedAt", metadata, "createdAt", "updatedAt")
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-	`, jobID, "INDEXING", "Running", fmt.Sprintf("Index %s (force=%t)", objectType, force), 
+	`, jobID, "Index", "Running", fmt.Sprintf("Index %s (force=%t)", objectType, force), 
 	   now, string(metadataJSON), now, now)
 	
 	if err != nil {
@@ -99,7 +99,7 @@ func (s *SqlIndexingStore) GetJobStatus(ctx context.Context, jobID string) (*Job
 		SELECT id, type, description, status, "startedAt", "completedAt", 
 		       progress, "durationSeconds", "errorMessge", metadata
 		FROM "Job" 
-		WHERE id = $1 AND type = 'INDEXING'
+		WHERE id = $1 AND type = 'Index'
 	`, jobID).Scan(
 		&job.ID, &job.Type, &description, &job.Status,
 		&startedAt, &completedAt, &progress, &durationSeconds, &errorMessage, &metadata,
@@ -148,7 +148,7 @@ func (s *SqlIndexingStore) ListRecentJobs(ctx context.Context, objectType string
 		SELECT id, type, description, status, "startedAt", "completedAt", 
 		       progress, "durationSeconds", "errorMessge", metadata
 		FROM "Job" 
-		WHERE type = 'INDEXING' 
+		WHERE type = 'Index' 
 		  AND metadata::jsonb->>'objectType' = $1
 		ORDER BY "startedAt" DESC
 		LIMIT 20
@@ -163,7 +163,7 @@ func (s *SqlIndexingStore) ListRunningJobs(ctx context.Context) ([]JobStatus, er
 		SELECT id, type, description, status, "startedAt", "completedAt", 
 		       progress, "durationSeconds", "errorMessge", metadata
 		FROM "Job" 
-		WHERE type = 'INDEXING' AND status = 'Running'
+		WHERE type = 'Index' AND status = 'Running'
 		ORDER BY "startedAt" DESC
 	`
 	
@@ -314,6 +314,7 @@ func (s *SqlIndexingStore) QueueBatchForReindex(ctx context.Context, objectType 
 			INSERT INTO "IndexOutbox" ("objectType", "objectId", action, "queuedAt")
 			SELECT 'Tag', id, 'upsert', NOW()
 			FROM "Tag"
+			WHERE context IS NOT NULL
 			ON CONFLICT ("objectType", "objectId") DO UPDATE
 			SET action = 'upsert', "queuedAt" = NOW()
 		`
