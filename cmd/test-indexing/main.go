@@ -33,7 +33,7 @@ func main() {
 	if openAIKey == "" {
 		log.Fatal("OPENAI_API_KEY environment variable is required")
 	}
-	aiClient := ai.NewAiClient(openAIKey)
+	aiClient := ai.NewClient(openAIKey, "gpt-4o")
 
 	// Create MCP processor
 	mcpProcessor := mcp.NewMCPProcessor(aiClient)
