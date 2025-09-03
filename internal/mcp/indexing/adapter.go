@@ -42,14 +42,28 @@ func (a *IndexingRepositoryAdapter) Find(ctx context.Context, filter IndexingFil
 			return nil, fmt.Errorf("failed to start indexing job: %w", err)
 		}
 		
-		// Return immediate response
+		// Get count of items that will be processed to provide better user feedback
+		validItemsMsg := "Processing all valid items"
+		if objectType == "Tag" {
+			// This gives a rough estimate since we filter at queue time
+			validItemsMsg = "Processing all valid tags (invalid records automatically excluded)"
+		}
+		
+		// Return immediate response with more context
 		now := time.Now()
+		forceMsg := ""
+		if force {
+			forceMsg = " (full rebuild - all items regardless of changes)"
+		} else {
+			forceMsg = " (incremental - only changed items)"
+		}
+		
 		execution := IndexingExecution{
 			ID:         jobID,
 			ObjectType: objectType,
 			Status:     string(IndexingStatusRunning),
 			StartedAt:  &now,
-			Message:    fmt.Sprintf("Started indexing %s (force=%t)", objectType, force),
+			Message:    fmt.Sprintf("Started %s indexing job %s%s. %s", objectType, jobID[:8], forceMsg, validItemsMsg),
 			Force:      force,
 		}
 		
@@ -64,9 +78,39 @@ func (a *IndexingRepositoryAdapter) Find(ctx context.Context, filter IndexingFil
 			return nil, fmt.Errorf("failed to list running jobs: %w", err)
 		}
 		
-		for _, job := range jobs {
-			execution := a.jobToExecution(job)
-			results = append(results, *execution)
+		// Create summary response for running jobs
+		if len(jobs) == 0 {
+			execution := IndexingExecution{
+				ID:      "status",
+				Message: "No indexing jobs currently running",
+				Status:  string(IndexingStatusComplete),
+			}
+			results = append(results, execution)
+		} else {
+			// Add summary first
+			summaryMsg := fmt.Sprintf("Indexing Status: %d jobs currently running", len(jobs))
+			if len(jobs) == 1 {
+				summaryMsg = "Indexing Status: 1 job currently running"
+			}
+			
+			execution := IndexingExecution{
+				ID:      "summary",
+				Message: summaryMsg,
+				Status:  string(IndexingStatusRunning),
+			}
+			results = append(results, execution)
+			
+			// Then add individual jobs with enhanced messages
+			for _, job := range jobs {
+				execution := a.jobToExecution(job)
+				// Enhance the message to be more descriptive
+				if execution.ItemsProcessed > 0 {
+					execution.Message = fmt.Sprintf("%s - %d items processed", execution.Message, execution.ItemsProcessed)
+				} else {
+					execution.Message = fmt.Sprintf("%s - starting up...", execution.Message)
+				}
+				results = append(results, *execution)
+			}
 		}
 		
 		return results, nil
@@ -87,17 +131,61 @@ func (a *IndexingRepositoryAdapter) Find(ctx context.Context, filter IndexingFil
 		return results, nil
 	}
 	
-	// Get all recent jobs (for all object types)
+	// Get status summary and recent jobs
+	runningJobs, _ := a.store.ListRunningJobs(ctx)
+	runningCount := len(runningJobs)
+	
+	// Create a summary response first
+	var summaryMsg string
+	if runningCount == 0 {
+		summaryMsg = "No indexing jobs currently running. Showing recent job history:"
+	} else if runningCount == 1 {
+		summaryMsg = "1 indexing job currently running. Recent activity:"
+	} else {
+		summaryMsg = fmt.Sprintf("%d indexing jobs currently running. Recent activity:", runningCount)
+	}
+	
+	summaryExecution := IndexingExecution{
+		ID:      "overview",
+		Message: summaryMsg,
+		Status:  string(IndexingStatusComplete),
+	}
+	results = append(results, summaryExecution)
+	
+	// Add running jobs first if any
+	for _, job := range runningJobs {
+		execution := a.jobToExecution(job)
+		if execution.ItemsProcessed > 0 {
+			execution.Message = fmt.Sprintf("🟡 %s - %d items processed", execution.Message, execution.ItemsProcessed)
+		} else {
+			execution.Message = fmt.Sprintf("🟡 %s - initializing...", execution.Message)
+		}
+		results = append(results, *execution)
+	}
+	
+	// Then get recent completed jobs for context
 	for _, objType := range AllObjectTypes() {
 		jobs, err := a.store.ListRecentJobs(ctx, objType)
 		if err != nil {
 			continue // Skip on error
 		}
 		
-		// Just take the most recent one for each type
-		if len(jobs) > 0 {
-			execution := a.jobToExecution(jobs[0])
-			results = append(results, *execution)
+		// Add the most recent completed job for each type (not running)
+		for _, job := range jobs {
+			if job.Status != "Running" {
+				execution := a.jobToExecution(job)
+				statusIcon := "✅"
+				if job.Status == "Failed" {
+					statusIcon = "❌"
+				}
+				if execution.ItemsProcessed > 0 {
+					execution.Message = fmt.Sprintf("%s %s - completed %d items", statusIcon, execution.Message, execution.ItemsProcessed)
+				} else {
+					execution.Message = fmt.Sprintf("%s %s", statusIcon, execution.Message)
+				}
+				results = append(results, *execution)
+				break // Only one recent completed job per type
+			}
 		}
 	}
 	
