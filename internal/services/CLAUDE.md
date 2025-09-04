@@ -29,19 +29,27 @@ All services embed the corresponding `Unimplemented*ServiceServer` from generate
 ## Implementation Details
 
 ### Chat Service Architecture
-The ChatService is the most complex, implementing an AI-powered conversational interface:
+The ChatService is the most complex, implementing both legacy tool routing and the new MCP (Model Context Protocol) system:
+
+#### MCP Integration (Primary System)
+- **MCP Processor**: Handles natural language processing via `internal/mcp`
+- **Repository Adapters**: Including `IndexingRepositoryAdapter` for index management
+- **Dynamic tool generation**: Creates OpenAI tools from registered repositories
+- **Indexing triggers**: 
+  - "index tags" → incremental indexing (only changed items)
+  - "force index tags" → complete rebuild (all items)
+
+#### Legacy Tool Integration
+- Dynamic system prompt generation based on available tools
+- OpenAI function calling for intent classification
+- Tool routing via the internal router package
+- Format detection from natural language (csv, json, list)
 
 #### Conversation History Management
 - `ConversationHistory` struct manages message history with size limits
 - Messages are stored in context metadata as JSON
 - Smart truncation keeps only recent messages (max 10 messages, 1000 chars each)
 - Response summarization prevents token limit issues
-
-#### AI Tool Integration
-- Dynamic system prompt generation based on available tools
-- OpenAI function calling for intent classification
-- Tool routing via the internal router package
-- Format detection from natural language (csv, json, list)
 
 #### Response Flow
 1. Extract conversation history from context metadata
@@ -54,7 +62,7 @@ The ChatService is the most complex, implementing an AI-powered conversational i
 8. Return response with updated context
 
 ### Authentication Patterns
-Services use consistent authentication patterns:
+Services use base handlers for authentication (see `internal/middleware/CLAUDE.md` for auth implementation details):
 ```go
 resp, err := AuthBaseHandler(ctx, func(ctx context.Context, session *middleware.SessionDetails) (interface{}, error) {
     if session.UserID == nil {

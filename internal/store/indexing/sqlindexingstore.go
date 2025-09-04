@@ -71,11 +71,23 @@ func (s *SqlIndexingStore) StartIndexingJob(ctx context.Context, objectType stri
 		return "", fmt.Errorf("failed to create job record: %w", err)
 	}
 	
-	// Queue all items for reindexing
-	if err := s.QueueBatchForReindex(ctx, objectType); err != nil {
-		// Update job as failed
-		s.updateJobStatus(jobID, "Failed", err.Error(), 0)
-		return jobID, err
+	// Queue items based on force flag
+	if force {
+		// Force mode: Queue ALL items for complete rebuild
+		if err := s.QueueBatchForReindex(ctx, objectType); err != nil {
+			// Update job as failed
+			s.updateJobStatus(jobID, "Failed", err.Error(), 0)
+			return jobID, err
+		}
+		fmt.Printf("Force mode: Queued all %s items for complete reindexing\n", objectType)
+	} else {
+		// Incremental mode: Only queue changed items
+		if err := s.QueueChangedForIndex(ctx, objectType); err != nil {
+			// Update job as failed
+			s.updateJobStatus(jobID, "Failed", err.Error(), 0)
+			return jobID, err
+		}
+		// Note: QueueChangedForIndex already logs how many items were queued
 	}
 	
 	// Start async processing
@@ -325,6 +337,74 @@ func (s *SqlIndexingStore) QueueBatchForReindex(ctx context.Context, objectType 
 	_, err := s.db.ExecContext(ctx, query)
 	if err != nil {
 		return fmt.Errorf("failed to queue batch for reindex: %w", err)
+	}
+	
+	return nil
+}
+
+// QueueChangedForIndex queues only changed objects for indexing (incremental mode)
+func (s *SqlIndexingStore) QueueChangedForIndex(ctx context.Context, objectType string) error {
+	var query string
+	
+	switch objectType {
+	case "Tag":
+		// This query identifies tags that need indexing by comparing current state with indexed state
+		// It queues tags that either:
+		// 1. Don't exist in SearchIndexState (never indexed)
+		// 2. Have been updated since last indexing
+		// 3. Have had their access permissions changed
+		// 4. Have had ancestor tags modified (parent changed)
+		query = `
+			WITH changed_tags AS (
+				SELECT DISTINCT t.id
+				FROM "Tag" t
+				LEFT JOIN "SearchIndexState" s ON s."objectType" = 'Tag' AND s."objectId" = t.id
+				WHERE t.context IS NOT NULL
+				AND (
+					-- Never indexed
+					s."objectId" IS NULL
+					-- Or tag itself was updated
+					OR t."updatedAt" > COALESCE(s."lastIndexedAt", '1970-01-01'::timestamp)
+				)
+				
+				UNION
+				
+				-- Tags whose access list may have changed
+				SELECT DISTINCT ta."tagId" as id
+				FROM "TagAccess" ta
+				INNER JOIN "Tag" t ON t.id = ta."tagId"
+				LEFT JOIN "SearchIndexState" s ON s."objectType" = 'Tag' AND s."objectId" = ta."tagId"
+				WHERE t.context IS NOT NULL
+				AND ta."updatedAt" > COALESCE(s."lastIndexedAt", '1970-01-01'::timestamp)
+				
+				UNION
+				
+				-- Tags whose ancestors were modified (affects ancestry chain)
+				SELECT DISTINCT child.id
+				FROM "Tag" child
+				INNER JOIN "Tag" parent ON child."parentTagId" = parent.id
+				LEFT JOIN "SearchIndexState" s ON s."objectType" = 'Tag' AND s."objectId" = child.id
+				WHERE child.context IS NOT NULL
+				AND parent."updatedAt" > COALESCE(s."lastIndexedAt", '1970-01-01'::timestamp)
+			)
+			INSERT INTO "IndexOutbox" ("objectType", "objectId", action, "queuedAt")
+			SELECT 'Tag', id, 'upsert', NOW()
+			FROM changed_tags
+			ON CONFLICT ("objectType", "objectId") DO UPDATE
+			SET action = 'upsert', "queuedAt" = NOW()
+		`
+	default:
+		return fmt.Errorf("unsupported object type for changed index: %s", objectType)
+	}
+	
+	result, err := s.db.ExecContext(ctx, query)
+	if err != nil {
+		return fmt.Errorf("failed to queue changed items for index: %w", err)
+	}
+	
+	// Log how many items were queued
+	if rows, err := result.RowsAffected(); err == nil {
+		fmt.Printf("Queued %d changed %s items for indexing\n", rows, objectType)
 	}
 	
 	return nil

@@ -3,6 +3,18 @@
 ## Overview
 The Study Guides API is a Go-based microservice providing gRPC and HTTP endpoints for a study guides platform. It implements a clean architecture with clear separation between API layer, business logic, and data access layers.
 
+## Documentation Structure
+For detailed component documentation, see:
+- `cmd/server/CLAUDE.md` - Server initialization and lifecycle
+- `internal/store/CLAUDE.md` - Data access layer with 9 domain stores, including indexing
+- `internal/services/CLAUDE.md` - Business logic and service implementations
+- `internal/mcp/CLAUDE.md` - Model Context Protocol system for AI-driven operations
+- `internal/middleware/CLAUDE.md` - Authentication, rate limiting, and error handling
+- `internal/lib/CLAUDE.md` - Shared libraries (AI, routing, formatting)
+- `internal/errors/CLAUDE.md` - Error definitions and handling
+- `internal/utils/CLAUDE.md` - Utility functions
+- `prisma/CLAUDE.md` - Database schema management
+
 ## Architecture Principles
 
 ### Layered Architecture
@@ -10,8 +22,9 @@ The codebase follows a classic layered architecture pattern:
 - **API Layer** (`api/v1/`): Protocol Buffers definitions for gRPC services
 - **Service Layer** (`internal/services/`): Business logic and service implementations  
 - **Data Access Layer** (`internal/store/`): Data persistence abstractions and implementations
+- **AI Integration Layer** (`internal/mcp/`): Model Context Protocol for AI-driven operations
 - **Middleware Layer** (`internal/middleware/`): Cross-cutting concerns (auth, rate limiting, error handling)
-- **Router Layer** (`internal/lib/router/`): Operation routing and handler mapping
+- **Router Layer** (`internal/lib/router/`): Operation routing and handler mapping (legacy)
 
 ### Key Design Patterns
 
@@ -119,20 +132,23 @@ The server implements proper graceful shutdown with:
 ## Common Patterns
 
 ### Error Handling
-Services use gRPC status codes consistently:
+The application uses gRPC status codes consistently across all layers:
 ```go
 return nil, status.Error(codes.Internal, err.Error())
 return nil, status.Error(codes.FailedPrecondition, "missing required environment variables")
 ```
+For detailed error handling implementation, see:
+- `internal/errors/CLAUDE.md` - Custom error definitions
+- `internal/middleware/CLAUDE.md` - Error middleware and transformation
 
 ### Context Propagation
 Context is passed through all layers for:
 - Request cancellation
-- Authentication details
+- Authentication details (see `internal/middleware/CLAUDE.md`)
 - Distributed tracing support
 
 ### Store Initialization
-All stores are initialized at startup with fail-fast behavior - if any store fails to initialize, the application terminates.
+All stores are initialized at startup with fail-fast behavior - if any store fails to initialize, the application terminates. For implementation details, see `internal/store/CLAUDE.md`.
 
 ## Naming Conventions
 
@@ -157,9 +173,15 @@ All stores are initialized at startup with fail-fast behavior - if any store fai
 
 4. **Roland Separation**: The Roland functionality (likely AI/chat) uses a separate database connection, suggesting it may have different scaling or data requirements
 
-5. **Tool-Based Routing**: The router maps "tool names" to handlers, suggesting this may be part of an AI agent system where tools correspond to available operations
+5. **Dual AI Systems**: 
+   - **MCP (Primary)**: Model Context Protocol for modern AI operations via ChatService
+   - **Legacy Router**: Tool-based routing for older integrations
 
-6. **Static Content Serving**: Despite being primarily a gRPC API, the service also serves static web content (favicon, images, CSS) through the webrouter
+6. **Indexing Modes**: Search index synchronization has two distinct modes:
+   - **"index tags"**: Incremental sync (only changed items)
+   - **"force index tags"**: Complete rebuild (all items)
+
+7. **Static Content Serving**: Despite being primarily a gRPC API, the service also serves static web content (favicon, images, CSS) through the webrouter
 
 ## Dependencies
 

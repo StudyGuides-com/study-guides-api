@@ -18,7 +18,12 @@ type Store interface {
     SearchStore() search.SearchStore
     TagStore() tag.TagStore
     UserStore() user.UserStore
-    // ... other stores
+    QuestionStore() question.QuestionStore
+    InteractionStore() interaction.InteractionStore
+    RolandStore() roland.RolandStore
+    DevopsStore() devops.DevopsStore
+    KPIStore() kpi.KPIStore
+    IndexingStore() indexing.IndexingStore
 }
 ```
 
@@ -37,6 +42,23 @@ Most stores follow consistent SQL patterns:
 - **Structured scanning**: Use `github.com/georgysavva/scany/v2/pgxscan` for result mapping
 - **Error handling**: Convert database errors to gRPC status codes
 - **Upsert operations**: Use `ON CONFLICT` for data deduplication
+
+### KPI Store
+The `KPIStore` manages performance metrics and analytics:
+- **Stored procedures execution**: Runs `calculate_time_stats_by_group` and `update_calculated_stats_by_group` procedures
+- **Job tracking**: Monitors execution status of long-running KPI calculations
+- **Group-based metrics**: Calculates statistics per user group (e.g., class, school)
+- **Execution management**: Tracks running, completed, and failed KPI jobs with metadata
+
+### Indexing Store
+The `IndexingStore` manages search index synchronization:
+- **Connection pooling**: Uses dedicated `pgxpool.Pool` for concurrent operations
+- **Outbox pattern**: Queue-based approach for reliable index updates
+- **State tracking**: Maintains index state with hashing for change detection
+- **Batch operations**: Supports bulk reindexing of entire object types
+- **Job management**: Similar to KPI store, tracks indexing job progress
+- **Algolia integration**: Direct integration with Algolia for index updates
+- **Dependency injection**: Requires TagStore for tag hierarchy operations
 
 ### Admin Store Complexity
 The `SqlAdminStore` is the most complex implementation, providing:
@@ -91,10 +113,12 @@ Complex metadata handling in admin operations:
 ## Key Files
 
 ### store.go
-- Main `Store` interface definition
+- Main `Store` interface definition with 9 domain stores
 - Store aggregation implementation
 - Initialization coordination for all stores
 - Environment variable dependency management
+- Connection pool creation for IndexingStore
+- Special initialization for stores with dependencies (IndexingStore needs TagStore)
 
 ### admin/sqladminstore.go
 Most complex store implementation featuring:
@@ -116,8 +140,30 @@ DevOps operations abstraction:
 - Deployment lifecycle management
 - Status mapping and error handling
 
+### kpi/sqlkpistore.go
+KPI metrics and analytics management:
+- Execution of stored procedures for time-based statistics
+- Job status tracking with metadata storage
+- Group-based metric calculation
+- Execution history and monitoring
+
+### indexing/sqlindexingstore.go
+Search index synchronization management:
+- Outbox pattern for incremental change tracking
+- Dual-mode indexing:
+  - **Incremental mode** (`force=false`): Only queues changed items via `QueueChangedForIndex`
+  - **Force rebuild** (`force=true`): Queues all items via `QueueBatchForReindex`
+- Change detection includes:
+  - Tag updates (`updatedAt` comparison)
+  - Access permission changes (TagAccess updates)
+  - Ancestry changes (parent tag modifications)
+- Index state tracking with SHA-256 content hashing
+- Job-based async processing with 30-minute timeout
+- Direct Algolia API integration
+- Batch processing (100 items at a time)
+
 ### Domain-specific stores
-Each domain (tag, user, question, etc.) follows the same pattern:
+Each domain (tag, user, question, interaction, roland) follows the same pattern:
 - Interface definition in `{domain}.go`
 - SQL implementation in `sql{domain}store.go`
 - Standard CRUD operations with domain-specific extensions
@@ -143,6 +189,25 @@ Each domain (tag, user, question, etc.) follows the same pattern:
 9. **Index Cache Management**: Admin store manages an index cache for performance optimization
 
 10. **Tree Deletion Order**: Tag tree deletion works from leaf nodes up to prevent foreign key violations
+
+11. **KPI Store Procedures**: KPI calculations run as database stored procedures, not application code
+
+12. **Indexing Store Pool**: IndexingStore creates its own connection pool separate from other stores for concurrent operations
+
+13. **Indexing Outbox Pattern**: 
+    - Outbox tracks incremental changes from CRUD operations
+    - `force=false`: Processes only changed items (incremental sync)
+    - `force=true`: Rebuilds entire index regardless of changes
+    - Failed operations remain in outbox for retry
+
+14. **Indexing Change Detection**: The incremental mode detects changes via:
+    - Direct tag updates (compares `updatedAt` timestamps)
+    - TagAccess permission changes
+    - Parent tag modifications (affects ancestry chain)
+
+15. **Store Initialization Order**: IndexingStore must be initialized after TagStore due to dependency
+
+16. **Indexing Job Timeout**: Jobs have a 30-minute timeout - large datasets (80k+ tags) may timeout if processing is too slow
 
 ## Dependencies
 
