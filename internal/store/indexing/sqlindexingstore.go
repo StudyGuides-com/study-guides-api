@@ -367,15 +367,8 @@ func (s *SqlIndexingStore) QueueChangedForIndex(ctx context.Context, objectType 
 					OR t."updatedAt" > COALESCE(s."lastIndexedAt", '1970-01-01'::timestamp)
 				)
 				
-				UNION
-				
-				-- Tags whose access list may have changed
-				SELECT DISTINCT ta."tagId" as id
-				FROM "TagAccess" ta
-				INNER JOIN "Tag" t ON t.id = ta."tagId"
-				LEFT JOIN "SearchIndexState" s ON s."objectType" = 'Tag' AND s."objectId" = ta."tagId"
-				WHERE t.context IS NOT NULL
-				AND ta."updatedAt" > COALESCE(s."lastIndexedAt", '1970-01-01'::timestamp)
+				-- NOTE: TagAccess change detection removed - TagAccess table has no updatedAt field
+				-- Future enhancement: implement proper permission change tracking
 				
 				UNION
 				
