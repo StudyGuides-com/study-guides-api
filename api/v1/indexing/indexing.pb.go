@@ -740,6 +740,71 @@ func (x *TriggerTagIndexingRequest) GetContextTypes() []shared.ContextType {
 	return nil
 }
 
+// Request to trigger indexing for a single specific item
+type TriggerSingleIndexingRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type of object to index (e.g., "Tag", "Question")
+	ObjectType string `protobuf:"bytes,1,opt,name=object_type,json=objectType,proto3" json:"object_type,omitempty"`
+	// ID of the specific item to index
+	Id string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	// If true, forces complete reindex ignoring change detection
+	// If false, only indexes if item has changed (incremental mode)
+	Force         bool `protobuf:"varint,3,opt,name=force,proto3" json:"force,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TriggerSingleIndexingRequest) Reset() {
+	*x = TriggerSingleIndexingRequest{}
+	mi := &file_v1_indexing_indexing_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TriggerSingleIndexingRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TriggerSingleIndexingRequest) ProtoMessage() {}
+
+func (x *TriggerSingleIndexingRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_indexing_indexing_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TriggerSingleIndexingRequest.ProtoReflect.Descriptor instead.
+func (*TriggerSingleIndexingRequest) Descriptor() ([]byte, []int) {
+	return file_v1_indexing_indexing_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *TriggerSingleIndexingRequest) GetObjectType() string {
+	if x != nil {
+		return x.ObjectType
+	}
+	return ""
+}
+
+func (x *TriggerSingleIndexingRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *TriggerSingleIndexingRequest) GetForce() bool {
+	if x != nil {
+		return x.Force
+	}
+	return false
+}
+
 var File_v1_indexing_indexing_proto protoreflect.FileDescriptor
 
 const file_v1_indexing_indexing_proto_rawDesc = "" +
@@ -800,13 +865,19 @@ const file_v1_indexing_indexing_proto_rawDesc = "" +
 	"\x19TriggerTagIndexingRequest\x12\x14\n" +
 	"\x05force\x18\x01 \x01(\bR\x05force\x12/\n" +
 	"\ttag_types\x18\x02 \x03(\x0e2\x12.shared.v1.TagTypeR\btagTypes\x12;\n" +
-	"\rcontext_types\x18\x03 \x03(\x0e2\x16.shared.v1.ContextTypeR\fcontextTypes2\xe1\x03\n" +
+	"\rcontext_types\x18\x03 \x03(\x0e2\x16.shared.v1.ContextTypeR\fcontextTypes\"e\n" +
+	"\x1cTriggerSingleIndexingRequest\x12\x1f\n" +
+	"\vobject_type\x18\x01 \x01(\tR\n" +
+	"objectType\x12\x0e\n" +
+	"\x02id\x18\x02 \x01(\tR\x02id\x12\x14\n" +
+	"\x05force\x18\x03 \x01(\bR\x05force2\xcb\x04\n" +
 	"\x0fIndexingService\x12\\\n" +
 	"\x0fTriggerIndexing\x12#.indexing.v1.TriggerIndexingRequest\x1a$.indexing.v1.TriggerIndexingResponse\x12S\n" +
 	"\fGetJobStatus\x12 .indexing.v1.GetJobStatusRequest\x1a!.indexing.v1.GetJobStatusResponse\x12\\\n" +
 	"\x0fListRunningJobs\x12#.indexing.v1.ListRunningJobsRequest\x1a$.indexing.v1.ListRunningJobsResponse\x12Y\n" +
 	"\x0eListRecentJobs\x12\".indexing.v1.ListRecentJobsRequest\x1a#.indexing.v1.ListRecentJobsResponse\x12b\n" +
-	"\x12TriggerTagIndexing\x12&.indexing.v1.TriggerTagIndexingRequest\x1a$.indexing.v1.TriggerIndexingResponseBHZFgithub.com/studyguides-com/study-guides-api/api/v1/indexing;indexingv1b\x06proto3"
+	"\x12TriggerTagIndexing\x12&.indexing.v1.TriggerTagIndexingRequest\x1a$.indexing.v1.TriggerIndexingResponse\x12h\n" +
+	"\x15TriggerSingleIndexing\x12).indexing.v1.TriggerSingleIndexingRequest\x1a$.indexing.v1.TriggerIndexingResponseBHZFgithub.com/studyguides-com/study-guides-api/api/v1/indexing;indexingv1b\x06proto3"
 
 var (
 	file_v1_indexing_indexing_proto_rawDescOnce sync.Once
@@ -820,49 +891,52 @@ func file_v1_indexing_indexing_proto_rawDescGZIP() []byte {
 	return file_v1_indexing_indexing_proto_rawDescData
 }
 
-var file_v1_indexing_indexing_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_v1_indexing_indexing_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_v1_indexing_indexing_proto_goTypes = []any{
-	(*TriggerIndexingRequest)(nil),    // 0: indexing.v1.TriggerIndexingRequest
-	(*TriggerIndexingResponse)(nil),   // 1: indexing.v1.TriggerIndexingResponse
-	(*GetJobStatusRequest)(nil),       // 2: indexing.v1.GetJobStatusRequest
-	(*GetJobStatusResponse)(nil),      // 3: indexing.v1.GetJobStatusResponse
-	(*JobMetadata)(nil),               // 4: indexing.v1.JobMetadata
-	(*ListRunningJobsRequest)(nil),    // 5: indexing.v1.ListRunningJobsRequest
-	(*ListRunningJobsResponse)(nil),   // 6: indexing.v1.ListRunningJobsResponse
-	(*ListRecentJobsRequest)(nil),     // 7: indexing.v1.ListRecentJobsRequest
-	(*ListRecentJobsResponse)(nil),    // 8: indexing.v1.ListRecentJobsResponse
-	(*JobInfo)(nil),                   // 9: indexing.v1.JobInfo
-	(*TriggerTagIndexingRequest)(nil), // 10: indexing.v1.TriggerTagIndexingRequest
-	nil,                               // 11: indexing.v1.JobMetadata.ExtraEntry
-	(*timestamppb.Timestamp)(nil),     // 12: google.protobuf.Timestamp
-	(shared.TagType)(0),               // 13: shared.v1.TagType
-	(shared.ContextType)(0),           // 14: shared.v1.ContextType
+	(*TriggerIndexingRequest)(nil),       // 0: indexing.v1.TriggerIndexingRequest
+	(*TriggerIndexingResponse)(nil),      // 1: indexing.v1.TriggerIndexingResponse
+	(*GetJobStatusRequest)(nil),          // 2: indexing.v1.GetJobStatusRequest
+	(*GetJobStatusResponse)(nil),         // 3: indexing.v1.GetJobStatusResponse
+	(*JobMetadata)(nil),                  // 4: indexing.v1.JobMetadata
+	(*ListRunningJobsRequest)(nil),       // 5: indexing.v1.ListRunningJobsRequest
+	(*ListRunningJobsResponse)(nil),      // 6: indexing.v1.ListRunningJobsResponse
+	(*ListRecentJobsRequest)(nil),        // 7: indexing.v1.ListRecentJobsRequest
+	(*ListRecentJobsResponse)(nil),       // 8: indexing.v1.ListRecentJobsResponse
+	(*JobInfo)(nil),                      // 9: indexing.v1.JobInfo
+	(*TriggerTagIndexingRequest)(nil),    // 10: indexing.v1.TriggerTagIndexingRequest
+	(*TriggerSingleIndexingRequest)(nil), // 11: indexing.v1.TriggerSingleIndexingRequest
+	nil,                                  // 12: indexing.v1.JobMetadata.ExtraEntry
+	(*timestamppb.Timestamp)(nil),        // 13: google.protobuf.Timestamp
+	(shared.TagType)(0),                  // 14: shared.v1.TagType
+	(shared.ContextType)(0),              // 15: shared.v1.ContextType
 }
 var file_v1_indexing_indexing_proto_depIdxs = []int32{
-	12, // 0: indexing.v1.TriggerIndexingResponse.started_at:type_name -> google.protobuf.Timestamp
-	12, // 1: indexing.v1.GetJobStatusResponse.started_at:type_name -> google.protobuf.Timestamp
-	12, // 2: indexing.v1.GetJobStatusResponse.completed_at:type_name -> google.protobuf.Timestamp
+	13, // 0: indexing.v1.TriggerIndexingResponse.started_at:type_name -> google.protobuf.Timestamp
+	13, // 1: indexing.v1.GetJobStatusResponse.started_at:type_name -> google.protobuf.Timestamp
+	13, // 2: indexing.v1.GetJobStatusResponse.completed_at:type_name -> google.protobuf.Timestamp
 	4,  // 3: indexing.v1.GetJobStatusResponse.metadata:type_name -> indexing.v1.JobMetadata
-	11, // 4: indexing.v1.JobMetadata.extra:type_name -> indexing.v1.JobMetadata.ExtraEntry
+	12, // 4: indexing.v1.JobMetadata.extra:type_name -> indexing.v1.JobMetadata.ExtraEntry
 	9,  // 5: indexing.v1.ListRunningJobsResponse.jobs:type_name -> indexing.v1.JobInfo
 	9,  // 6: indexing.v1.ListRecentJobsResponse.jobs:type_name -> indexing.v1.JobInfo
-	12, // 7: indexing.v1.JobInfo.started_at:type_name -> google.protobuf.Timestamp
-	12, // 8: indexing.v1.JobInfo.completed_at:type_name -> google.protobuf.Timestamp
+	13, // 7: indexing.v1.JobInfo.started_at:type_name -> google.protobuf.Timestamp
+	13, // 8: indexing.v1.JobInfo.completed_at:type_name -> google.protobuf.Timestamp
 	4,  // 9: indexing.v1.JobInfo.metadata:type_name -> indexing.v1.JobMetadata
-	13, // 10: indexing.v1.TriggerTagIndexingRequest.tag_types:type_name -> shared.v1.TagType
-	14, // 11: indexing.v1.TriggerTagIndexingRequest.context_types:type_name -> shared.v1.ContextType
+	14, // 10: indexing.v1.TriggerTagIndexingRequest.tag_types:type_name -> shared.v1.TagType
+	15, // 11: indexing.v1.TriggerTagIndexingRequest.context_types:type_name -> shared.v1.ContextType
 	0,  // 12: indexing.v1.IndexingService.TriggerIndexing:input_type -> indexing.v1.TriggerIndexingRequest
 	2,  // 13: indexing.v1.IndexingService.GetJobStatus:input_type -> indexing.v1.GetJobStatusRequest
 	5,  // 14: indexing.v1.IndexingService.ListRunningJobs:input_type -> indexing.v1.ListRunningJobsRequest
 	7,  // 15: indexing.v1.IndexingService.ListRecentJobs:input_type -> indexing.v1.ListRecentJobsRequest
 	10, // 16: indexing.v1.IndexingService.TriggerTagIndexing:input_type -> indexing.v1.TriggerTagIndexingRequest
-	1,  // 17: indexing.v1.IndexingService.TriggerIndexing:output_type -> indexing.v1.TriggerIndexingResponse
-	3,  // 18: indexing.v1.IndexingService.GetJobStatus:output_type -> indexing.v1.GetJobStatusResponse
-	6,  // 19: indexing.v1.IndexingService.ListRunningJobs:output_type -> indexing.v1.ListRunningJobsResponse
-	8,  // 20: indexing.v1.IndexingService.ListRecentJobs:output_type -> indexing.v1.ListRecentJobsResponse
-	1,  // 21: indexing.v1.IndexingService.TriggerTagIndexing:output_type -> indexing.v1.TriggerIndexingResponse
-	17, // [17:22] is the sub-list for method output_type
-	12, // [12:17] is the sub-list for method input_type
+	11, // 17: indexing.v1.IndexingService.TriggerSingleIndexing:input_type -> indexing.v1.TriggerSingleIndexingRequest
+	1,  // 18: indexing.v1.IndexingService.TriggerIndexing:output_type -> indexing.v1.TriggerIndexingResponse
+	3,  // 19: indexing.v1.IndexingService.GetJobStatus:output_type -> indexing.v1.GetJobStatusResponse
+	6,  // 20: indexing.v1.IndexingService.ListRunningJobs:output_type -> indexing.v1.ListRunningJobsResponse
+	8,  // 21: indexing.v1.IndexingService.ListRecentJobs:output_type -> indexing.v1.ListRecentJobsResponse
+	1,  // 22: indexing.v1.IndexingService.TriggerTagIndexing:output_type -> indexing.v1.TriggerIndexingResponse
+	1,  // 23: indexing.v1.IndexingService.TriggerSingleIndexing:output_type -> indexing.v1.TriggerIndexingResponse
+	18, // [18:24] is the sub-list for method output_type
+	12, // [12:18] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name
 	12, // [12:12] is the sub-list for extension extendee
 	0,  // [0:12] is the sub-list for field type_name
@@ -879,7 +953,7 @@ func file_v1_indexing_indexing_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_indexing_indexing_proto_rawDesc), len(file_v1_indexing_indexing_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

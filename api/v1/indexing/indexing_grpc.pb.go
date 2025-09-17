@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	IndexingService_TriggerIndexing_FullMethodName    = "/indexing.v1.IndexingService/TriggerIndexing"
-	IndexingService_GetJobStatus_FullMethodName       = "/indexing.v1.IndexingService/GetJobStatus"
-	IndexingService_ListRunningJobs_FullMethodName    = "/indexing.v1.IndexingService/ListRunningJobs"
-	IndexingService_ListRecentJobs_FullMethodName     = "/indexing.v1.IndexingService/ListRecentJobs"
-	IndexingService_TriggerTagIndexing_FullMethodName = "/indexing.v1.IndexingService/TriggerTagIndexing"
+	IndexingService_TriggerIndexing_FullMethodName       = "/indexing.v1.IndexingService/TriggerIndexing"
+	IndexingService_GetJobStatus_FullMethodName          = "/indexing.v1.IndexingService/GetJobStatus"
+	IndexingService_ListRunningJobs_FullMethodName       = "/indexing.v1.IndexingService/ListRunningJobs"
+	IndexingService_ListRecentJobs_FullMethodName        = "/indexing.v1.IndexingService/ListRecentJobs"
+	IndexingService_TriggerTagIndexing_FullMethodName    = "/indexing.v1.IndexingService/TriggerTagIndexing"
+	IndexingService_TriggerSingleIndexing_FullMethodName = "/indexing.v1.IndexingService/TriggerSingleIndexing"
 )
 
 // IndexingServiceClient is the client API for IndexingService service.
@@ -43,6 +44,8 @@ type IndexingServiceClient interface {
 	ListRecentJobs(ctx context.Context, in *ListRecentJobsRequest, opts ...grpc.CallOption) (*ListRecentJobsResponse, error)
 	// Trigger tag indexing with flexible filtering by TagType and/or ContextType
 	TriggerTagIndexing(ctx context.Context, in *TriggerTagIndexingRequest, opts ...grpc.CallOption) (*TriggerIndexingResponse, error)
+	// Trigger indexing for a single specific item
+	TriggerSingleIndexing(ctx context.Context, in *TriggerSingleIndexingRequest, opts ...grpc.CallOption) (*TriggerIndexingResponse, error)
 }
 
 type indexingServiceClient struct {
@@ -103,6 +106,16 @@ func (c *indexingServiceClient) TriggerTagIndexing(ctx context.Context, in *Trig
 	return out, nil
 }
 
+func (c *indexingServiceClient) TriggerSingleIndexing(ctx context.Context, in *TriggerSingleIndexingRequest, opts ...grpc.CallOption) (*TriggerIndexingResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TriggerIndexingResponse)
+	err := c.cc.Invoke(ctx, IndexingService_TriggerSingleIndexing_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // IndexingServiceServer is the server API for IndexingService service.
 // All implementations must embed UnimplementedIndexingServiceServer
 // for forward compatibility.
@@ -120,6 +133,8 @@ type IndexingServiceServer interface {
 	ListRecentJobs(context.Context, *ListRecentJobsRequest) (*ListRecentJobsResponse, error)
 	// Trigger tag indexing with flexible filtering by TagType and/or ContextType
 	TriggerTagIndexing(context.Context, *TriggerTagIndexingRequest) (*TriggerIndexingResponse, error)
+	// Trigger indexing for a single specific item
+	TriggerSingleIndexing(context.Context, *TriggerSingleIndexingRequest) (*TriggerIndexingResponse, error)
 	mustEmbedUnimplementedIndexingServiceServer()
 }
 
@@ -144,6 +159,9 @@ func (UnimplementedIndexingServiceServer) ListRecentJobs(context.Context, *ListR
 }
 func (UnimplementedIndexingServiceServer) TriggerTagIndexing(context.Context, *TriggerTagIndexingRequest) (*TriggerIndexingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TriggerTagIndexing not implemented")
+}
+func (UnimplementedIndexingServiceServer) TriggerSingleIndexing(context.Context, *TriggerSingleIndexingRequest) (*TriggerIndexingResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TriggerSingleIndexing not implemented")
 }
 func (UnimplementedIndexingServiceServer) mustEmbedUnimplementedIndexingServiceServer() {}
 func (UnimplementedIndexingServiceServer) testEmbeddedByValue()                         {}
@@ -256,6 +274,24 @@ func _IndexingService_TriggerTagIndexing_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _IndexingService_TriggerSingleIndexing_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TriggerSingleIndexingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IndexingServiceServer).TriggerSingleIndexing(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IndexingService_TriggerSingleIndexing_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IndexingServiceServer).TriggerSingleIndexing(ctx, req.(*TriggerSingleIndexingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // IndexingService_ServiceDesc is the grpc.ServiceDesc for IndexingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -282,6 +318,10 @@ var IndexingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TriggerTagIndexing",
 			Handler:    _IndexingService_TriggerTagIndexing_Handler,
+		},
+		{
+			MethodName: "TriggerSingleIndexing",
+			Handler:    _IndexingService_TriggerSingleIndexing_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
