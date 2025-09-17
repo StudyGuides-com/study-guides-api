@@ -96,6 +96,45 @@ func (s *SqlIndexingStore) StartIndexingJob(ctx context.Context, objectType stri
 	return jobID, nil
 }
 
+// StartSingleIndexingJob starts a background indexing job for a single specific item
+func (s *SqlIndexingStore) StartSingleIndexingJob(ctx context.Context, objectType, objectID string, force bool) (string, error) {
+	jobID := cuid.New()
+	now := time.Now()
+
+	// Create metadata
+	metadata := map[string]interface{}{
+		"objectType": objectType,
+		"objectID":   objectID,
+		"force":      force,
+	}
+	metadataJSON, _ := json.Marshal(metadata)
+
+	// Insert job record
+	_, err := s.db.ExecContext(ctx, `
+		INSERT INTO "Job" (id, type, status, description, "startedAt", metadata, "createdAt", "updatedAt")
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, jobID, "Index", "Running", fmt.Sprintf("Index single %s (ID=%s, force=%t)", objectType, objectID, force),
+	   now, string(metadataJSON), now, now)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to create job record: %w", err)
+	}
+
+	// Queue the specific item for indexing
+	if err := s.QueueIndexOperation(ctx, objectType, objectID, "upsert"); err != nil {
+		// Update job as failed
+		s.updateJobStatus(jobID, "Failed", err.Error(), 0)
+		return jobID, err
+	}
+
+	fmt.Printf("Queued single %s item (ID=%s) for indexing\n", objectType, objectID)
+
+	// Start async processing for this single item
+	go s.runSingleIndexingAsync(jobID, objectType, objectID, force)
+
+	return jobID, nil
+}
+
 // GetJobStatus retrieves the status of an indexing job
 func (s *SqlIndexingStore) GetJobStatus(ctx context.Context, jobID string) (*JobStatus, error) {
 	var job JobStatus
@@ -534,6 +573,53 @@ func (s *SqlIndexingStore) runIndexingAsync(jobID, objectType string, force bool
 		}
 	}
 	
+	// Update job as completed
+	s.updateJobStatus(jobID, "Completed", "", itemsProcessed)
+}
+
+// runSingleIndexingAsync processes a single item indexing job asynchronously
+func (s *SqlIndexingStore) runSingleIndexingAsync(jobID, objectType, objectID string, force bool) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
+	itemsProcessed := 0
+
+	// Get the specific operation from outbox for this objectID
+	operations, err := s.GetPendingOperations(ctx, objectType, 1000) // Get more to find our specific item
+	if err != nil {
+		s.updateJobStatus(jobID, "Failed", err.Error(), itemsProcessed)
+		return
+	}
+
+	// Find the operation for our specific objectID
+	var targetOperation *IndexOperation
+	for _, op := range operations {
+		if op.ObjectID == objectID {
+			targetOperation = &op
+			break
+		}
+	}
+
+	if targetOperation == nil {
+		s.updateJobStatus(jobID, "Failed", fmt.Sprintf("Operation for %s ID %s not found in queue", objectType, objectID), itemsProcessed)
+		return
+	}
+
+	// Process the single operation
+	if err := s.processOperation(ctx, *targetOperation, force); err != nil {
+		fmt.Printf("Error processing single %s %s: %v\n", targetOperation.ObjectType, targetOperation.ObjectID, err)
+		s.UpdateIndexError(ctx, targetOperation.ObjectType, targetOperation.ObjectID, err)
+		s.updateJobStatus(jobID, "Failed", err.Error(), itemsProcessed)
+		return
+	}
+
+	// Remove from outbox after successful processing
+	if err := s.RemoveFromOutbox(ctx, targetOperation.ID); err != nil {
+		fmt.Printf("Error removing from outbox: %v\n", err)
+	}
+
+	itemsProcessed = 1
+
 	// Update job as completed
 	s.updateJobStatus(jobID, "Completed", "", itemsProcessed)
 }

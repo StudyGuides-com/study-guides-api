@@ -231,6 +231,38 @@ func (s *IndexingService) TriggerTagIndexing(ctx context.Context, req *indexingv
 	return resp.(*indexingv1.TriggerIndexingResponse), nil
 }
 
+// TriggerSingleIndexing starts a new indexing job for a single specific item
+func (s *IndexingService) TriggerSingleIndexing(ctx context.Context, req *indexingv1.TriggerSingleIndexingRequest) (*indexingv1.TriggerIndexingResponse, error) {
+	resp, err := services.AuthBaseHandler(ctx, func(ctx context.Context, session *middleware.SessionDetails) (interface{}, error) {
+		// Check admin permissions
+		if !session.HasRole(sharedpb.UserRole_USER_ROLE_ADMIN) {
+			return nil, status.Error(codes.PermissionDenied, "admin access required for indexing operations")
+		}
+
+		// Convert protobuf types to business types
+		businessReq := indexingcore.TriggerSingleIndexingRequest{
+			ObjectType: req.ObjectType,
+			ID:         req.Id,
+			Force:      req.Force,
+		}
+		businessResp, err := s.business.TriggerSingleIndexing(ctx, businessReq)
+		if err != nil {
+			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to trigger single indexing: %v", err))
+		}
+
+		return &indexingv1.TriggerIndexingResponse{
+			JobId:     businessResp.JobID,
+			Status:    businessResp.Status,
+			Message:   businessResp.Message,
+			StartedAt: timestamppb.New(businessResp.StartedAt),
+		}, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*indexingv1.TriggerIndexingResponse), nil
+}
+
 // convertJobStatusToJobInfo converts internal JobStatus to protobuf JobInfo
 func convertJobStatusToJobInfo(job indexing.JobStatus) *indexingv1.JobInfo {
 	jobInfo := &indexingv1.JobInfo{

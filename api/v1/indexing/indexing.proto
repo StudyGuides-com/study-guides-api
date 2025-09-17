@@ -24,6 +24,9 @@ service IndexingService {
 
   // Trigger tag indexing with flexible filtering by TagType and/or ContextType
   rpc TriggerTagIndexing(TriggerTagIndexingRequest) returns (TriggerIndexingResponse);
+
+  // Trigger indexing for a single specific item
+  rpc TriggerSingleIndexing(TriggerSingleIndexingRequest) returns (TriggerIndexingResponse);
 }
 
 // Request to trigger an indexing job
@@ -165,4 +168,17 @@ message TriggerTagIndexingRequest {
   // Optional filter by context types - empty array means no filter
   // Can be used alone or combined with tag_types
   repeated shared.v1.ContextType context_types = 3;
+}
+
+// Request to trigger indexing for a single specific item
+message TriggerSingleIndexingRequest {
+  // Type of object to index (e.g., "Tag", "Question")
+  string object_type = 1;
+
+  // ID of the specific item to index
+  string id = 2;
+
+  // If true, forces complete reindex ignoring change detection
+  // If false, only indexes if item has changed (incremental mode)
+  bool force = 3;
 }

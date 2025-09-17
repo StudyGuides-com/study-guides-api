@@ -162,3 +162,44 @@ func (bs *BusinessService) TriggerTagIndexing(ctx context.Context, req TriggerTa
 		StartedAt: time.Now(),
 	}, nil
 }
+
+// TriggerSingleIndexingRequest represents a single item indexing request
+type TriggerSingleIndexingRequest struct {
+	ObjectType string
+	ID         string
+	Force      bool
+}
+
+// TriggerSingleIndexing starts a new indexing job for a single specific item
+func (bs *BusinessService) TriggerSingleIndexing(ctx context.Context, req TriggerSingleIndexingRequest) (*TriggerIndexingResponse, error) {
+	// Default object type to "Tag" if not specified
+	objectType := req.ObjectType
+	if objectType == "" {
+		objectType = "Tag"
+	}
+
+	// Validate that ID is provided
+	if req.ID == "" {
+		return nil, fmt.Errorf("ID is required for single item indexing")
+	}
+
+	// Start single item indexing job
+	jobID, err := bs.store.IndexingStore().StartSingleIndexingJob(ctx, objectType, req.ID, req.Force)
+	if err != nil {
+		return nil, fmt.Errorf("failed to start single indexing job: %w", err)
+	}
+
+	// Create response message
+	forceMsg := "incremental"
+	if req.Force {
+		forceMsg = "force rebuild"
+	}
+	message := fmt.Sprintf("Started single %s indexing job for ID %s (%s mode)", objectType, req.ID, forceMsg)
+
+	return &TriggerIndexingResponse{
+		JobID:     jobID,
+		Status:    "Running",
+		Message:   message,
+		StartedAt: time.Now(),
+	}, nil
+}

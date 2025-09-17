@@ -43,6 +43,7 @@ type JobStatus struct {
 type IndexingStore interface {
 	// Job management (like KPIs)
 	StartIndexingJob(ctx context.Context, objectType string, force bool) (string, error)
+	StartSingleIndexingJob(ctx context.Context, objectType, objectID string, force bool) (string, error)
 	GetJobStatus(ctx context.Context, jobID string) (*JobStatus, error)
 	ListRecentJobs(ctx context.Context, objectType string) ([]JobStatus, error)
 	ListRunningJobs(ctx context.Context) ([]JobStatus, error)
