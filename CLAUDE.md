@@ -6,8 +6,9 @@ The Study Guides API is a Go-based microservice providing gRPC and HTTP endpoint
 ## Documentation Structure
 For detailed component documentation, see:
 - `cmd/server/CLAUDE.md` - Server initialization and lifecycle
+- `internal/core/CLAUDE.md` - Shared business logic services
 - `internal/store/CLAUDE.md` - Data access layer with 9 domain stores, including indexing
-- `internal/services/CLAUDE.md` - Business logic and service implementations
+- `internal/services/CLAUDE.md` - gRPC service implementations and interface layer
 - `internal/mcp/CLAUDE.md` - Model Context Protocol system for AI-driven operations
 - `internal/middleware/CLAUDE.md` - Authentication, rate limiting, and error handling
 - `internal/lib/CLAUDE.md` - Shared libraries (AI, routing, formatting)
@@ -18,13 +19,13 @@ For detailed component documentation, see:
 ## Architecture Principles
 
 ### Layered Architecture
-The codebase follows a classic layered architecture pattern:
+The codebase follows a clean layered architecture pattern:
 - **API Layer** (`api/v1/`): Protocol Buffers definitions for gRPC services
-- **Service Layer** (`internal/services/`): Business logic and service implementations  
+- **Interface Layer** (`internal/services/`, `internal/mcp/`): gRPC services and MCP adapters
+- **Business Logic Layer** (`internal/core/`): Shared domain business logic
 - **Data Access Layer** (`internal/store/`): Data persistence abstractions and implementations
-- **AI Integration Layer** (`internal/mcp/`): Model Context Protocol for AI-driven operations
 - **Middleware Layer** (`internal/middleware/`): Cross-cutting concerns (auth, rate limiting, error handling)
-- **Router Layer** (`internal/lib/router/`): Operation routing and handler mapping (legacy)
+- **Library Layer** (`internal/lib/`): Shared utilities and legacy router system
 
 ### Key Design Patterns
 
@@ -58,6 +59,18 @@ JWT-based authentication is handled via gRPC interceptors:
 func AuthUnaryInterceptor(secret string) grpc.UnaryServerInterceptor
 ```
 
+#### Shared Business Logic Pattern
+Core business services provide domain logic that can be used by multiple interface layers:
+```go
+// internal/core/indexing/service.go
+type BusinessService struct {
+    store store.Store
+}
+
+// Used by both gRPC services and MCP adapters
+func (bs *BusinessService) TriggerTagIndexing(ctx context.Context, req TriggerTagIndexingRequest) (*TriggerIndexingResponse, error)
+```
+
 #### Handler Pattern with Base Handlers
 Services use base handlers for common authentication patterns:
 ```go
@@ -70,7 +83,7 @@ func AuthBaseHandler(ctx context.Context, fn func(ctx context.Context, session *
 
 ### `/api/v1/`
 Protocol Buffer definitions organized by service domain:
-- **Service domains**: admin, chat, devops, health, interaction, question, roland, search, tag, user
+- **Service domains**: admin, chat, devops, health, indexing, interaction, question, roland, search, tag, user
 - **Shared types**: Common protobuf messages in `/shared/` subdirectory
 - **Generated code**: `.pb.go` and `_grpc.pb.go` files are auto-generated
 
@@ -80,8 +93,17 @@ Application entry point and server management:
 - `servermanager.go`: Graceful shutdown handling with 30-second timeout
 - `server.go`: Core server implementation (not examined in detail)
 
+### `/internal/core/`
+Shared business logic layer containing domain services:
+- Domain-specific business services (e.g., `indexing/service.go`)
+- Framework-agnostic business logic shared by multiple interfaces
+- Type definitions for business operations
+
 ### `/internal/services/`
-Business logic layer with one service per domain matching the API structure. Each service implements the corresponding gRPC service interface.
+gRPC interface layer with one service per domain matching the API structure:
+- Each service implements the corresponding gRPC service interface
+- Handles authentication, request validation, and type conversion
+- Delegates business logic to shared core services
 
 ### `/internal/store/`
 Data access layer with interface/implementation separation:
@@ -173,15 +195,21 @@ All stores are initialized at startup with fail-fast behavior - if any store fai
 
 4. **Roland Separation**: The Roland functionality (likely AI/chat) uses a separate database connection, suggesting it may have different scaling or data requirements
 
-5. **Dual AI Systems**: 
+5. **Dual AI Systems**:
    - **MCP (Primary)**: Model Context Protocol for modern AI operations via ChatService
    - **Legacy Router**: Tool-based routing for older integrations
 
-6. **Indexing Modes**: Search index synchronization has two distinct modes:
-   - **"index tags"**: Incremental sync (only changed items)
-   - **"force index tags"**: Complete rebuild (all items)
+6. **Parallel Interface Architecture**: Indexing operations have multiple access paths:
+   - **gRPC IndexingService**: Direct API access for admin applications
+   - **MCP Natural Language**: AI-driven triggers via ChatService ("index tags", "force index tags")
+   - **Shared Core Logic**: Both paths use the same business service (`internal/core/indexing`)
 
-7. **Static Content Serving**: Despite being primarily a gRPC API, the service also serves static web content (favicon, images, CSS) through the webrouter
+7. **Indexing Filtering Options**: Tag indexing supports flexible filtering:
+   - **Generic**: `TriggerIndexing(objectType, force)` for any object type
+   - **Filtered**: `TriggerTagIndexing(tagTypes, contextTypes, force)` with flexible filter combinations
+   - **Single**: `TriggerSingleIndexing(objectType, id, force)` for individual objects
+
+8. **Static Content Serving**: Despite being primarily a gRPC API, the service also serves static web content (favicon, images, CSS) through the webrouter
 
 ## Dependencies
 

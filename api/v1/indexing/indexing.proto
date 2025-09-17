@@ -1,0 +1,168 @@
+syntax = "proto3";
+
+package indexing.v1;
+option go_package = "github.com/studyguides-com/study-guides-api/api/v1/indexing;indexingv1";
+
+import "google/protobuf/timestamp.proto";
+import "v1/shared/tagtype.proto";
+import "v1/shared/contexttype.proto";
+
+// IndexingService provides direct gRPC access to indexing operations
+// This runs in parallel with the MCP natural language interface for Slack bot
+service IndexingService {
+  // Trigger a new indexing job
+  rpc TriggerIndexing(TriggerIndexingRequest) returns (TriggerIndexingResponse);
+
+  // Get the status of a specific indexing job
+  rpc GetJobStatus(GetJobStatusRequest) returns (GetJobStatusResponse);
+
+  // List all running indexing jobs
+  rpc ListRunningJobs(ListRunningJobsRequest) returns (ListRunningJobsResponse);
+
+  // List recent indexing jobs for a specific object type
+  rpc ListRecentJobs(ListRecentJobsRequest) returns (ListRecentJobsResponse);
+
+  // Trigger tag indexing with flexible filtering by TagType and/or ContextType
+  rpc TriggerTagIndexing(TriggerTagIndexingRequest) returns (TriggerIndexingResponse);
+}
+
+// Request to trigger an indexing job
+message TriggerIndexingRequest {
+  // Type of object to index (defaults to "Tag")
+  string object_type = 1;
+
+  // If true, forces complete reindex ignoring change detection
+  // If false, only indexes changed items (incremental mode)
+  bool force = 2;
+}
+
+// Response from triggering an indexing job
+message TriggerIndexingResponse {
+  // Unique job ID for tracking
+  string job_id = 1;
+
+  // Initial status of the job
+  string status = 2;
+
+  // Human-readable message about the job
+  string message = 3;
+
+  // Timestamp when job was started
+  google.protobuf.Timestamp started_at = 4;
+}
+
+// Request to get status of a specific job
+message GetJobStatusRequest {
+  // Job ID to query
+  string job_id = 1;
+}
+
+// Response with job status details
+message GetJobStatusResponse {
+  // Job ID
+  string job_id = 1;
+
+  // Current status (Running, Completed, Failed)
+  string status = 2;
+
+  // Job description
+  string description = 3;
+
+  // When the job started
+  google.protobuf.Timestamp started_at = 4;
+
+  // When the job completed (if applicable)
+  google.protobuf.Timestamp completed_at = 5;
+
+  // Error message if job failed
+  string error_message = 6;
+
+  // Job metadata
+  JobMetadata metadata = 7;
+}
+
+// Metadata about an indexing job
+message JobMetadata {
+  // Type of object being indexed
+  string object_type = 1;
+
+  // Whether this is a force rebuild
+  bool force = 2;
+
+  // Number of items processed
+  int64 items_processed = 3;
+
+  // Number of items failed
+  int64 items_failed = 4;
+
+  // Additional key-value metadata
+  map<string, string> extra = 5;
+}
+
+// Request to list running jobs
+message ListRunningJobsRequest {
+  // No parameters needed
+}
+
+// Response with list of running jobs
+message ListRunningJobsResponse {
+  // List of running jobs
+  repeated JobInfo jobs = 1;
+
+  // Total count of running jobs
+  int32 total_count = 2;
+}
+
+// Request to list recent jobs
+message ListRecentJobsRequest {
+  // Object type to filter by (optional, returns all types if not specified)
+  string object_type = 1;
+
+  // Maximum number of jobs to return (default 10)
+  int32 limit = 2;
+}
+
+// Response with list of recent jobs
+message ListRecentJobsResponse {
+  // List of recent jobs
+  repeated JobInfo jobs = 1;
+}
+
+// Information about an indexing job
+message JobInfo {
+  // Job ID
+  string job_id = 1;
+
+  // Current status
+  string status = 2;
+
+  // Job description
+  string description = 3;
+
+  // When the job started
+  google.protobuf.Timestamp started_at = 4;
+
+  // When the job completed (if applicable)
+  google.protobuf.Timestamp completed_at = 5;
+
+  // Error message if failed
+  string error_message = 6;
+
+  // Job metadata
+  JobMetadata metadata = 7;
+}
+
+// Request to trigger tag indexing with flexible filtering
+message TriggerTagIndexingRequest {
+  // If true, forces complete reindex ignoring change detection
+  // If false, only indexes changed items (incremental mode)
+  bool force = 1;
+
+  // Optional filter by tag types - empty array means no filter
+  // Can be used alone or combined with context_types
+  repeated shared.v1.TagType tag_types = 2;
+
+  // Optional filter by context types - empty array means no filter
+  // Can be used alone or combined with tag_types
+  repeated shared.v1.ContextType context_types = 3;
+}

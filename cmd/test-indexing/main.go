@@ -13,6 +13,7 @@ import (
 	"github.com/studyguides-com/study-guides-api/internal/lib/ai"
 	"github.com/studyguides-com/study-guides-api/internal/mcp"
 	"github.com/studyguides-com/study-guides-api/internal/mcp/indexing"
+	indexingcore "github.com/studyguides-com/study-guides-api/internal/core/indexing"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 )
 
@@ -39,7 +40,8 @@ func main() {
 	mcpProcessor := mcp.NewMCPProcessor(aiClient)
 
 	// Register indexing repository
-	indexingRepo := indexing.NewIndexingRepositoryAdapter(mainStore.IndexingStore())
+	indexingBusiness := indexingcore.NewBusinessService(mainStore)
+	indexingRepo := indexing.NewIndexingRepositoryAdapter(indexingBusiness)
 	mcpProcessor.Register(indexing.ResourceName, indexingRepo, indexing.GetResourceSchema())
 
 	fmt.Println("🚀 Algolia Indexing Test Tool")

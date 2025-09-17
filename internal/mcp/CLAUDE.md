@@ -48,12 +48,13 @@ type Repository interface {
 }
 ```
 
-### Indexing Integration
-The IndexingRepositoryAdapter provides AI-driven index management:
+### Shared Business Service Integration
+The IndexingRepositoryAdapter uses the shared business service for consistency with gRPC interface:
+- **Core Integration**: Delegates to `internal/core/indexing.BusinessService`
 - **Incremental indexing**: `"index tags"` → `triggerReindex: true, force: false`
 - **Force rebuild**: `"force index tags"` → `triggerReindex: true, force: true`
 - **Status monitoring**: `"check indexing status"` → `status: "running"`
-- **Job tracking**: Progress monitoring and error reporting
+- **Job tracking**: Progress monitoring and error reporting via business service
 
 ## Natural Language Triggers
 
@@ -76,7 +77,7 @@ The IndexingRepositoryAdapter provides AI-driven index management:
 Each repository is registered with the MCP processor:
 ```go
 mcpProcessor := mcp.NewMCPProcessor(aiClient)
-indexingRepo := indexing.NewIndexingRepositoryAdapter(store.IndexingStore())
+indexingRepo := indexing.NewIndexingRepositoryAdapter(store)
 mcpProcessor.Register(indexing.ResourceName, indexingRepo, indexing.GetResourceSchema())
 ```
 
@@ -117,7 +118,7 @@ Each repository provides schema information for tool generation:
 ### indexing/adapter.go
 - IndexingRepositoryAdapter implementation
 - Indexing job management and status tracking
-- Integration with IndexingStore
+- Integration with shared business service (`internal/core/indexing.BusinessService`)
 
 ### indexing/schema.go
 - Indexing operation schema definitions
@@ -147,6 +148,7 @@ Each repository provides schema information for tool generation:
 - Standard library for JSON parsing and validation
 
 ### Internal Dependencies
+- `internal/core/indexing` - Shared business service for indexing operations
 - `internal/store/indexing` - Indexing store for search operations
 - `internal/store/kpi` - KPI store for metrics operations
 - `internal/store/tag` - Tag store for tag operations

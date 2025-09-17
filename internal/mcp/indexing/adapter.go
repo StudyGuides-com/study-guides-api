@@ -5,18 +5,19 @@ import (
 	"fmt"
 	"time"
 
+	indexingcore "github.com/studyguides-com/study-guides-api/internal/core/indexing"
 	"github.com/studyguides-com/study-guides-api/internal/store/indexing"
 )
 
-// IndexingRepositoryAdapter adapts the indexing store to implement the MCP repository pattern
+// IndexingRepositoryAdapter adapts the indexing business service to implement the MCP repository pattern
 type IndexingRepositoryAdapter struct {
-	store indexing.IndexingStore
+	business *indexingcore.BusinessService
 }
 
 // NewIndexingRepositoryAdapter creates a new adapter for indexing operations
-func NewIndexingRepositoryAdapter(store indexing.IndexingStore) *IndexingRepositoryAdapter {
+func NewIndexingRepositoryAdapter(business *indexingcore.BusinessService) *IndexingRepositoryAdapter {
 	return &IndexingRepositoryAdapter{
-		store: store,
+		business: business,
 	}
 }
 
@@ -36,11 +37,16 @@ func (a *IndexingRepositoryAdapter) Find(ctx context.Context, filter IndexingFil
 			force = *filter.Force
 		}
 		
-		// Start indexing job
-		jobID, err := a.store.StartIndexingJob(ctx, objectType, force)
+		// Start indexing job using business service
+		businessReq := indexingcore.TriggerIndexingRequest{
+			ObjectType: objectType,
+			Force:      force,
+		}
+		businessResp, err := a.business.TriggerIndexing(ctx, businessReq)
 		if err != nil {
 			return nil, fmt.Errorf("failed to start indexing job: %w", err)
 		}
+		jobID := businessResp.JobID
 		
 		// Get count of items that will be processed to provide better user feedback
 		validItemsMsg := "Processing all valid items"
@@ -73,7 +79,7 @@ func (a *IndexingRepositoryAdapter) Find(ctx context.Context, filter IndexingFil
 	
 	// Handle status filter - get running jobs
 	if filter.Status != nil && *filter.Status == string(IndexingStatusRunning) {
-		jobs, err := a.store.ListRunningJobs(ctx)
+		jobs, err := a.business.ListRunningJobs(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to list running jobs: %w", err)
 		}
@@ -118,7 +124,10 @@ func (a *IndexingRepositoryAdapter) Find(ctx context.Context, filter IndexingFil
 	
 	// Get recent jobs for specific object type
 	if filter.ObjectType != nil {
-		jobs, err := a.store.ListRecentJobs(ctx, *filter.ObjectType)
+		businessReq := indexingcore.ListRecentJobsRequest{
+			ObjectType: *filter.ObjectType,
+		}
+		jobs, err := a.business.ListRecentJobs(ctx, businessReq)
 		if err != nil {
 			return nil, fmt.Errorf("failed to list recent jobs: %w", err)
 		}
@@ -132,7 +141,7 @@ func (a *IndexingRepositoryAdapter) Find(ctx context.Context, filter IndexingFil
 	}
 	
 	// Get status summary and recent jobs
-	runningJobs, _ := a.store.ListRunningJobs(ctx)
+	runningJobs, _ := a.business.ListRunningJobs(ctx)
 	runningCount := len(runningJobs)
 	
 	// Create a summary response first
@@ -165,7 +174,10 @@ func (a *IndexingRepositoryAdapter) Find(ctx context.Context, filter IndexingFil
 	
 	// Then get recent completed jobs for context
 	for _, objType := range AllObjectTypes() {
-		jobs, err := a.store.ListRecentJobs(ctx, objType)
+		businessReq := indexingcore.ListRecentJobsRequest{
+			ObjectType: objType,
+		}
+		jobs, err := a.business.ListRecentJobs(ctx, businessReq)
 		if err != nil {
 			continue // Skip on error
 		}
@@ -194,7 +206,7 @@ func (a *IndexingRepositoryAdapter) Find(ctx context.Context, filter IndexingFil
 
 // FindByID returns a specific indexing execution by job ID
 func (a *IndexingRepositoryAdapter) FindByID(ctx context.Context, id string) (*IndexingExecution, error) {
-	job, err := a.store.GetJobStatus(ctx, id)
+	job, err := a.business.GetJobStatus(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get job status: %w", err)
 	}
@@ -208,10 +220,15 @@ func (a *IndexingRepositoryAdapter) Create(ctx context.Context, entity IndexingE
 		entity.ObjectType = "Tag" // Default
 	}
 	
-	jobID, err := a.store.StartIndexingJob(ctx, entity.ObjectType, entity.Force)
+	businessReq := indexingcore.TriggerIndexingRequest{
+		ObjectType: entity.ObjectType,
+		Force:      entity.Force,
+	}
+	businessResp, err := a.business.TriggerIndexing(ctx, businessReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start indexing job: %w", err)
 	}
+	jobID := businessResp.JobID
 	
 	now := time.Now()
 	return &IndexingExecution{
@@ -237,7 +254,7 @@ func (a *IndexingRepositoryAdapter) Delete(ctx context.Context, id string) error
 // Count returns the number of running indexing jobs
 func (a *IndexingRepositoryAdapter) Count(ctx context.Context, filter IndexingFilter) (int, error) {
 	if filter.Status != nil && *filter.Status == string(IndexingStatusRunning) {
-		jobs, err := a.store.ListRunningJobs(ctx)
+		jobs, err := a.business.ListRunningJobs(ctx)
 		if err != nil {
 			return 0, fmt.Errorf("failed to list running jobs: %w", err)
 		}
@@ -247,7 +264,10 @@ func (a *IndexingRepositoryAdapter) Count(ctx context.Context, filter IndexingFi
 	// Count all recent jobs
 	total := 0
 	for _, objType := range AllObjectTypes() {
-		jobs, err := a.store.ListRecentJobs(ctx, objType)
+		businessReq := indexingcore.ListRecentJobsRequest{
+			ObjectType: objType,
+		}
+		jobs, err := a.business.ListRecentJobs(ctx, businessReq)
 		if err != nil {
 			continue
 		}

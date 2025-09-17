@@ -11,6 +11,7 @@ import (
 	chatpb "github.com/studyguides-com/study-guides-api/api/v1/chat"
 	devopspb "github.com/studyguides-com/study-guides-api/api/v1/devops"
 	healthpb "github.com/studyguides-com/study-guides-api/api/v1/health"
+	indexingpb "github.com/studyguides-com/study-guides-api/api/v1/indexing"
 	questionpb "github.com/studyguides-com/study-guides-api/api/v1/question"
 	searchpb "github.com/studyguides-com/study-guides-api/api/v1/search"
 	tagpb "github.com/studyguides-com/study-guides-api/api/v1/tag"
@@ -21,6 +22,7 @@ import (
 
 	"github.com/studyguides-com/study-guides-api/internal/middleware"
 	"github.com/studyguides-com/study-guides-api/internal/services"
+	indexingservice "github.com/studyguides-com/study-guides-api/internal/services/indexing"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
@@ -128,6 +130,9 @@ func (s *Server) registerServices(appStore store.Store) {
 
 	// Register Devops Service
 	devopspb.RegisterDevopsServiceServer(s.grpcServer, services.NewDevopsService(appStore))
+
+	// Register Indexing Service (parallel path to MCP)
+	indexingpb.RegisterIndexingServiceServer(s.grpcServer, indexingservice.NewIndexingService(appStore))
 }
 
 // Shutdown gracefully shuts down the server

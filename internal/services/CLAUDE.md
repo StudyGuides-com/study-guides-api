@@ -11,6 +11,7 @@ Each service corresponds to a specific business domain and gRPC service:
 - `ChatService` - AI-powered conversational interface with tool routing
 - `DevopsService` - Deployment and infrastructure management
 - `HealthService` - Health check endpoints
+- `IndexingService` - Direct indexing operations with flexible filtering
 - `InteractionService` - User interaction tracking
 - `QuestionService` - Question and assessment management
 - `RolandService` - AI assistant functionality
@@ -25,6 +26,12 @@ Two base handlers provide consistent authentication patterns:
 
 ### Embedded Unimplemented Servers
 All services embed the corresponding `Unimplemented*ServiceServer` from generated protobuf code, ensuring forward compatibility when new RPC methods are added.
+
+### Shared Business Service Integration
+Services that share logic with other interfaces use the core business service pattern:
+- `IndexingService` delegates to `internal/core/indexing.BusinessService`
+- Multiple interface layers (gRPC, MCP) can use the same business logic
+- Type conversion between interface-specific types and business types
 
 ## Implementation Details
 
@@ -60,6 +67,52 @@ The ChatService is the most complex, implementing both legacy tool routing and t
 6. Route to appropriate handler
 7. Add response summary to history
 8. Return response with updated context
+
+### IndexingService Architecture
+The IndexingService provides direct gRPC access to indexing operations, running in parallel with the MCP natural language interface:
+
+#### Core Business Service Integration
+- **Shared Logic**: Delegates to `internal/core/indexing.BusinessService`
+- **Type Conversion**: Converts between protobuf types and business types
+- **Admin Authentication**: All operations require `USER_ROLE_ADMIN`
+
+#### API Endpoints
+**Generic Indexing:**
+- `TriggerIndexing(objectType, force)` - Index any object type
+- Returns job ID and status for monitoring
+
+**Tag-Specific Filtering:**
+- `TriggerTagIndexing(tagTypes, contextTypes, force)` - Flexible tag filtering
+- Supports independent or combined filters:
+  - TagType only: `[Topic, Category]`
+  - ContextType only: `[DoD, Colleges]`
+  - Combined: `TagTypes=[Topic] AND ContextTypes=[DoD]`
+  - No filters: Index all tags
+
+**Job Management:**
+- `GetJobStatus(jobID)` - Monitor specific job progress
+- `ListRunningJobs()` - View all active indexing operations
+- `ListRecentJobs(objectType, limit)` - Job history with filtering
+
+#### Implementation Pattern
+```go
+func (s *IndexingService) TriggerTagIndexing(ctx context.Context, req *indexingv1.TriggerTagIndexingRequest) (*indexingv1.TriggerIndexingResponse, error) {
+    return services.AuthBaseHandler(ctx, func(ctx context.Context, session *middleware.SessionDetails) (interface{}, error) {
+        // Convert protobuf → business types
+        businessReq := indexingcore.TriggerTagIndexingRequest{
+            Force:        req.Force,
+            TagTypes:     req.TagTypes,
+            ContextTypes: req.ContextTypes,
+        }
+
+        // Delegate to business service
+        businessResp, err := s.business.TriggerTagIndexing(ctx, businessReq)
+
+        // Convert business → protobuf types
+        return &indexingv1.TriggerIndexingResponse{...}, nil
+    })
+}
+```
 
 ### Authentication Patterns
 Services use base handlers for authentication (see `internal/middleware/CLAUDE.md` for auth implementation details):
@@ -122,8 +175,15 @@ Administrative operations requiring authentication:
 ### devops.go
 Infrastructure management operations:
 - Application deployment
-- Rollback functionality  
+- Rollback functionality
 - Deployment listing and status checking
+
+### indexing/indexing.go
+Direct indexing operations for admin applications:
+- Generic object indexing (TriggerIndexing)
+- Tag-specific filtering (TriggerTagIndexing)
+- Job monitoring and management
+- Integration with shared business service
 
 ### Other service files
 Standard CRUD operations for their respective domains, following the same patterns.
@@ -158,6 +218,7 @@ Standard CRUD operations for their respective domains, following the same patter
 
 ### Internal Dependencies
 - `api/v1/*` - Generated protobuf service interfaces and types
+- `internal/core/*` - Shared business logic services (indexing service only)
 - `internal/store` - Data access layer
 - `internal/middleware` - Authentication context and session details
 - `internal/lib/router` - Tool routing (chat service only)

@@ -40,6 +40,11 @@ serviceInstance := services.NewServiceType(appStore)
 servicepb.RegisterServiceTypeServer(s.grpcServer, serviceInstance)
 ```
 
+All gRPC services including IndexingService are registered in the `registerServices()` method:
+```go
+indexingpb.RegisterIndexingServiceServer(s.grpcServer, indexingservice.NewIndexingService(appStore))
+```
+
 ### Special Case: Chat Service
 The chat service has additional dependencies beyond the standard store:
 - Router for operation handling
@@ -121,11 +126,12 @@ Utility functions provide safe environment variable parsing with fallbacks:
 - `golang.org/x/time/rate` - Rate limiting
 - `github.com/joho/godotenv` - Environment file loading
 
-### Internal Dependencies  
+### Internal Dependencies
 - `internal/store` - Data access layer
-- `internal/services` - Business logic layer
+- `internal/services` - Business logic layer including IndexingService
+- `internal/core` - Shared business logic services
 - `internal/middleware` - Cross-cutting concerns
 - `internal/lib/router` - Operation routing (chat service only)
 - `internal/lib/ai` - AI integration (chat service only)
 - `internal/lib/webrouter` - HTTP web routing
-- `api/v1/*` - Generated protobuf services
+- `api/v1/*` - Generated protobuf services including indexing service

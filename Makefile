@@ -108,6 +108,7 @@ proto:
 		$(PROTO_DIR)/v1/shared/section.proto \
 		$(PROTO_DIR)/v1/shared/guide.proto \
 		$(PROTO_DIR)/v1/devops/devops.proto \
+		$(PROTO_DIR)/v1/indexing/indexing.proto \
 
 build:
 	go build -o ./bin/server ./cmd/server

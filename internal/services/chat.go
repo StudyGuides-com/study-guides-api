@@ -12,6 +12,7 @@ import (
 	"github.com/studyguides-com/study-guides-api/internal/mcp/indexing"
 	"github.com/studyguides-com/study-guides-api/internal/mcp/kpi"
 	"github.com/studyguides-com/study-guides-api/internal/mcp/tag"
+	indexingcore "github.com/studyguides-com/study-guides-api/internal/core/indexing"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 
 	"github.com/sashabaranov/go-openai"
@@ -217,7 +218,8 @@ func NewChatService(store store.Store, ai ai.AiClient) *ChatService {
 	mcpProcessor.Register(kpi.ResourceName, kpiRepo, kpi.GetResourceSchema())
 	
 	// Register indexing repository
-	indexingRepo := indexing.NewIndexingRepositoryAdapter(store.IndexingStore())
+	indexingBusiness := indexingcore.NewBusinessService(store)
+	indexingRepo := indexing.NewIndexingRepositoryAdapter(indexingBusiness)
 	mcpProcessor.Register(indexing.ResourceName, indexingRepo, indexing.GetResourceSchema())
 	
 	return &ChatService{
