@@ -28,4 +28,7 @@ enum TagType {
   Instruction = 21;
   Chapter = 22;
   Section = 23;
+  Part = 24;
+  Volume = 25;
+  Range = 26;
 } 

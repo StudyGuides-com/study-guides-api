@@ -48,6 +48,9 @@ const (
 	TagType_Instruction       TagType = 21
 	TagType_Chapter           TagType = 22
 	TagType_Section           TagType = 23
+	TagType_Part              TagType = 24
+	TagType_Volume            TagType = 25
+	TagType_Range             TagType = 26
 )
 
 // Enum value maps for TagType.
@@ -77,6 +80,9 @@ var (
 		21: "Instruction",
 		22: "Chapter",
 		23: "Section",
+		24: "Part",
+		25: "Volume",
+		26: "Range",
 	}
 	TagType_value = map[string]int32{
 		"Category":          0,
@@ -103,6 +109,9 @@ var (
 		"Instruction":       21,
 		"Chapter":           22,
 		"Section":           23,
+		"Part":              24,
+		"Volume":            25,
+		"Range":             26,
 	}
 )
 
@@ -137,7 +146,7 @@ var File_v1_shared_tagtype_proto protoreflect.FileDescriptor
 
 const file_v1_shared_tagtype_proto_rawDesc = "" +
 	"\n" +
-	"\x17v1/shared/tagtype.proto\x12\tshared.v1*\x87\x03\n" +
+	"\x17v1/shared/tagtype.proto\x12\tshared.v1*\xa8\x03\n" +
 	"\aTagType\x12\f\n" +
 	"\bCategory\x10\x00\x12\x0f\n" +
 	"\vSubCategory\x10\x01\x12\x0e\n" +
@@ -171,7 +180,11 @@ const file_v1_shared_tagtype_proto_rawDesc = "" +
 	"\x11Instruction_Group\x10\x14\x12\x0f\n" +
 	"\vInstruction\x10\x15\x12\v\n" +
 	"\aChapter\x10\x16\x12\v\n" +
-	"\aSection\x10\x17BDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
+	"\aSection\x10\x17\x12\b\n" +
+	"\x04Part\x10\x18\x12\n" +
+	"\n" +
+	"\x06Volume\x10\x19\x12\t\n" +
+	"\x05Range\x10\x1aBDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
 
 var (
 	file_v1_shared_tagtype_proto_rawDescOnce sync.Once
