@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
@@ -522,7 +523,8 @@ func (s *SqlIndexingStore) updateJobStatus(jobID, status, errorMsg string, items
 			`SELECT metadata FROM "Job" WHERE id = $1`, jobID).Scan(&originalMetadata)
 		if err != nil {
 			fmt.Printf("Failed to get metadata for job %s: %v\n", jobID, err)
-			return
+			// Don't return early - still try to update the job status
+			originalMetadata.Valid = false
 		}
 
 		var metadata map[string]interface{}
@@ -579,15 +581,38 @@ func (s *SqlIndexingStore) runIndexingAsync(jobID, objectType string, force bool
 			if err := s.processOperation(ctx, op, force); err != nil {
 				// Log error but continue processing
 				fmt.Printf("Error processing %s %s: %v\n", op.ObjectType, op.ObjectID, err)
+
+				// Check if this is a "not found" error or if we've exceeded retry limit
+				shouldRemove := false
+				if strings.Contains(err.Error(), "no rows in result set") || strings.Contains(err.Error(), "failed to get tag") {
+					// Item doesn't exist, remove from queue
+					fmt.Printf("Item %s %s not found, removing from queue\n", op.ObjectType, op.ObjectID)
+					shouldRemove = true
+				} else {
+					// Check attempt count
+					state, _ := s.GetIndexState(ctx, op.ObjectType, op.ObjectID)
+					if state != nil && state.AttemptCount >= 10 {
+						fmt.Printf("Item %s %s exceeded retry limit (%d attempts), removing from queue\n", op.ObjectType, op.ObjectID, state.AttemptCount)
+						shouldRemove = true
+					}
+				}
+
 				s.UpdateIndexError(ctx, op.ObjectType, op.ObjectID, err)
+
+				if shouldRemove {
+					// Remove from outbox to prevent infinite retries
+					if err := s.RemoveFromOutbox(ctx, op.ID); err != nil {
+						fmt.Printf("Error removing failed item from outbox: %v\n", err)
+					}
+				}
 				continue
 			}
-			
+
 			// Remove from outbox after successful processing
 			if err := s.RemoveFromOutbox(ctx, op.ID); err != nil {
 				fmt.Printf("Error removing from outbox: %v\n", err)
 			}
-			
+
 			itemsProcessed++
 		}
 	}
