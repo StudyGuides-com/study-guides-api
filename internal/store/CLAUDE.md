@@ -113,7 +113,7 @@ Complex metadata handling in admin operations:
 ## Key Files
 
 ### store.go
-- Main `Store` interface definition with 9 domain stores
+- Main `Store` interface definition with 9 domain stores (AdminStore exists separately)
 - Store aggregation implementation
 - Initialization coordination for all stores
 - Environment variable dependency management

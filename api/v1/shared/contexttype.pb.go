@@ -28,9 +28,10 @@ const (
 	ContextType_Certifications       ContextType = 1
 	ContextType_EntranceExams        ContextType = 2
 	ContextType_APExams              ContextType = 3
-	ContextType_DoD                  ContextType = 4
-	ContextType_UserGeneratedContent ContextType = 5
-	ContextType_All                  ContextType = 6
+	ContextType_UserGeneratedContent ContextType = 4
+	ContextType_DoD                  ContextType = 5
+	ContextType_Encyclopedia         ContextType = 6
+	ContextType_All                  ContextType = 7
 )
 
 // Enum value maps for ContextType.
@@ -40,18 +41,20 @@ var (
 		1: "Certifications",
 		2: "EntranceExams",
 		3: "APExams",
-		4: "DoD",
-		5: "UserGeneratedContent",
-		6: "All",
+		4: "UserGeneratedContent",
+		5: "DoD",
+		6: "Encyclopedia",
+		7: "All",
 	}
 	ContextType_value = map[string]int32{
 		"Colleges":             0,
 		"Certifications":       1,
 		"EntranceExams":        2,
 		"APExams":              3,
-		"DoD":                  4,
-		"UserGeneratedContent": 5,
-		"All":                  6,
+		"UserGeneratedContent": 4,
+		"DoD":                  5,
+		"Encyclopedia":         6,
+		"All":                  7,
 	}
 )
 
@@ -86,15 +89,16 @@ var File_v1_shared_contexttype_proto protoreflect.FileDescriptor
 
 const file_v1_shared_contexttype_proto_rawDesc = "" +
 	"\n" +
-	"\x1bv1/shared/contexttype.proto\x12\tshared.v1*{\n" +
+	"\x1bv1/shared/contexttype.proto\x12\tshared.v1*\x8d\x01\n" +
 	"\vContextType\x12\f\n" +
 	"\bColleges\x10\x00\x12\x12\n" +
 	"\x0eCertifications\x10\x01\x12\x11\n" +
 	"\rEntranceExams\x10\x02\x12\v\n" +
-	"\aAPExams\x10\x03\x12\a\n" +
-	"\x03DoD\x10\x04\x12\x18\n" +
-	"\x14UserGeneratedContent\x10\x05\x12\a\n" +
-	"\x03All\x10\x06BDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
+	"\aAPExams\x10\x03\x12\x18\n" +
+	"\x14UserGeneratedContent\x10\x04\x12\a\n" +
+	"\x03DoD\x10\x05\x12\x10\n" +
+	"\fEncyclopedia\x10\x06\x12\a\n" +
+	"\x03All\x10\aBDZBgithub.com/studyguides-com/study-guides-api/api/v1/shared;sharedv1b\x06proto3"
 
 var (
 	file_v1_shared_contexttype_proto_rawDescOnce sync.Once

@@ -505,34 +505,53 @@ func (s *SqlIndexingStore) queryJobs(ctx context.Context, query string, args ...
 // updateJobStatus updates a job's status in the database
 func (s *SqlIndexingStore) updateJobStatus(jobID, status, errorMsg string, itemsProcessed int) {
 	now := time.Now()
-	
+
 	if status == "Failed" && errorMsg != "" {
-		s.db.ExecContext(context.Background(), `
-			UPDATE "Job" 
+		_, err := s.db.ExecContext(context.Background(), `
+			UPDATE "Job"
 			SET status = $1, "completedAt" = $2, "errorMessge" = $3, "updatedAt" = $4
 			WHERE id = $5
 		`, status, now, errorMsg, now, jobID)
+		if err != nil {
+			fmt.Printf("Failed to update job %s status to Failed: %v\n", jobID, err)
+		}
 	} else {
 		// Get original metadata and update with items processed
 		var originalMetadata sql.NullString
-		s.db.QueryRowContext(context.Background(), 
+		err := s.db.QueryRowContext(context.Background(),
 			`SELECT metadata FROM "Job" WHERE id = $1`, jobID).Scan(&originalMetadata)
-		
+		if err != nil {
+			fmt.Printf("Failed to get metadata for job %s: %v\n", jobID, err)
+			return
+		}
+
 		var metadata map[string]interface{}
 		if originalMetadata.Valid && originalMetadata.String != "" {
-			json.Unmarshal([]byte(originalMetadata.String), &metadata)
+			if err := json.Unmarshal([]byte(originalMetadata.String), &metadata); err != nil {
+				fmt.Printf("Failed to unmarshal metadata for job %s: %v\n", jobID, err)
+				metadata = make(map[string]interface{})
+			}
 		} else {
 			metadata = make(map[string]interface{})
 		}
 		metadata["itemsProcessed"] = itemsProcessed
-		
-		metadataJSON, _ := json.Marshal(metadata)
-		
-		s.db.ExecContext(context.Background(), `
-			UPDATE "Job" 
+
+		metadataJSON, err := json.Marshal(metadata)
+		if err != nil {
+			fmt.Printf("Failed to marshal metadata for job %s: %v\n", jobID, err)
+			return
+		}
+
+		_, err = s.db.ExecContext(context.Background(), `
+			UPDATE "Job"
 			SET status = $1, "completedAt" = $2, metadata = $3, progress = 100, "updatedAt" = $4
 			WHERE id = $5
 		`, status, now, string(metadataJSON), now, jobID)
+		if err != nil {
+			fmt.Printf("Failed to update job %s status to %s: %v\n", jobID, status, err)
+		} else {
+			fmt.Printf("Successfully updated job %s status to %s (items processed: %d)\n", jobID, status, itemsProcessed)
+		}
 	}
 }
 

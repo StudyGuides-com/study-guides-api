@@ -7,7 +7,7 @@ The Study Guides API is a Go-based microservice providing gRPC and HTTP endpoint
 For detailed component documentation, see:
 - `cmd/server/CLAUDE.md` - Server initialization and lifecycle
 - `internal/core/CLAUDE.md` - Shared business logic services
-- `internal/store/CLAUDE.md` - Data access layer with 9 domain stores, including indexing
+- `internal/store/CLAUDE.md` - Data access layer with 10 domain stores, including indexing and admin
 - `internal/services/CLAUDE.md` - gRPC service implementations and interface layer
 - `internal/mcp/CLAUDE.md` - Model Context Protocol system for AI-driven operations
 - `internal/middleware/CLAUDE.md` - Authentication, rate limiting, and error handling
@@ -34,8 +34,9 @@ Each domain (user, tag, question, etc.) has its own store interface with SQL imp
 ```go
 // Example from internal/store/tag/tag.go
 type TagStore interface {
-    GetTag(ctx context.Context, id string) (*sharedpb.Tag, error)
-    ListTags(ctx context.Context, opts ListTagsOptions) ([]*sharedpb.Tag, error)
+    GetTagByID(ctx context.Context, id string) (*sharedpb.Tag, error)
+    ListTagsByParent(ctx context.Context, parentID string) ([]*sharedpb.Tag, error)
+    ListTagsByType(ctx context.Context, tagType sharedpb.TagType) ([]*sharedpb.Tag, error)
     // ... other methods
 }
 ```
@@ -48,7 +49,13 @@ type Store interface {
     SearchStore() search.SearchStore
     TagStore() tag.TagStore
     UserStore() user.UserStore
-    // ... other stores
+    QuestionStore() question.QuestionStore
+    InteractionStore() interaction.InteractionStore
+    RolandStore() roland.RolandStore
+    DevopsStore() devops.DevopsStore
+    KPIStore() kpi.KPIStore
+    IndexingStore() indexing.IndexingStore
+    // Note: AdminStore exists separately, not in main Store interface
 }
 ```
 
@@ -210,6 +217,8 @@ All stores are initialized at startup with fail-fast behavior - if any store fai
    - **Single**: `TriggerSingleIndexing(objectType, id, force)` for individual objects
 
 8. **Static Content Serving**: Despite being primarily a gRPC API, the service also serves static web content (favicon, images, CSS) through the webrouter
+
+9. **Enum Completeness**: Recent issues with TagType and ContextType enums falling back to default values (Category/Colleges) when new enum values are missing from protobuf definitions. Both TagType (Volume, Part, Range) and ContextType (Encyclopedia) have been updated to include all database values.
 
 ## Dependencies
 

@@ -8,7 +8,8 @@ enum ContextType {
   Certifications = 1;
   EntranceExams = 2;
   APExams = 3;
-  DoD = 4;
-  UserGeneratedContent = 5;
-  All = 6;
+  UserGeneratedContent = 4;
+  DoD = 5;
+  Encyclopedia = 6;
+  All = 7;
 }
