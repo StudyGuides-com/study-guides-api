@@ -608,10 +608,49 @@ func (s *SqlAdminStore) Tree(ctx context.Context, id string) (*sharedpb.TagNode,
 			id,
 			COALESCE("parentTagId", '') AS "parent_tag_id",
 			name,
-			type,
+			CASE
+				WHEN type = 'Category' THEN 0
+				WHEN type = 'SubCategory' THEN 1
+				WHEN type = 'University' THEN 2
+				WHEN type = 'Region' THEN 3
+				WHEN type = 'Department' THEN 4
+				WHEN type = 'Course' THEN 5
+				WHEN type = 'Topic' THEN 6
+				WHEN type = 'UserStudyGuide' THEN 7
+				WHEN type = 'UserContent' THEN 8
+				WHEN type = 'UserFolder' THEN 9
+				WHEN type = 'UserTopic' THEN 10
+				WHEN type = 'Organization' THEN 11
+				WHEN type = 'Certifying_Agency' THEN 12
+				WHEN type = 'Certification' THEN 13
+				WHEN type = 'Module' THEN 14
+				WHEN type = 'Domain' THEN 15
+				WHEN type = 'Entrance_Exam' THEN 16
+				WHEN type = 'AP_Exam' THEN 17
+				WHEN type = 'Branch' THEN 18
+				WHEN type = 'Instruction_Type' THEN 19
+				WHEN type = 'Instruction_Group' THEN 20
+				WHEN type = 'Instruction' THEN 21
+				WHEN type = 'Chapter' THEN 22
+				WHEN type = 'Section' THEN 23
+				WHEN type = 'Part' THEN 24
+				WHEN type = 'Volume' THEN 25
+				WHEN type = 'Range' THEN 26
+				ELSE 0
+			END AS type,
 			public,
-			context,
-			description,
+			CASE
+				WHEN context = 'Colleges' THEN 0
+				WHEN context = 'Certifications' THEN 1
+				WHEN context = 'EntranceExams' THEN 2
+				WHEN context = 'APExams' THEN 3
+				WHEN context = 'UserGeneratedContent' THEN 4
+				WHEN context = 'DoD' THEN 5
+				WHEN context = 'Encyclopedia' THEN 6
+				WHEN context = 'All' THEN 7
+				ELSE 0
+			END AS context,
+			COALESCE(description, '') AS description,
 			"hasChildren" AS "has_children",
 			"hasQuestions" AS "has_questions",
 			level
