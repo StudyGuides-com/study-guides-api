@@ -707,7 +707,7 @@ func (s *SqlAdminStore) KillTree(ctx context.Context, id string) ([]string, erro
 
 	// Recursively delete the tree starting from leaf nodes
 	if err := s.deleteTreeRecursively(ctx, tree); err != nil {
-		return nil, status.Error(codes.Internal, "failed to delete tree")
+		return nil, err
 	}
 
 	return ids, nil
@@ -751,7 +751,7 @@ func (s *SqlAdminStore) deleteTreeRecursively(ctx context.Context, node *sharedp
 
 	// Then delete this node and its references
 	if err := s.deleteTagAndReferences(ctx, node.TagRow.Id); err != nil {
-		return err
+		return fmt.Errorf("failed to delete tag %s (%s): %w", node.TagRow.Id, node.TagRow.Name, err)
 	}
 
 	return nil
@@ -801,7 +801,8 @@ func (s *SqlAdminStore) deleteTagAndReferences(ctx context.Context, tagID string
 
 	_, err := s.db.Exec(ctx, query, tagID)
 	if err != nil {
-		return status.Error(codes.Internal, "failed to delete tag and references")
+		log.Printf("Database error deleting tag %s: %v", tagID, err)
+		return status.Error(codes.Internal, fmt.Sprintf("database error deleting tag %s: %v", tagID, err))
 	}
 
 	return nil
