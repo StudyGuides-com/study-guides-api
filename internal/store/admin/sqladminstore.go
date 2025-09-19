@@ -659,7 +659,7 @@ func (s *SqlAdminStore) Tree(ctx context.Context, id string) (*sharedpb.TagNode,
 func (s *SqlAdminStore) KillTree(ctx context.Context, id string) ([]string, error) {
 	tree, err := s.Tree(ctx, id)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "failed to get tree")
+		return nil, err
 	}
 
 	// Collect all IDs from the tree
