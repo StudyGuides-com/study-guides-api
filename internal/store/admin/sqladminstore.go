@@ -606,7 +606,7 @@ func (s *SqlAdminStore) Tree(ctx context.Context, id string) (*sharedpb.TagNode,
 		)
 		SELECT
 			id,
-			"parentTagId" AS "parent_tag_id",
+			COALESCE("parentTagId", '') AS "parent_tag_id",
 			name,
 			type,
 			public,
