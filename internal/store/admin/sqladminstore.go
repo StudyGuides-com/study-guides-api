@@ -647,7 +647,6 @@ func (s *SqlAdminStore) Tree(ctx context.Context, id string) (*sharedpb.TagNode,
 				WHEN context = 'UserGeneratedContent' THEN 4
 				WHEN context = 'DoD' THEN 5
 				WHEN context = 'Encyclopedia' THEN 6
-				WHEN context = 'All' THEN 7
 				ELSE 0
 			END AS context,
 			COALESCE(description, '') AS description,
