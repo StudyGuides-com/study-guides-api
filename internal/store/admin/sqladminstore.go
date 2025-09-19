@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
@@ -621,7 +622,8 @@ func (s *SqlAdminStore) Tree(ctx context.Context, id string) (*sharedpb.TagNode,
 	var tagRows []*sharedpb.TagRow
 	err := pgxscan.Select(ctx, s.db, &tagRows, query, id)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "failed to scan tag rows")
+		log.Printf("Failed to scan tag rows for id %s: %v", id, err)
+		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to scan tag rows: %v", err))
 	}
 
 	// Build a map of nodes by ID for quick lookup
