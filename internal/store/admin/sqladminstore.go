@@ -606,14 +606,14 @@ func (s *SqlAdminStore) Tree(ctx context.Context, id string) (*sharedpb.TagNode,
 		)
 		SELECT
 			id,
-			"parentTagId" AS "parentTagId",
+			"parentTagId" AS "parent_tag_id",
 			name,
 			type,
 			public,
 			context,
 			description,
-			"hasChildren" AS "hasChildren",
-			"hasQuestions" AS "hasQuestions",
+			"hasChildren" AS "has_children",
+			"hasQuestions" AS "has_questions",
 			level
 		FROM tag_tree
 		ORDER BY level, id;
