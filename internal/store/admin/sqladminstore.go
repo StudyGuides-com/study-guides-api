@@ -690,7 +690,7 @@ func (s *SqlAdminStore) Tree(ctx context.Context, id string) (*sharedpb.TagNode,
 	}
 
 	if rootNode == nil {
-		return nil, status.Error(codes.NotFound, "root node not found")
+		return nil, status.Error(codes.NotFound, fmt.Sprintf("tag with id '%s' not found or has no accessible tree structure", id))
 	}
 
 	return rootNode, nil

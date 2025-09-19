@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	adminpb "github.com/studyguides-com/study-guides-api/api/v1/admin"
@@ -93,7 +94,13 @@ func (s *AdminService) KillTree(ctx context.Context, req *adminpb.KillTreeAdminR
 		deletedIds, err := s.store.AdminStore().KillTree(ctx, req.Id)
 		if err != nil {
 			log.Printf("Error killing tree %s: %v", req.Id, err)
-			return nil, status.Error(codes.Internal, "failed to kill tree")
+			// Preserve the original error details for the client
+			if _, ok := status.FromError(err); ok {
+				// If it's already a gRPC error, preserve the code and message
+				return nil, err
+			}
+			// If it's not a gRPC error, wrap it with details
+			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to kill tree %s: %v", req.Id, err))
 		}
 
 		return &adminpb.KillTreeAdminResponse{
