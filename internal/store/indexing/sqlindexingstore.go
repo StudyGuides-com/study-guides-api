@@ -11,7 +11,9 @@ import (
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/lib/pq"
 	"github.com/lucsky/cuid"
+	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 	"github.com/studyguides-com/study-guides-api/internal/store/tag"
 )
 
@@ -94,6 +96,67 @@ func (s *SqlIndexingStore) StartIndexingJob(ctx context.Context, objectType stri
 	// Start async processing
 	go s.runIndexingAsync(jobID, objectType, force)
 	
+	return jobID, nil
+}
+
+// StartIndexingJobWithFilters starts a background indexing job with optional filters
+func (s *SqlIndexingStore) StartIndexingJobWithFilters(ctx context.Context, objectType string, force bool, tagTypes []sharedpb.TagType, contextTypes []sharedpb.ContextType) (string, error) {
+	jobID := cuid.New()
+	now := time.Now()
+
+	// Create metadata including filter information
+	metadata := map[string]interface{}{
+		"objectType": objectType,
+		"force":      force,
+	}
+	if len(tagTypes) > 0 {
+		tagTypeStrings := make([]string, len(tagTypes))
+		for i, tagType := range tagTypes {
+			tagTypeStrings[i] = tagType.String()
+		}
+		metadata["tagTypes"] = tagTypeStrings
+	}
+	if len(contextTypes) > 0 {
+		contextTypeStrings := make([]string, len(contextTypes))
+		for i, contextType := range contextTypes {
+			contextTypeStrings[i] = contextType.String()
+		}
+		metadata["contextTypes"] = contextTypeStrings
+	}
+	metadataJSON, _ := json.Marshal(metadata)
+
+	// Insert job record
+	_, err := s.db.ExecContext(ctx, `
+		INSERT INTO "Job" (id, type, status, description, "startedAt", metadata, "createdAt", "updatedAt")
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, jobID, "Index", "Running", fmt.Sprintf("Index %s with filters (force=%t)", objectType, force),
+	   now, string(metadataJSON), now, now)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to create job record: %w", err)
+	}
+
+	// Queue items based on force flag with filters
+	if force {
+		// Force mode: Queue ALL matching items for complete rebuild
+		if err := s.QueueBatchForReindexWithFilters(ctx, objectType, tagTypes, contextTypes); err != nil {
+			// Update job as failed
+			s.updateJobStatus(jobID, "Failed", err.Error(), 0)
+			return jobID, err
+		}
+		fmt.Printf("Force mode: Queued all matching %s items for complete reindexing\n", objectType)
+	} else {
+		// Incremental mode: Only queue changed matching items
+		if err := s.QueueChangedForIndexWithFilters(ctx, objectType, tagTypes, contextTypes); err != nil {
+			// Update job as failed
+			s.updateJobStatus(jobID, "Failed", err.Error(), 0)
+			return jobID, err
+		}
+	}
+
+	// Start async processing
+	go s.runIndexingAsync(jobID, objectType, force)
+
 	return jobID, nil
 }
 
@@ -439,7 +502,155 @@ func (s *SqlIndexingStore) QueueChangedForIndex(ctx context.Context, objectType 
 	if rows, err := result.RowsAffected(); err == nil {
 		fmt.Printf("Queued %d changed %s items for indexing\n", rows, objectType)
 	}
-	
+
+	return nil
+}
+
+// QueueBatchForReindexWithFilters queues all objects of a type for reindexing with optional filters
+func (s *SqlIndexingStore) QueueBatchForReindexWithFilters(ctx context.Context, objectType string, tagTypes []sharedpb.TagType, contextTypes []sharedpb.ContextType) error {
+	var query string
+	var args []interface{}
+	argIndex := 1
+
+	switch objectType {
+	case "Tag":
+		query = `
+			INSERT INTO "IndexOutbox" ("objectType", "objectId", action, "queuedAt")
+			SELECT 'Tag', id, 'upsert', NOW()
+			FROM "Tag"
+			WHERE context IS NOT NULL`
+
+		// Add TagType filter if provided
+		if len(tagTypes) > 0 {
+			query += ` AND type = ANY($` + fmt.Sprintf("%d", argIndex) + `)`
+
+			// Convert enum values to strings
+			tagTypeStrings := make([]string, len(tagTypes))
+			for i, tagType := range tagTypes {
+				tagTypeStrings[i] = tagType.String()
+			}
+			args = append(args, pq.Array(tagTypeStrings))
+			argIndex++
+		}
+
+		// Add ContextType filter if provided
+		if len(contextTypes) > 0 {
+			query += ` AND context = ANY($` + fmt.Sprintf("%d", argIndex) + `)`
+
+			// Convert enum values to strings
+			contextTypeStrings := make([]string, len(contextTypes))
+			for i, contextType := range contextTypes {
+				contextTypeStrings[i] = contextType.String()
+			}
+			args = append(args, pq.Array(contextTypeStrings))
+			argIndex++
+		}
+
+		query += `
+			ON CONFLICT ("objectType", "objectId") DO UPDATE
+			SET action = 'upsert', "queuedAt" = NOW()`
+
+	default:
+		return fmt.Errorf("unsupported object type for batch reindex: %s", objectType)
+	}
+
+	_, err := s.db.ExecContext(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("failed to queue filtered batch for reindex: %w", err)
+	}
+
+	return nil
+}
+
+// QueueChangedForIndexWithFilters queues only changed objects for indexing with optional filters
+func (s *SqlIndexingStore) QueueChangedForIndexWithFilters(ctx context.Context, objectType string, tagTypes []sharedpb.TagType, contextTypes []sharedpb.ContextType) error {
+	var query string
+	var args []interface{}
+	argIndex := 1
+
+	switch objectType {
+	case "Tag":
+		query = `
+			WITH changed_tags AS (
+				SELECT DISTINCT t.id
+				FROM "Tag" t
+				LEFT JOIN "SearchIndexState" s ON s."objectType" = 'Tag' AND s."objectId" = t.id
+				WHERE t.context IS NOT NULL`
+
+		// Add TagType filter if provided
+		if len(tagTypes) > 0 {
+			query += ` AND t.type = ANY($` + fmt.Sprintf("%d", argIndex) + `)`
+
+			// Convert enum values to strings
+			tagTypeStrings := make([]string, len(tagTypes))
+			for i, tagType := range tagTypes {
+				tagTypeStrings[i] = tagType.String()
+			}
+			args = append(args, pq.Array(tagTypeStrings))
+			argIndex++
+		}
+
+		// Add ContextType filter if provided
+		if len(contextTypes) > 0 {
+			query += ` AND t.context = ANY($` + fmt.Sprintf("%d", argIndex) + `)`
+
+			// Convert enum values to strings
+			contextTypeStrings := make([]string, len(contextTypes))
+			for i, contextType := range contextTypes {
+				contextTypeStrings[i] = contextType.String()
+			}
+			args = append(args, pq.Array(contextTypeStrings))
+			argIndex++
+		}
+
+		query += `
+				AND (
+					-- Never indexed
+					s."objectId" IS NULL
+					-- Or tag itself was updated
+					OR t."updatedAt" > COALESCE(s."lastIndexedAt", '1970-01-01'::timestamp)
+				)
+
+				UNION
+
+				-- Tags whose ancestors were modified (affects ancestry chain)
+				SELECT DISTINCT child.id
+				FROM "Tag" child
+				INNER JOIN "Tag" parent ON child."parentTagId" = parent.id
+				LEFT JOIN "SearchIndexState" s ON s."objectType" = 'Tag' AND s."objectId" = child.id
+				WHERE child.context IS NOT NULL`
+
+		// Apply same filters to the ancestor check
+		if len(tagTypes) > 0 {
+			query += ` AND child.type = ANY($` + fmt.Sprintf("%d", len(args)) + `)`
+		}
+		if len(contextTypes) > 0 {
+			query += ` AND child.context = ANY($` + fmt.Sprintf("%d", len(args)+1) + `)`
+		}
+
+		query += `
+				AND parent."updatedAt" > COALESCE(s."lastIndexedAt", '1970-01-01'::timestamp)
+			)
+			INSERT INTO "IndexOutbox" ("objectType", "objectId", action, "queuedAt")
+			SELECT 'Tag', id, 'upsert', NOW()
+			FROM changed_tags
+			ON CONFLICT ("objectType", "objectId") DO UPDATE
+			SET action = 'upsert', "queuedAt" = NOW()`
+
+	default:
+		return fmt.Errorf("unsupported object type for changed index: %s", objectType)
+	}
+
+	result, err := s.db.ExecContext(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("failed to queue filtered changed items for index: %w", err)
+	}
+
+	// Log how many items were queued
+	if rows, err := result.RowsAffected(); err == nil {
+		fmt.Printf("Queued %d changed %s items for indexing (with filters)\n", rows, objectType)
+	}
+
 	return nil
 }
 

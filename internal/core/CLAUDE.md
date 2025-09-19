@@ -86,49 +86,10 @@ type TriggerIndexingResponse struct {
 ## Integration Patterns
 
 ### gRPC Service Integration
-gRPC services use the core service as a dependency:
-
-```go
-type IndexingService struct {
-    business *indexingcore.BusinessService
-}
-
-func (s *IndexingService) TriggerTagIndexing(ctx context.Context, req *indexingv1.TriggerTagIndexingRequest) (*indexingv1.TriggerIndexingResponse, error) {
-    // Convert protobuf → business types
-    businessReq := indexingcore.TriggerTagIndexingRequest{
-        Force:        req.Force,
-        TagTypes:     req.TagTypes,
-        ContextTypes: req.ContextTypes,
-    }
-
-    // Delegate to business service
-    businessResp, err := s.business.TriggerTagIndexing(ctx, businessReq)
-
-    // Convert business → protobuf types
-    return &indexingv1.TriggerIndexingResponse{...}, nil
-}
-```
+gRPC services use the core service as a dependency and handle type conversion between protobuf and business types. See `internal/services/CLAUDE.md` for implementation details.
 
 ### MCP Adapter Integration
-MCP adapters also use the core service:
-
-```go
-type IndexingRepositoryAdapter struct {
-    business *indexingcore.BusinessService
-}
-
-func (a *IndexingRepositoryAdapter) Find(ctx context.Context, filter IndexingFilter) ([]IndexingExecution, error) {
-    // Convert MCP filter → business request
-    businessReq := indexingcore.TriggerTagIndexingRequest{
-        Force:        *filter.Force,
-        TagTypes:     convertTagTypes(filter.TagTypes),
-        ContextTypes: convertContextTypes(filter.ContextTypes),
-    }
-
-    // Delegate to business service
-    return a.business.TriggerTagIndexing(ctx, businessReq)
-}
-```
+MCP adapters also use the core service for natural language triggers. See `internal/mcp/CLAUDE.md` for implementation details.
 
 ## Key Design Decisions
 
@@ -195,8 +156,11 @@ jobID, err := bs.store.IndexingStore().StartIndexingJob(ctx, objectType, req.For
 
 ## Future Enhancements
 
+### Recent Improvements
+- **Enhanced Filtering**: ✅ Implemented database-level filtering for TagType and ContextType via `StartIndexingJobWithFilters()`
+- **Error Handling**: ✅ Added retry limits and graceful handling of non-existent items
+
 ### Planned Improvements
-- **Enhanced Filtering**: Database-level filtering support in store layer
 - **Batch Operations**: Support for multiple object processing
 - **Validation Layer**: Input validation at business service level
 - **Metrics Integration**: Business-level operation metrics

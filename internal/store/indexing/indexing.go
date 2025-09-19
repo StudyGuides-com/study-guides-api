@@ -3,6 +3,8 @@ package indexing
 import (
 	"context"
 	"time"
+
+	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 )
 
 // IndexOperation represents a pending indexing operation from the outbox
@@ -43,6 +45,7 @@ type JobStatus struct {
 type IndexingStore interface {
 	// Job management (like KPIs)
 	StartIndexingJob(ctx context.Context, objectType string, force bool) (string, error)
+	StartIndexingJobWithFilters(ctx context.Context, objectType string, force bool, tagTypes []sharedpb.TagType, contextTypes []sharedpb.ContextType) (string, error)
 	StartSingleIndexingJob(ctx context.Context, objectType, objectID string, force bool) (string, error)
 	GetJobStatus(ctx context.Context, jobID string) (*JobStatus, error)
 	ListRecentJobs(ctx context.Context, objectType string) ([]JobStatus, error)
@@ -60,4 +63,6 @@ type IndexingStore interface {
 	
 	// Batch operations
 	QueueBatchForReindex(ctx context.Context, objectType string) error
+	QueueBatchForReindexWithFilters(ctx context.Context, objectType string, tagTypes []sharedpb.TagType, contextTypes []sharedpb.ContextType) error
+	QueueChangedForIndexWithFilters(ctx context.Context, objectType string, tagTypes []sharedpb.TagType, contextTypes []sharedpb.ContextType) error
 }

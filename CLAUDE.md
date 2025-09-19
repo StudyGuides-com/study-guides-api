@@ -7,7 +7,7 @@ The Study Guides API is a Go-based microservice providing gRPC and HTTP endpoint
 For detailed component documentation, see:
 - `cmd/server/CLAUDE.md` - Server initialization and lifecycle
 - `internal/core/CLAUDE.md` - Shared business logic services
-- `internal/store/CLAUDE.md` - Data access layer with 10 domain stores, including indexing and admin
+- `internal/store/CLAUDE.md` - Data access layer with 11 domain stores, including indexing and admin
 - `internal/services/CLAUDE.md` - gRPC service implementations and interface layer
 - `internal/mcp/CLAUDE.md` - Model Context Protocol system for AI-driven operations
 - `internal/middleware/CLAUDE.md` - Authentication, rate limiting, and error handling
@@ -213,12 +213,18 @@ All stores are initialized at startup with fail-fast behavior - if any store fai
 
 7. **Indexing Filtering Options**: Tag indexing supports flexible filtering:
    - **Generic**: `TriggerIndexing(objectType, force)` for any object type
-   - **Filtered**: `TriggerTagIndexing(tagTypes, contextTypes, force)` with flexible filter combinations
+   - **Filtered**: `TriggerTagIndexing(tagTypes, contextTypes, force)` with SQL-level filtering by TagType and ContextType
    - **Single**: `TriggerSingleIndexing(objectType, id, force)` for individual objects
+   - **Implementation**: Uses `StartIndexingJobWithFilters()` and filtered SQL queries to process only matching items
 
 8. **Static Content Serving**: Despite being primarily a gRPC API, the service also serves static web content (favicon, images, CSS) through the webrouter
 
 9. **Enum Completeness**: Recent issues with TagType and ContextType enums falling back to default values (Category/Colleges) when new enum values are missing from protobuf definitions. Both TagType (Volume, Part, Range) and ContextType (Encyclopedia) have been updated to include all database values.
+
+10. **Indexing Error Handling**: Recent improvements prevent infinite retry loops:
+    - **Retry Limits**: Failed items are removed from queue after 10 attempts or when item doesn't exist
+    - **Error Detection**: Special handling for "no rows in result set" errors (non-existent items)
+    - **Job Completion**: Fixed metadata query failures that prevented jobs from completing
 
 ## Dependencies
 

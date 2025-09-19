@@ -2,9 +2,11 @@ package indexing
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
+	"github.com/lucsky/cuid"
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 	"github.com/studyguides-com/study-guides-api/internal/store/indexing"
@@ -121,11 +123,8 @@ type TriggerTagIndexingRequest struct {
 
 // TriggerTagIndexing starts a new tag indexing job with filtering
 func (bs *BusinessService) TriggerTagIndexing(ctx context.Context, req TriggerTagIndexingRequest) (*TriggerIndexingResponse, error) {
-	// For now, we'll delegate to the regular indexing but will enhance this
-	// TODO: Add actual filtering logic when store layer supports it
-
-	// Start indexing job (will need to enhance store to support filters)
-	jobID, err := bs.store.IndexingStore().StartIndexingJob(ctx, "Tag", req.Force)
+	// Start indexing job with filters
+	jobID, err := bs.store.IndexingStore().StartIndexingJobWithFilters(ctx, "Tag", req.Force, req.TagTypes, req.ContextTypes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start tag indexing job: %w", err)
 	}

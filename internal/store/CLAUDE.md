@@ -56,7 +56,9 @@ The `IndexingStore` manages search index synchronization:
 - **Outbox pattern**: Queue-based approach for reliable index updates
 - **State tracking**: Maintains index state with hashing for change detection
 - **Batch operations**: Supports bulk reindexing of entire object types
+- **Filtering support**: SQL-level filtering by TagType and ContextType via `StartIndexingJobWithFilters()`
 - **Job management**: Similar to KPI store, tracks indexing job progress
+- **Error handling**: Retry limits and automatic removal of failed/non-existent items
 - **Algolia integration**: Direct integration with Algolia for index updates
 - **Dependency injection**: Requires TagStore for tag hierarchy operations
 
@@ -194,20 +196,31 @@ Each domain (tag, user, question, interaction, roland) follows the same pattern:
 
 12. **Indexing Store Pool**: IndexingStore creates its own connection pool separate from other stores for concurrent operations
 
-13. **Indexing Outbox Pattern**: 
+13. **Indexing Outbox Pattern**:
     - Outbox tracks incremental changes from CRUD operations
     - `force=false`: Processes only changed items (incremental sync)
     - `force=true`: Rebuilds entire index regardless of changes
     - Failed operations remain in outbox for retry
 
-14. **Indexing Change Detection**: The incremental mode detects changes via:
+14. **Indexing Filtering Methods**:
+    - `StartIndexingJobWithFilters()`: Creates jobs with TagType/ContextType filters
+    - `QueueBatchForReindexWithFilters()`: Queues all matching items for force rebuild
+    - `QueueChangedForIndexWithFilters()`: Queues only changed matching items
+    - SQL-level filtering using `WHERE type = ANY($1) AND context = ANY($2)`
+
+15. **Indexing Change Detection**: The incremental mode detects changes via:
     - Direct tag updates (compares `updatedAt` timestamps)
     - TagAccess permission changes
     - Parent tag modifications (affects ancestry chain)
 
-15. **Store Initialization Order**: IndexingStore must be initialized after TagStore due to dependency
+16. **Indexing Error Handling**: Recent improvements prevent infinite retry loops:
+    - Retry limits: Failed items removed after 10 attempts
+    - Error detection: Special handling for "no rows in result set" (non-existent items)
+    - Job completion: Fixed metadata query failures that prevented completion
 
-16. **Indexing Job Timeout**: Jobs have a 30-minute timeout - large datasets (80k+ tags) may timeout if processing is too slow
+17. **Store Initialization Order**: IndexingStore must be initialized after TagStore due to dependency
+
+18. **Indexing Job Timeout**: Jobs have a 30-minute timeout - large datasets (80k+ tags) may timeout if processing is too slow
 
 ## Dependencies
 
@@ -231,6 +244,7 @@ The store implementations assume specific PostgreSQL schema:
 - Metadata stored as JSONB
 - Recursive functions for user data deletion
 - Index cache table for performance optimization
+- **Known schema issue**: Job table has misspelled column `"errorMessge"` (missing 'a') - code correctly uses this spelling
 
 ## Performance Considerations
 - Connection pooling for database operations
