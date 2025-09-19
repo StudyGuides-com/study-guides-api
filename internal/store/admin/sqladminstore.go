@@ -769,6 +769,10 @@ func (s *SqlAdminStore) deleteTagAndReferences(ctx context.Context, tagID string
 		deleted_ratings AS (
 			DELETE FROM public."UserTagRating" WHERE "tagId" = $1
 		),
+		deleted_test_questions AS (
+			DELETE FROM public."TestQuestion"
+			WHERE "sessionId" IN (SELECT id FROM public."TestSession" WHERE "tagId" = $1)
+		),
 		deleted_test_sessions AS (
 			DELETE FROM public."TestSession" WHERE "tagId" = $1
 		),
@@ -783,6 +787,10 @@ func (s *SqlAdminStore) deleteTagAndReferences(ctx context.Context, tagID string
 		),
 		deleted_topic_progress AS (
 			DELETE FROM public."UserTopicProgress" WHERE "topicId" = $1
+		),
+		deleted_survival_questions AS (
+			DELETE FROM public."SurvivalQuestion"
+			WHERE "sessionId" IN (SELECT id FROM public."SurvivalSession" WHERE "tagId" = $1)
 		),
 		deleted_survival_sessions AS (
 			DELETE FROM public."SurvivalSession" WHERE "tagId" = $1
