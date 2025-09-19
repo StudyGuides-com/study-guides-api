@@ -2,11 +2,9 @@ package indexing
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
-	"github.com/lucsky/cuid"
 	sharedpb "github.com/studyguides-com/study-guides-api/api/v1/shared"
 	"github.com/studyguides-com/study-guides-api/internal/store"
 	"github.com/studyguides-com/study-guides-api/internal/store/indexing"

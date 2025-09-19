@@ -33,8 +33,17 @@ message KillUserAdminResponse {
   bool ok = 1;
 }
 
+message KillTreeAdminRequest {
+  string id = 1;
+}
+
+message KillTreeAdminResponse {
+  repeated string deleted_ids = 1;
+}
+
 service AdminService {
   rpc KillUser(KillUserAdminRequest) returns (KillUserAdminResponse) {}
+  rpc KillTree(KillTreeAdminRequest) returns (KillTreeAdminResponse) {}
 }
 
 // TODO: add all the other admin endpoints the map from the store.

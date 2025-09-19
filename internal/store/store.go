@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/studyguides-com/study-guides-api/internal/store/admin"
 	"github.com/studyguides-com/study-guides-api/internal/store/devops"
 	"github.com/studyguides-com/study-guides-api/internal/store/indexing"
 	"github.com/studyguides-com/study-guides-api/internal/store/interaction"
@@ -28,6 +29,7 @@ type Store interface {
 	DevopsStore() devops.DevopsStore
 	KPIStore() kpi.KPIStore
 	IndexingStore() indexing.IndexingStore
+	AdminStore() admin.AdminStore
 }
 
 type store struct {
@@ -40,6 +42,7 @@ type store struct {
 	devopsStore      devops.DevopsStore
 	kpiStore         kpi.KPIStore
 	indexingStore    indexing.IndexingStore
+	adminStore       admin.AdminStore
 }
 
 func (s *store) SearchStore() search.SearchStore {
@@ -76,6 +79,10 @@ func (s *store) KPIStore() kpi.KPIStore {
 
 func (s *store) IndexingStore() indexing.IndexingStore {
 	return s.indexingStore
+}
+
+func (s *store) AdminStore() admin.AdminStore {
+	return s.adminStore
 }
 
 func NewStore() (Store, error) {
@@ -140,6 +147,11 @@ func NewStore() (Store, error) {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	adminStore, err := admin.NewSqlAdminStore(ctx, dbURL)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	return &store{
 		searchStore:      searchStore,
 		tagStore:         tagStore,
@@ -150,5 +162,6 @@ func NewStore() (Store, error) {
 		devopsStore:      devopsStore,
 		kpiStore:         kpiStore,
 		indexingStore:    indexingStore,
+		adminStore:       adminStore,
 	}, nil
 }

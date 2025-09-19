@@ -262,6 +262,94 @@ func (x *KillUserAdminResponse) GetOk() bool {
 	return false
 }
 
+type KillTreeAdminRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *KillTreeAdminRequest) Reset() {
+	*x = KillTreeAdminRequest{}
+	mi := &file_v1_admin_admin_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KillTreeAdminRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KillTreeAdminRequest) ProtoMessage() {}
+
+func (x *KillTreeAdminRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_admin_admin_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KillTreeAdminRequest.ProtoReflect.Descriptor instead.
+func (*KillTreeAdminRequest) Descriptor() ([]byte, []int) {
+	return file_v1_admin_admin_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *KillTreeAdminRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type KillTreeAdminResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DeletedIds    []string               `protobuf:"bytes,1,rep,name=deleted_ids,json=deletedIds,proto3" json:"deleted_ids,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *KillTreeAdminResponse) Reset() {
+	*x = KillTreeAdminResponse{}
+	mi := &file_v1_admin_admin_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KillTreeAdminResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KillTreeAdminResponse) ProtoMessage() {}
+
+func (x *KillTreeAdminResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_admin_admin_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KillTreeAdminResponse.ProtoReflect.Descriptor instead.
+func (*KillTreeAdminResponse) Descriptor() ([]byte, []int) {
+	return file_v1_admin_admin_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *KillTreeAdminResponse) GetDeletedIds() []string {
+	if x != nil {
+		return x.DeletedIds
+	}
+	return nil
+}
+
 var File_v1_admin_admin_proto protoreflect.FileDescriptor
 
 const file_v1_admin_admin_proto_rawDesc = "" +
@@ -286,9 +374,15 @@ const file_v1_admin_admin_proto_rawDesc = "" +
 	"\x14KillUserAdminRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\"'\n" +
 	"\x15KillUserAdminResponse\x12\x0e\n" +
-	"\x02ok\x18\x01 \x01(\bR\x02ok2]\n" +
+	"\x02ok\x18\x01 \x01(\bR\x02ok\"&\n" +
+	"\x14KillTreeAdminRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"8\n" +
+	"\x15KillTreeAdminResponse\x12\x1f\n" +
+	"\vdeleted_ids\x18\x01 \x03(\tR\n" +
+	"deletedIds2\xac\x01\n" +
 	"\fAdminService\x12M\n" +
-	"\bKillUser\x12\x1e.admin.v1.KillUserAdminRequest\x1a\x1f.admin.v1.KillUserAdminResponse\"\x00BBZ@github.com/studyguides-com/study-guides-api/api/v1/admin;adminv1b\x06proto3"
+	"\bKillUser\x12\x1e.admin.v1.KillUserAdminRequest\x1a\x1f.admin.v1.KillUserAdminResponse\"\x00\x12M\n" +
+	"\bKillTree\x12\x1e.admin.v1.KillTreeAdminRequest\x1a\x1f.admin.v1.KillTreeAdminResponse\"\x00BBZ@github.com/studyguides-com/study-guides-api/api/v1/admin;adminv1b\x06proto3"
 
 var (
 	file_v1_admin_admin_proto_rawDescOnce sync.Once
@@ -302,33 +396,37 @@ func file_v1_admin_admin_proto_rawDescGZIP() []byte {
 	return file_v1_admin_admin_proto_rawDescData
 }
 
-var file_v1_admin_admin_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_v1_admin_admin_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_v1_admin_admin_proto_goTypes = []any{
 	(*NewTagAdminRequest)(nil),        // 0: admin.v1.NewTagAdminRequest
 	(*NewTagAdminResponse)(nil),       // 1: admin.v1.NewTagAdminResponse
 	(*KillUserAdminRequest)(nil),      // 2: admin.v1.KillUserAdminRequest
 	(*KillUserAdminResponse)(nil),     // 3: admin.v1.KillUserAdminResponse
-	nil,                               // 4: admin.v1.NewTagAdminRequest.MetadataEntry
-	(shared.TagType)(0),               // 5: shared.v1.TagType
-	(shared.ContentRating)(0),         // 6: shared.v1.ContentRating
-	(shared.ContentDescriptorType)(0), // 7: shared.v1.ContentDescriptorType
-	(shared.ParserType)(0),            // 8: shared.v1.ParserType
-	(*shared.Tag)(nil),                // 9: shared.v1.Tag
+	(*KillTreeAdminRequest)(nil),      // 4: admin.v1.KillTreeAdminRequest
+	(*KillTreeAdminResponse)(nil),     // 5: admin.v1.KillTreeAdminResponse
+	nil,                               // 6: admin.v1.NewTagAdminRequest.MetadataEntry
+	(shared.TagType)(0),               // 7: shared.v1.TagType
+	(shared.ContentRating)(0),         // 8: shared.v1.ContentRating
+	(shared.ContentDescriptorType)(0), // 9: shared.v1.ContentDescriptorType
+	(shared.ParserType)(0),            // 10: shared.v1.ParserType
+	(*shared.Tag)(nil),                // 11: shared.v1.Tag
 }
 var file_v1_admin_admin_proto_depIdxs = []int32{
-	5, // 0: admin.v1.NewTagAdminRequest.type:type_name -> shared.v1.TagType
-	6, // 1: admin.v1.NewTagAdminRequest.rating:type_name -> shared.v1.ContentRating
-	7, // 2: admin.v1.NewTagAdminRequest.descriptors:type_name -> shared.v1.ContentDescriptorType
-	8, // 3: admin.v1.NewTagAdminRequest.parser_type:type_name -> shared.v1.ParserType
-	4, // 4: admin.v1.NewTagAdminRequest.metadata:type_name -> admin.v1.NewTagAdminRequest.MetadataEntry
-	9, // 5: admin.v1.NewTagAdminResponse.tag:type_name -> shared.v1.Tag
-	2, // 6: admin.v1.AdminService.KillUser:input_type -> admin.v1.KillUserAdminRequest
-	3, // 7: admin.v1.AdminService.KillUser:output_type -> admin.v1.KillUserAdminResponse
-	7, // [7:8] is the sub-list for method output_type
-	6, // [6:7] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	7,  // 0: admin.v1.NewTagAdminRequest.type:type_name -> shared.v1.TagType
+	8,  // 1: admin.v1.NewTagAdminRequest.rating:type_name -> shared.v1.ContentRating
+	9,  // 2: admin.v1.NewTagAdminRequest.descriptors:type_name -> shared.v1.ContentDescriptorType
+	10, // 3: admin.v1.NewTagAdminRequest.parser_type:type_name -> shared.v1.ParserType
+	6,  // 4: admin.v1.NewTagAdminRequest.metadata:type_name -> admin.v1.NewTagAdminRequest.MetadataEntry
+	11, // 5: admin.v1.NewTagAdminResponse.tag:type_name -> shared.v1.Tag
+	2,  // 6: admin.v1.AdminService.KillUser:input_type -> admin.v1.KillUserAdminRequest
+	4,  // 7: admin.v1.AdminService.KillTree:input_type -> admin.v1.KillTreeAdminRequest
+	3,  // 8: admin.v1.AdminService.KillUser:output_type -> admin.v1.KillUserAdminResponse
+	5,  // 9: admin.v1.AdminService.KillTree:output_type -> admin.v1.KillTreeAdminResponse
+	8,  // [8:10] is the sub-list for method output_type
+	6,  // [6:8] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_v1_admin_admin_proto_init() }
@@ -342,7 +440,7 @@ func file_v1_admin_admin_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_admin_admin_proto_rawDesc), len(file_v1_admin_admin_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

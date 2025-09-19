@@ -49,6 +49,12 @@ func (s *AdminService) KillUser(ctx context.Context, req *adminpb.KillUserAdminR
 			return nil, status.Error(codes.Unauthenticated, "authentication required")
 		}
 
+		// Check for admin role
+		if !session.HasRole(sharedpb.UserRole_USER_ROLE_ADMIN) {
+			log.Printf("KillUser request from non-admin user %s", *session.UserID)
+			return nil, status.Error(codes.PermissionDenied, "admin role required")
+		}
+
 		log.Printf("KillUser request from user %s for email %s", *session.UserID, req.Email)
 
 		// Call the store method to kill the user
@@ -66,4 +72,36 @@ func (s *AdminService) KillUser(ctx context.Context, req *adminpb.KillUserAdminR
 		return nil, err
 	}
 	return resp.(*adminpb.KillUserAdminResponse), nil
+}
+
+func (s *AdminService) KillTree(ctx context.Context, req *adminpb.KillTreeAdminRequest) (*adminpb.KillTreeAdminResponse, error) {
+	resp, err := AuthBaseHandler(ctx, func(ctx context.Context, session *middleware.SessionDetails) (interface{}, error) {
+		if session.UserID == nil {
+			log.Printf("KillTree request from anonymous user")
+			return nil, status.Error(codes.Unauthenticated, "authentication required")
+		}
+
+		// Check for admin role
+		if !session.HasRole(sharedpb.UserRole_USER_ROLE_ADMIN) {
+			log.Printf("KillTree request from non-admin user %s", *session.UserID)
+			return nil, status.Error(codes.PermissionDenied, "admin role required")
+		}
+
+		log.Printf("KillTree request from user %s for id %s", *session.UserID, req.Id)
+
+		// Call the admin store method to kill the tree
+		deletedIds, err := s.store.AdminStore().KillTree(ctx, req.Id)
+		if err != nil {
+			log.Printf("Error killing tree %s: %v", req.Id, err)
+			return nil, status.Error(codes.Internal, "failed to kill tree")
+		}
+
+		return &adminpb.KillTreeAdminResponse{
+			DeletedIds: deletedIds,
+		}, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*adminpb.KillTreeAdminResponse), nil
 }
