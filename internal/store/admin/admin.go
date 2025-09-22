@@ -3,6 +3,7 @@ package admin
 import (
 	"context"
 
+	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -75,10 +76,21 @@ type AdminStore interface {
 	ClearIndexCache(ctx context.Context) error
 }
 
-func NewSqlAdminStore(ctx context.Context, dbURL string) (*SqlAdminStore, error) {
+func NewSqlAdminStore(ctx context.Context, dbURL string, algoliaAppID, algoliaAPIKey string) (*SqlAdminStore, error) {
 	db, err := pgxpool.New(ctx, dbURL)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to connect to postgres: "+err.Error())
 	}
-	return &SqlAdminStore{db: db}, nil
+
+	// Initialize Algolia client (optional - graceful if not provided)
+	var tagIndex *search.Index
+	if algoliaAppID != "" && algoliaAPIKey != "" {
+		algoliaClient := search.NewClient(algoliaAppID, algoliaAPIKey)
+		tagIndex = algoliaClient.InitIndex("tags")
+	}
+
+	return &SqlAdminStore{
+		db:       db,
+		tagIndex: tagIndex,
+	}, nil
 }

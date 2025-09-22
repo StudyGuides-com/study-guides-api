@@ -10,6 +10,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -22,7 +23,8 @@ import (
 )
 
 type SqlAdminStore struct {
-	db *pgxpool.Pool
+	db       *pgxpool.Pool
+	tagIndex *search.Index // Algolia tag index for immediate deletion
 }
 
 const maxTagDepth = 5 // Maximum depth for tag hierarchy traversal
@@ -705,12 +707,64 @@ func (s *SqlAdminStore) KillTree(ctx context.Context, id string) ([]string, erro
 	// Collect all IDs from the tree
 	ids := collectNodeIDs(tree)
 
-	// Recursively delete the tree starting from leaf nodes
+	// Recursively delete the tree from database starting from leaf nodes
 	if err := s.deleteTreeRecursively(ctx, tree); err != nil {
 		return nil, err
 	}
 
+	// Batch delete from Algolia after successful database deletion
+	if s.tagIndex != nil && len(ids) > 0 {
+		if err := s.batchDeleteFromAlgolia(ctx, ids); err != nil {
+			// Log error but don't fail - database is source of truth
+			log.Printf("Warning: Failed to delete tags from Algolia: %v", err)
+		}
+	}
+
 	return ids, nil
+}
+
+// batchDeleteFromAlgolia deletes tags from Algolia in batches
+func (s *SqlAdminStore) batchDeleteFromAlgolia(ctx context.Context, tagIDs []string) error {
+	const batchSize = 1000 // Algolia's limit
+	successCount := 0
+	failedBatches := 0
+
+	for i := 0; i < len(tagIDs); i += batchSize {
+		// Check for context cancellation
+		select {
+		case <-ctx.Done():
+			log.Printf("Algolia deletion cancelled after %d tags deleted: %v", successCount, ctx.Err())
+			return nil // Still return nil to maintain non-fatal behavior
+		default:
+		}
+
+		end := i + batchSize
+		if end > len(tagIDs) {
+			end = len(tagIDs)
+		}
+
+		batch := tagIDs[i:end]
+		res, err := s.tagIndex.DeleteObjects(batch)
+		if err != nil {
+			// Log warning but continue with remaining batches - consistent with single deletion
+			log.Printf("Warning: Failed to delete batch %d-%d from Algolia: %v", i, end, err)
+			failedBatches++
+			continue
+		}
+
+		// Log successful deletion
+		successCount += len(res.ObjectIDs)
+		log.Printf("Deleted %d tags from Algolia (batch %d-%d)",
+			len(res.ObjectIDs), i, end)
+	}
+
+	// Log summary if there were any failures
+	if failedBatches > 0 {
+		log.Printf("Algolia deletion summary: %d tags deleted successfully, %d batches failed",
+			successCount, failedBatches)
+	}
+
+	return nil // Always return nil to maintain non-fatal behavior
 }
 
 func (s *SqlAdminStore) UserByEmail(ctx context.Context, email string) (*sharedpb.User, error) {
@@ -811,6 +865,14 @@ func (s *SqlAdminStore) deleteTagAndReferences(ctx context.Context, tagID string
 	if err != nil {
 		log.Printf("Database error deleting tag %s: %v", tagID, err)
 		return status.Error(codes.Internal, fmt.Sprintf("database error deleting tag %s: %v", tagID, err))
+	}
+
+	// Delete from Algolia after successful database deletion
+	if s.tagIndex != nil {
+		if _, err := s.tagIndex.DeleteObject(tagID); err != nil {
+			// Log but don't fail - database is source of truth
+			log.Printf("Warning: Failed to delete tag %s from Algolia: %v", tagID, err)
+		}
 	}
 
 	return nil

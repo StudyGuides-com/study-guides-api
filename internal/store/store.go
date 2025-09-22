@@ -147,7 +147,7 @@ func NewStore() (Store, error) {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	adminStore, err := admin.NewSqlAdminStore(ctx, dbURL)
+	adminStore, err := admin.NewSqlAdminStore(ctx, dbURL, algoliaAppID, algoliaAdminAPIKey)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
