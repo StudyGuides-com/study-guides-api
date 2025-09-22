@@ -913,7 +913,7 @@ func (s *SqlIndexingStore) StartPruningJob(ctx context.Context, objectType strin
 	_, err := s.db.ExecContext(ctx, `
 		INSERT INTO "Job" (id, type, status, description, "startedAt", metadata, "createdAt", "updatedAt")
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-	`, jobID, "Prune", "Running", "Prune orphaned index objects",
+	`, jobID, "Index", "Running", "Prune orphaned index objects",
 	   now, string(metadataJSON), now, now)
 
 	if err != nil {
