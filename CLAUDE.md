@@ -76,6 +76,7 @@ type BusinessService struct {
 
 // Used by both gRPC services and MCP adapters
 func (bs *BusinessService) TriggerTagIndexing(ctx context.Context, req TriggerTagIndexingRequest) (*TriggerIndexingResponse, error)
+func (bs *BusinessService) TriggerPruning(ctx context.Context, req TriggerPruningRequest) (*TriggerPruningResponse, error)
 ```
 
 #### Handler Pattern with Base Handlers
@@ -225,6 +226,19 @@ All stores are initialized at startup with fail-fast behavior - if any store fai
     - **Retry Limits**: Failed items are removed from queue after 10 attempts or when item doesn't exist
     - **Error Detection**: Special handling for "no rows in result set" errors (non-existent items)
     - **Job Completion**: Fixed metadata query failures that prevented jobs from completing
+
+11. **Pruning Operations**: New functionality for removing orphaned Algolia objects:
+    - **Streaming Approach**: Processes Algolia objects one at a time for constant memory usage (~1MB)
+    - **Database Verification**: Each Algolia object checked against database for existence
+    - **Batch Deletion**: Removes non-existent objects in 1000-item batches
+    - **MCP Integration**: Natural language triggers ("prune index", "prune tags with filters")
+    - **Documentation**: See `api/v1/indexing/PRUNE_INDEX.md` for detailed implementation
+
+12. **Admin Tag Deletion with Algolia**: Enhanced kill tag operations:
+    - **Immediate Cleanup**: Deleted tags are immediately removed from Algolia search index
+    - **Batch Processing**: Handles large tag deletions in 1000-item chunks
+    - **Error Resilience**: Algolia deletion failures are logged but don't block database operations
+    - **Database Priority**: Database operations complete even if Algolia operations fail
 
 ## Dependencies
 

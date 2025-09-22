@@ -42,9 +42,11 @@ The ChatService is the most complex, implementing both legacy tool routing and t
 - **MCP Processor**: Handles natural language processing via `internal/mcp`
 - **Repository Adapters**: Including `IndexingRepositoryAdapter` for index management
 - **Dynamic tool generation**: Creates OpenAI tools from registered repositories
-- **Indexing triggers**: 
+- **Indexing triggers**:
   - "index tags" → incremental indexing (only changed items)
   - "force index tags" → complete rebuild (all items)
+  - "prune index" → remove orphaned Algolia objects
+  - "prune tags with filters" → filtered pruning by TagType/ContextType
 
 #### Legacy Tool Integration
 - Dynamic system prompt generation based on available tools
@@ -88,6 +90,11 @@ The IndexingService provides direct gRPC access to indexing operations, running 
   - ContextType only: `[DoD, Colleges]`
   - Combined: `TagTypes=[Topic] AND ContextTypes=[DoD]`
   - No filters: Index all tags
+
+**Pruning Operations:**
+- `PruneIndex(objectType, tagTypes, contextTypes)` - Remove orphaned Algolia objects
+- Resource-efficient streaming approach for large indexes
+- Optional filtering by TagType and ContextType
 
 **Job Management:**
 - `GetJobStatus(jobID)` - Monitor specific job progress
@@ -182,6 +189,7 @@ Infrastructure management operations:
 Direct indexing operations for admin applications:
 - Generic object indexing (TriggerIndexing)
 - Tag-specific filtering (TriggerTagIndexing)
+- Pruning operations (PruneIndex) for removing orphaned Algolia objects
 - Job monitoring and management
 - Integration with shared business service
 

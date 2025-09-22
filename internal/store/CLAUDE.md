@@ -59,8 +59,10 @@ The `IndexingStore` manages search index synchronization:
 - **Filtering support**: SQL-level filtering by TagType and ContextType via `StartIndexingJobWithFilters()`
 - **Job management**: Similar to KPI store, tracks indexing job progress
 - **Error handling**: Retry limits and automatic removal of failed/non-existent items
-- **Algolia integration**: Direct integration with Algolia for index updates
+- **Algolia integration**: Direct integration with Algolia for index updates and pruning operations
 - **Dependency injection**: Requires TagStore for tag hierarchy operations
+- **Pruning operations**: Resource-efficient removal of orphaned Algolia objects via streaming approach
+- **Memory optimization**: Constant ~1MB memory usage regardless of Algolia index size during pruning
 
 ### Admin Store Complexity
 The `SqlAdminStore` is the most complex implementation, providing:
@@ -68,6 +70,8 @@ The `SqlAdminStore` is the most complex implementation, providing:
 - **Bulk operations**: Import/export functionality with GOB serialization
 - **Tree operations**: Tag hierarchy traversal with cycle detection
 - **Content management**: Tag, passage, and question CRUD with metadata
+- **Algolia integration**: Batch deletion of search index objects during tag deletion operations
+- **Error resilience**: Algolia operations are non-blocking - failures are logged but don't prevent database operations
 
 ### Search Store Integration
 The `AlgoliaStore` provides sophisticated search capabilities:
@@ -163,6 +167,12 @@ Search index synchronization management:
 - Job-based async processing with 30-minute timeout
 - Direct Algolia API integration
 - Batch processing (100 items at a time)
+- Pruning operations:
+  - **Streaming approach**: Uses `BrowseObjects()` to iterate through all Algolia objects
+  - **Database verification**: Each object checked for existence via `TagExistsFor()`
+  - **Batch deletion**: Orphaned objects removed in 1000-item chunks
+  - **Memory efficiency**: Constant ~1MB memory regardless of index size
+  - **Error resilience**: Individual parse/verification failures logged but don't stop job
 
 ### Domain-specific stores
 Each domain (tag, user, question, interaction, roland) follows the same pattern:
@@ -221,6 +231,17 @@ Each domain (tag, user, question, interaction, roland) follows the same pattern:
 17. **Store Initialization Order**: IndexingStore must be initialized after TagStore due to dependency
 
 18. **Indexing Job Timeout**: Jobs have a 30-minute timeout - large datasets (80k+ tags) may timeout if processing is too slow
+
+19. **Pruning Resource Efficiency**: The pruning operation is designed for constant memory usage:
+    - Streams through Algolia objects one at a time using `BrowseObjects()`
+    - Memory usage remains ~1MB regardless of index size (tested with 80k+ objects)
+    - Database verification happens for each object individually to avoid loading large result sets
+
+20. **Admin Algolia Integration**: Tag deletion operations now include immediate Algolia cleanup:
+    - `KillTree()` automatically removes deleted tags from search index
+    - Batch processing handles large deletions efficiently (1000-item chunks)
+    - Algolia failures are logged as warnings but don't block database operations
+    - Database operations always take priority over search index consistency
 
 ## Dependencies
 

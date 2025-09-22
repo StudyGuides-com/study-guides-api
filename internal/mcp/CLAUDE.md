@@ -53,6 +53,7 @@ The IndexingRepositoryAdapter uses the shared business service for consistency w
 - **Core Integration**: Delegates to `internal/core/indexing.BusinessService`
 - **Incremental indexing**: `"index tags"` → `triggerReindex: true, force: false`
 - **Force rebuild**: `"force index tags"` → `triggerReindex: true, force: true`
+- **Pruning operations**: `"prune index"` → Remove orphaned Algolia objects
 - **Status monitoring**: `"check indexing status"` → `status: "running"`
 - **Job tracking**: Progress monitoring and error reporting via business service
 
@@ -61,6 +62,8 @@ The IndexingRepositoryAdapter uses the shared business service for consistency w
 ### Indexing Operations
 - **"index tags", "reindex tags", "sync tags"** → Incremental indexing
 - **"force reindex", "rebuild index"** → Complete rebuild
+- **"prune index", "clean index", "remove orphaned objects"** → Pruning operations
+- **"prune tags with filters"** → Filtered pruning by TagType/ContextType
 - **"check indexing", "indexing status"** → Status check
 
 ### KPI Operations  

@@ -30,6 +30,7 @@ The core indexing business service provides fundamental indexing operations:
 **Core Operations:**
 - `TriggerIndexing(req)` - Generic object indexing
 - `TriggerTagIndexing(req)` - Tag-specific indexing with filtering
+- `TriggerPruning(req)` - Remove orphaned Algolia objects with optional filtering
 - `GetJobStatus(jobID)` - Job status retrieval
 - `ListRunningJobs()` - Active job monitoring
 - `ListRecentJobs(req)` - Job history queries
@@ -45,6 +46,9 @@ func (bs *BusinessService) TriggerIndexing(ctx context.Context, req TriggerIndex
 
 // Tag-specific indexing with filtering capabilities
 func (bs *BusinessService) TriggerTagIndexing(ctx context.Context, req TriggerTagIndexingRequest) (*TriggerIndexingResponse, error)
+
+// Pruning operations for removing orphaned Algolia objects
+func (bs *BusinessService) TriggerPruning(ctx context.Context, req TriggerPruningRequest) (*TriggerPruningResponse, error)
 ```
 
 #### Flexible Tag Filtering
@@ -64,6 +68,25 @@ type TriggerTagIndexingRequest struct {
 - **TagType only**: `TagTypes=[Topic, Category]` → Index specific tag types
 - **ContextType only**: `ContextTypes=[DoD, Colleges]` → Index specific contexts
 - **Combined**: `TagTypes=[Topic]` AND `ContextTypes=[DoD]` → Tag type AND context
+
+#### Pruning Operations
+The `TriggerPruning` method provides resource-efficient cleanup of orphaned Algolia objects:
+
+**Pruning Features:**
+```go
+type TriggerPruningRequest struct {
+    ObjectType   string                     // Object type to prune (defaults to "Tag")
+    TagTypes     []sharedpb.TagType        // Optional filter by tag types
+    ContextTypes []sharedpb.ContextType    // Optional filter by context types
+}
+```
+
+**Pruning Characteristics:**
+- **Streaming approach**: Processes Algolia objects one at a time for constant memory usage
+- **Database verification**: Each object checked for existence before deletion
+- **Batch deletion**: Removes non-existent objects in 1000-item chunks
+- **Optional filtering**: Supports same TagType/ContextType filtering as indexing
+- **Resource efficiency**: ~1MB memory usage regardless of index size
 
 #### Type Definitions
 The core service defines framework-agnostic types:
@@ -159,6 +182,8 @@ jobID, err := bs.store.IndexingStore().StartIndexingJob(ctx, objectType, req.For
 ### Recent Improvements
 - **Enhanced Filtering**: ✅ Implemented database-level filtering for TagType and ContextType via `StartIndexingJobWithFilters()`
 - **Error Handling**: ✅ Added retry limits and graceful handling of non-existent items
+- **Pruning Operations**: ✅ Added resource-efficient pruning for orphaned Algolia objects
+- **Admin Integration**: ✅ Enhanced tag deletion to include immediate Algolia cleanup
 
 ### Planned Improvements
 - **Batch Operations**: Support for multiple object processing
