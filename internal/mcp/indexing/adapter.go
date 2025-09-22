@@ -25,6 +25,34 @@ func NewIndexingRepositoryAdapter(business *indexingcore.BusinessService) *Index
 func (a *IndexingRepositoryAdapter) Find(ctx context.Context, filter IndexingFilter) ([]IndexingExecution, error) {
 	var results []IndexingExecution
 	
+	// Handle trigger pruning request
+	if filter.TriggerPruning {
+		objectType := "Tag" // Default
+		if filter.ObjectType != nil {
+			objectType = *filter.ObjectType
+		}
+
+		businessReq := indexingcore.TriggerPruningRequest{
+			ObjectType: objectType,
+		}
+		businessResp, err := a.business.TriggerPruning(ctx, businessReq)
+		if err != nil {
+			return nil, fmt.Errorf("failed to trigger pruning: %w", err)
+		}
+
+		jobID := businessResp.JobID
+		now := time.Now()
+		execution := IndexingExecution{
+			ID:         jobID,
+			ObjectType: objectType,
+			Status:     "running",
+			StartedAt:  &now,
+			Message:    fmt.Sprintf("Started pruning job to remove orphaned %s objects from search index", objectType),
+		}
+		results = append(results, execution)
+		return results, nil
+	}
+
 	// Handle trigger reindex request
 	if filter.TriggerReindex {
 		objectType := "Tag" // Default

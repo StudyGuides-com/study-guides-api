@@ -200,3 +200,56 @@ func (bs *BusinessService) TriggerSingleIndexing(ctx context.Context, req Trigge
 		StartedAt: time.Now(),
 	}, nil
 }
+
+// TriggerPruningRequest represents a pruning job request
+type TriggerPruningRequest struct {
+	ObjectType   string
+	TagTypes     []sharedpb.TagType
+	ContextTypes []sharedpb.ContextType
+}
+
+// TriggerPruningResponse represents the response from triggering a pruning job
+type TriggerPruningResponse struct {
+	JobID     string
+	Status    string
+	Message   string
+	StartedAt time.Time
+}
+
+// TriggerPruning starts a new pruning job to remove orphaned index objects
+func (bs *BusinessService) TriggerPruning(ctx context.Context, req TriggerPruningRequest) (*TriggerPruningResponse, error) {
+	// Default object type to "Tag" if not specified
+	objectType := req.ObjectType
+	if objectType == "" {
+		objectType = "Tag"
+	}
+
+	// Start pruning job
+	jobID, err := bs.store.IndexingStore().StartPruningJob(ctx, objectType, req.TagTypes, req.ContextTypes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to start pruning job: %w", err)
+	}
+
+	// Create response message
+	var filterParts []string
+	if len(req.TagTypes) > 0 {
+		filterParts = append(filterParts, fmt.Sprintf("%d tag types", len(req.TagTypes)))
+	}
+	if len(req.ContextTypes) > 0 {
+		filterParts = append(filterParts, fmt.Sprintf("%d context types", len(req.ContextTypes)))
+	}
+
+	var filterMsg string
+	if len(filterParts) > 0 {
+		filterMsg = fmt.Sprintf(" with filters: %v", filterParts)
+	}
+
+	message := fmt.Sprintf("Started %s pruning job%s", objectType, filterMsg)
+
+	return &TriggerPruningResponse{
+		JobID:     jobID,
+		Status:    "Running",
+		Message:   message,
+		StartedAt: time.Now(),
+	}, nil
+}

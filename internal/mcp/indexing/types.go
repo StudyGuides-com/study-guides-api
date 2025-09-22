@@ -8,10 +8,11 @@ const ResourceName = "indexing"
 // IndexingFilter defines the filter criteria for indexing operations
 type IndexingFilter struct {
 	TriggerReindex bool    `json:"triggerReindex,omitempty"`
-	ObjectType     *string `json:"objectType,omitempty"` // "Tag", "User", "Contact", "FAQ"
-	Force          *bool   `json:"force,omitempty"`      // Bypass hash comparison
-	Status         *string `json:"status,omitempty"`      // Filter by job status
-	JobID          *string `json:"jobId,omitempty"`       // Get specific job
+	TriggerPruning bool    `json:"triggerPruning,omitempty"` // Remove orphaned objects from index
+	ObjectType     *string `json:"objectType,omitempty"`     // "Tag", "User", "Contact", "FAQ"
+	Force          *bool   `json:"force,omitempty"`          // Bypass hash comparison
+	Status         *string `json:"status,omitempty"`          // Filter by job status
+	JobID          *string `json:"jobId,omitempty"`           // Get specific job
 }
 
 // IndexingExecution represents an indexing job execution

@@ -25,6 +25,7 @@ const (
 	IndexingService_ListRecentJobs_FullMethodName        = "/indexing.v1.IndexingService/ListRecentJobs"
 	IndexingService_TriggerTagIndexing_FullMethodName    = "/indexing.v1.IndexingService/TriggerTagIndexing"
 	IndexingService_TriggerSingleIndexing_FullMethodName = "/indexing.v1.IndexingService/TriggerSingleIndexing"
+	IndexingService_PruneIndex_FullMethodName            = "/indexing.v1.IndexingService/PruneIndex"
 )
 
 // IndexingServiceClient is the client API for IndexingService service.
@@ -46,6 +47,8 @@ type IndexingServiceClient interface {
 	TriggerTagIndexing(ctx context.Context, in *TriggerTagIndexingRequest, opts ...grpc.CallOption) (*TriggerIndexingResponse, error)
 	// Trigger indexing for a single specific item
 	TriggerSingleIndexing(ctx context.Context, in *TriggerSingleIndexingRequest, opts ...grpc.CallOption) (*TriggerIndexingResponse, error)
+	// Prune orphaned objects from the search index that no longer exist in the database
+	PruneIndex(ctx context.Context, in *PruneIndexRequest, opts ...grpc.CallOption) (*PruneIndexResponse, error)
 }
 
 type indexingServiceClient struct {
@@ -116,6 +119,16 @@ func (c *indexingServiceClient) TriggerSingleIndexing(ctx context.Context, in *T
 	return out, nil
 }
 
+func (c *indexingServiceClient) PruneIndex(ctx context.Context, in *PruneIndexRequest, opts ...grpc.CallOption) (*PruneIndexResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PruneIndexResponse)
+	err := c.cc.Invoke(ctx, IndexingService_PruneIndex_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // IndexingServiceServer is the server API for IndexingService service.
 // All implementations must embed UnimplementedIndexingServiceServer
 // for forward compatibility.
@@ -135,6 +148,8 @@ type IndexingServiceServer interface {
 	TriggerTagIndexing(context.Context, *TriggerTagIndexingRequest) (*TriggerIndexingResponse, error)
 	// Trigger indexing for a single specific item
 	TriggerSingleIndexing(context.Context, *TriggerSingleIndexingRequest) (*TriggerIndexingResponse, error)
+	// Prune orphaned objects from the search index that no longer exist in the database
+	PruneIndex(context.Context, *PruneIndexRequest) (*PruneIndexResponse, error)
 	mustEmbedUnimplementedIndexingServiceServer()
 }
 
@@ -162,6 +177,9 @@ func (UnimplementedIndexingServiceServer) TriggerTagIndexing(context.Context, *T
 }
 func (UnimplementedIndexingServiceServer) TriggerSingleIndexing(context.Context, *TriggerSingleIndexingRequest) (*TriggerIndexingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TriggerSingleIndexing not implemented")
+}
+func (UnimplementedIndexingServiceServer) PruneIndex(context.Context, *PruneIndexRequest) (*PruneIndexResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PruneIndex not implemented")
 }
 func (UnimplementedIndexingServiceServer) mustEmbedUnimplementedIndexingServiceServer() {}
 func (UnimplementedIndexingServiceServer) testEmbeddedByValue()                         {}
@@ -292,6 +310,24 @@ func _IndexingService_TriggerSingleIndexing_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _IndexingService_PruneIndex_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PruneIndexRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IndexingServiceServer).PruneIndex(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IndexingService_PruneIndex_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IndexingServiceServer).PruneIndex(ctx, req.(*PruneIndexRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // IndexingService_ServiceDesc is the grpc.ServiceDesc for IndexingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -322,6 +358,10 @@ var IndexingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TriggerSingleIndexing",
 			Handler:    _IndexingService_TriggerSingleIndexing_Handler,
+		},
+		{
+			MethodName: "PruneIndex",
+			Handler:    _IndexingService_PruneIndex_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

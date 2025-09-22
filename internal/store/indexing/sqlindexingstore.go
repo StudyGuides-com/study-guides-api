@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -887,5 +888,187 @@ func (s *SqlIndexingStore) processOperation(ctx context.Context, op IndexOperati
 	// Future: Add User, Contact, FAQ cases
 	default:
 		return fmt.Errorf("unsupported object type: %s", op.ObjectType)
+	}
+}
+
+// StartPruningJob starts a background job to prune orphaned index objects
+func (s *SqlIndexingStore) StartPruningJob(ctx context.Context, objectType string, tagTypes []sharedpb.TagType, contextTypes []sharedpb.ContextType) (string, error) {
+	jobID := cuid.New()
+	now := time.Now()
+
+	// Create metadata
+	metadata := map[string]interface{}{
+		"objectType": objectType,
+		"pruneCount": 0,
+	}
+	if len(tagTypes) > 0 {
+		metadata["tagTypes"] = tagTypes
+	}
+	if len(contextTypes) > 0 {
+		metadata["contextTypes"] = contextTypes
+	}
+	metadataJSON, _ := json.Marshal(metadata)
+
+	// Insert job record
+	_, err := s.db.ExecContext(ctx, `
+		INSERT INTO "Job" (id, type, status, description, "startedAt", metadata, "createdAt", "updatedAt")
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, jobID, "Prune", "Running", "Prune orphaned index objects",
+	   now, string(metadataJSON), now, now)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to create job record: %w", err)
+	}
+
+	// Start async pruning
+	go s.runPruningAsync(jobID, objectType, tagTypes, contextTypes)
+
+	return jobID, nil
+}
+
+// runPruningAsync performs the actual pruning operation asynchronously
+func (s *SqlIndexingStore) runPruningAsync(jobID, objectType string, tagTypes []sharedpb.TagType, contextTypes []sharedpb.ContextType) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+	defer cancel()
+	startTime := time.Now()
+	deletedCount := 0
+
+	defer func() {
+		// Always update job status on completion
+		duration := int(time.Since(startTime).Seconds())
+		if r := recover(); r != nil {
+			s.updateJobStatus(jobID, "Failed", fmt.Sprintf("panic: %v", r), duration)
+		}
+	}()
+
+	// Currently only support Tag pruning
+	if objectType != "Tag" {
+		s.updateJobStatus(jobID, "Failed", fmt.Sprintf("unsupported object type: %s", objectType), 0)
+		return
+	}
+
+	// Prepare existence check query with optional filters
+	checkQuery := `SELECT 1 FROM "Tag" WHERE id = $1`
+	filterArgs := []interface{}{}
+	argCount := 1
+
+	if len(tagTypes) > 0 {
+		argCount++
+		checkQuery += fmt.Sprintf(" AND type = ANY($%d)", argCount)
+		filterArgs = append(filterArgs, pq.Array(tagTypes))
+	}
+
+	if len(contextTypes) > 0 {
+		argCount++
+		checkQuery += fmt.Sprintf(" AND context = ANY($%d)", argCount)
+		filterArgs = append(filterArgs, pq.Array(contextTypes))
+	}
+
+	// Prepare statement for efficient repeated queries
+	stmt, err := s.db.PrepareContext(ctx, checkQuery)
+	if err != nil {
+		s.updateJobStatus(jobID, "Failed", fmt.Sprintf("failed to prepare query: %v", err), 0)
+		return
+	}
+	defer stmt.Close() // Moved immediately after successful preparation
+
+	// Stream through Algolia objects
+	it, err := s.tagIndex.BrowseObjects()
+	if err != nil {
+		s.updateJobStatus(jobID, "Failed", fmt.Sprintf("failed to browse Algolia index: %v", err), 0)
+		return
+	}
+
+	// Batch for deletion (accumulate up to 1000 IDs)
+	deleteBuffer := make([]string, 0, 1000)
+	processedCount := 0
+
+	for {
+		// Check for context cancellation (timeout or cancellation)
+		select {
+		case <-ctx.Done():
+			fmt.Printf("Pruning job %s cancelled/timed out after processing %d items: %v\n", jobID, processedCount, ctx.Err())
+			goto cleanup
+		default:
+			// Continue processing
+		}
+
+		// Get next object from Algolia
+		var record struct {
+			ObjectID string `json:"objectID"`
+		}
+
+		_, err := it.Next(&record)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			fmt.Printf("Warning: Failed to parse Algolia record in job %s: %v\n", jobID, err)
+			continue // Skip bad records but log the error
+		}
+
+		processedCount++
+
+		// Check if exists in database
+		var exists int
+		queryArgs := append([]interface{}{record.ObjectID}, filterArgs...)
+		err = stmt.QueryRowContext(ctx, queryArgs...).Scan(&exists)
+
+		if err == sql.ErrNoRows {
+			// Object doesn't exist in DB, queue for deletion
+			deleteBuffer = append(deleteBuffer, record.ObjectID)
+
+			// Delete when buffer is full
+			if len(deleteBuffer) >= 1000 {
+				_, err := s.tagIndex.DeleteObjects(deleteBuffer)
+				if err == nil {
+					deletedCount += len(deleteBuffer)
+				} else {
+					fmt.Printf("Failed to delete batch from Algolia: %v\n", err)
+				}
+				deleteBuffer = deleteBuffer[:0] // Clear buffer
+
+				// Periodic progress update
+				s.updatePruneProgress(jobID, deletedCount)
+			}
+		}
+	}
+
+cleanup:
+	// Delete remaining items in buffer
+	if len(deleteBuffer) > 0 {
+		_, err := s.tagIndex.DeleteObjects(deleteBuffer)
+		if err == nil {
+			deletedCount += len(deleteBuffer)
+		} else {
+			fmt.Printf("Failed to delete final batch from Algolia: %v\n", err)
+		}
+	}
+
+	// Update job as completed
+	duration := int(time.Since(startTime).Seconds())
+	s.updateJobStatus(jobID, "Completed", "", duration)
+	s.updatePruneProgress(jobID, deletedCount)
+
+	fmt.Printf("Pruning job %s completed: processed %d items, deleted %d orphaned objects in %d seconds\n",
+		jobID, processedCount, deletedCount, duration)
+}
+
+// updatePruneProgress updates the pruning job metadata with deletion count
+func (s *SqlIndexingStore) updatePruneProgress(jobID string, deletedCount int) {
+	metadata := map[string]interface{}{
+		"objectType": "Tag",
+		"pruneCount": deletedCount,
+	}
+	metadataJSON, _ := json.Marshal(metadata)
+
+	_, err := s.db.Exec(`
+		UPDATE "Job"
+		SET metadata = $1, "updatedAt" = $2
+		WHERE id = $3
+	`, string(metadataJSON), time.Now(), jobID)
+
+	if err != nil {
+		fmt.Printf("Failed to update prune progress for job %s: %v\n", jobID, err)
 	}
 }

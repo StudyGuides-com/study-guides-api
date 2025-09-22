@@ -263,6 +263,40 @@ func (s *IndexingService) TriggerSingleIndexing(ctx context.Context, req *indexi
 	return resp.(*indexingv1.TriggerIndexingResponse), nil
 }
 
+// PruneIndex removes orphaned objects from the search index that no longer exist in the database
+func (s *IndexingService) PruneIndex(ctx context.Context, req *indexingv1.PruneIndexRequest) (*indexingv1.PruneIndexResponse, error) {
+	resp, err := services.AuthBaseHandler(ctx, func(ctx context.Context, session *middleware.SessionDetails) (interface{}, error) {
+		// Check admin permissions
+		if !session.HasRole(sharedpb.UserRole_USER_ROLE_ADMIN) {
+			return nil, status.Error(codes.PermissionDenied, "admin access required for pruning operations")
+		}
+
+		// Convert protobuf types to business types
+		businessReq := indexingcore.TriggerPruningRequest{
+			ObjectType:   req.ObjectType,
+			TagTypes:     req.TagTypes,
+			ContextTypes: req.ContextTypes,
+		}
+		businessResp, err := s.business.TriggerPruning(ctx, businessReq)
+		if err != nil {
+			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to trigger pruning: %v", err))
+		}
+
+		return &indexingv1.PruneIndexResponse{
+			JobId:     businessResp.JobID,
+			Status:    businessResp.Status,
+			Message:   businessResp.Message,
+			StartedAt: timestamppb.New(businessResp.StartedAt),
+		}, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.(*indexingv1.PruneIndexResponse), nil
+}
+
 // convertJobStatusToJobInfo converts internal JobStatus to protobuf JobInfo
 func convertJobStatusToJobInfo(job indexing.JobStatus) *indexingv1.JobInfo {
 	jobInfo := &indexingv1.JobInfo{

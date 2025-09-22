@@ -27,6 +27,9 @@ service IndexingService {
 
   // Trigger indexing for a single specific item
   rpc TriggerSingleIndexing(TriggerSingleIndexingRequest) returns (TriggerIndexingResponse);
+
+  // Prune orphaned objects from the search index that no longer exist in the database
+  rpc PruneIndex(PruneIndexRequest) returns (PruneIndexResponse);
 }
 
 // Request to trigger an indexing job
@@ -181,4 +184,31 @@ message TriggerSingleIndexingRequest {
   // If true, forces complete reindex ignoring change detection
   // If false, only indexes if item has changed (incremental mode)
   bool force = 3;
+}
+
+// Request to prune orphaned objects from the search index
+message PruneIndexRequest {
+  // Type of object to prune (defaults to "Tag")
+  string object_type = 1;
+
+  // Optional filter by tag types - empty array means no filter
+  repeated shared.v1.TagType tag_types = 2;
+
+  // Optional filter by context types - empty array means no filter
+  repeated shared.v1.ContextType context_types = 3;
+}
+
+// Response from pruning the search index
+message PruneIndexResponse {
+  // Unique job ID for tracking
+  string job_id = 1;
+
+  // Initial status of the job
+  string status = 2;
+
+  // Human-readable message about the job
+  string message = 3;
+
+  // Timestamp when job was started
+  google.protobuf.Timestamp started_at = 4;
 }

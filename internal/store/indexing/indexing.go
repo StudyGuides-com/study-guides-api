@@ -65,4 +65,7 @@ type IndexingStore interface {
 	QueueBatchForReindex(ctx context.Context, objectType string) error
 	QueueBatchForReindexWithFilters(ctx context.Context, objectType string, tagTypes []sharedpb.TagType, contextTypes []sharedpb.ContextType) error
 	QueueChangedForIndexWithFilters(ctx context.Context, objectType string, tagTypes []sharedpb.TagType, contextTypes []sharedpb.ContextType) error
+
+	// Pruning operations
+	StartPruningJob(ctx context.Context, objectType string, tagTypes []sharedpb.TagType, contextTypes []sharedpb.ContextType) (string, error)
 }

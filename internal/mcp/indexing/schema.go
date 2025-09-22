@@ -23,6 +23,9 @@ Examples:
 - "force reindex tags" → {"filter": {"triggerReindex": true, "objectType": "Tag", "force": true}}
 - "sync tags to algolia" → {"filter": {"triggerReindex": true, "objectType": "Tag"}}
 - "index all tags" → {"filter": {"triggerReindex": true, "objectType": "Tag"}}
+- "prune tags" → {"filter": {"triggerPruning": true, "objectType": "Tag"}}
+- "clean algolia index" → {"filter": {"triggerPruning": true, "objectType": "Tag"}}
+- "remove orphaned tags" → {"filter": {"triggerPruning": true, "objectType": "Tag"}}
 - "check indexing status" → {"filter": {"status": "running"}}
 - "check indexing jobs" → {"filter": {}}
 
@@ -31,6 +34,7 @@ Available object types:
 
 Options:
 - triggerReindex: Set to true to start a new indexing job
+- triggerPruning: Set to true to remove orphaned objects from search index
 - force: Set to true to reindex even if content hasn't changed
 - objectType: Specify "Tag" to index tags (required for triggering)
 - status: Filter by job status ("running", "complete", "failed")
@@ -50,15 +54,18 @@ func GetAIPromptAdditions() string {
 	return `
 Indexing Operations:
 - When user asks to "reindex", "index", "sync to algolia", use indexing_find with triggerReindex:true
-- Always specify objectType:"Tag" when triggering indexing
+- When user asks to "prune", "clean index", "remove orphaned", use indexing_find with triggerPruning:true
+- Always specify objectType:"Tag" when triggering indexing or pruning
 - Use force:true when user mentions "force" or "even if unchanged"
-- Indexing jobs run in background and may take several minutes
-- Suggest checking status after starting indexing operations
+- Indexing and pruning jobs run in background and may take several minutes
+- Suggest checking status after starting operations
 
 Indexing Trigger Phrases:
 - "reindex tags", "index tags", "sync tags" → triggerReindex:true, objectType:"Tag"
 - "force reindex", "reindex all" → triggerReindex:true, objectType:"Tag", force:true
 - "algolia sync", "sync to search" → triggerReindex:true, objectType:"Tag"
+- "prune tags", "prune index", "clean algolia" → triggerPruning:true, objectType:"Tag"
+- "remove orphaned tags", "clean search index" → triggerPruning:true, objectType:"Tag"
 - "check indexing", "indexing status" → status filter or empty filter
 `
 }
